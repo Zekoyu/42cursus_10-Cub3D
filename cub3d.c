@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/29 16:38:03 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/29 19:05:17 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,35 +48,6 @@ int worldMap[mapWidth][mapHeight]=
   {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
-/*
-int worldMap[mapWidth][mapHeight]=
-{
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-  {3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3},
-  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-  {3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3},
-  {3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3},
-  {3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3},
-  {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-  {3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3},
-  {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3},
-  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-};
-*/
 /*	     X
 	+-------->
 	|
@@ -85,12 +56,25 @@ int worldMap[mapWidth][mapHeight]=
 	V
 */
 
+#include <sys/time.h>
+#include <stdio.h>
+
+void print_elapsed(char str[], struct timeval start)
+{
+	struct timeval now;
+
+	gettimeofday(&now, NULL);
+	int diff_s = now.tv_sec - start.tv_sec;
+	int diff_u = now.tv_usec - start.tv_usec;
+	printf("%s %d elapsed\n", str, (diff_s * 1000 * 1000 + diff_u));
+}
+
 void	mlx_put_pixel_img(t_img_data *img, int x, int y, int color)
 {
 	char	*dst;
 
 	dst = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
-	*((unsigned int *) dst) = color;
+	*((unsigned int *)dst) = color;
 }
 
 inline double	ft_lerp(double min, double max, double val)
@@ -112,12 +96,18 @@ void	drawline_from_distance(int x, double distance, int wall_type, char side)
 	int	line_height = round(((double)screenHeight / distance));
 	unsigned int	color = 0x00000FFF;
 
+	/*struct timeval start;
+	gettimeofday(&start, NULL);
+	print_elapsed("start: ", start);*/
+
 	int drawStart = -line_height / 2 + screenHeight / 2;
     if(drawStart < 0)
 		drawStart = 0;
     int drawEnd = line_height / 2 + screenHeight / 2;
 	if(drawEnd >= screenHeight)
 		drawEnd = screenHeight - 1;
+	
+	//print_elapsed("calculs: ", start);
 	switch(wall_type)
 	{
 		case 1:
@@ -133,19 +123,38 @@ void	drawline_from_distance(int x, double distance, int wall_type, char side)
 			color = 0x00FFFFFF;
 			break; //white
         default:
-			color = 0x00FFFF00;
+			color = wall_type;
 			break; //yellow
 	}
 	if (side == 'y')
-		color = color | 0x80000000;
+		color = color | 0x88000000;
+	//print_elapsed("colors: ", start);
 	int y = 0;
+
+	//unsigned int	*img_addr;
+
+	//img_addr = (unsigned int *) game.main_img.addr;
+
 	while (y < drawStart)
-		mlx_pixel_put(game.mlx , game.window, x, y++, 0x00231570);
+	{
+		//img_addr[x + y * screenWidth] = 0x00231570;
+		//y++;
+		mlx_put_pixel_img(&game.main_img, x, y++, 0x00231570);
+	}
 	while (y <= drawEnd)
-		mlx_pixel_put(game.mlx , game.window, x, y++, color);
+	{
+		//img_addr[x + y * screenWidth] = color;
+		//y++;
+		mlx_put_pixel_img(&game.main_img, x, y++, color);
+	}
 	while (y < screenHeight)
-		mlx_pixel_put(game.mlx , game.window, x, y++, 0x00ede482);	
-		
+	{
+		//img_addr[x + y * screenWidth] = 0x00ede482;
+		//y++;
+		mlx_put_pixel_img(&game.main_img, x, y++, 0x00ede482);
+	}
+	//print_elapsed("put pixels: ", start);
+	// Around 10us using mlx put pixel to put all pixels for a line (start 0 calculs 2 colors 4 put pixels 14)
 }
 
 /*
@@ -175,6 +184,178 @@ double	get_x_for_1y_step(t_vector direction)
 		return (10E35);
 }
 
+static double get_dda_x_distance(t_vector direction)
+{
+	if (direction.x == 0)
+		return (1E30);
+	else
+		return (fabs(1.0 / direction.x));
+}
+
+static double get_dda_y_distance(t_vector direction)
+{
+	if (direction.y == 0)
+		return (1E30);
+	else
+		return (fabs(1.0 / direction.y));
+}
+
+t_vector	get_dda_distances(t_vector direction)
+{
+	t_vector	res;
+
+	res.x = get_dda_x_distance(direction);
+	res.y = get_dda_y_distance(direction);
+	return (res);
+}
+
+t_point	get_player_current_tile(t_vector player_pos)
+{
+	t_point	res;
+
+	res.x = (int) player_pos.x;
+	res.y = (int) player_pos.y;
+	return (res);
+}
+
+t_point	get_direction_steps(t_vector direction)
+{
+	t_point	step;
+
+	if (direction.x < 0)
+		step.x = -1;
+	else
+		step.x = 1;
+	if (direction.y < 0)
+		step.y = -1;
+	else
+		step.y = 1;
+	return (step);
+}
+
+// player position relative to the tile (between 0-1; 0-1)
+// if ray is going left, then relative position = distance from left (default)
+// if ray is going right, relative position = distance from right (1 - position)
+t_vector	init_base_distances(t_vector direction, t_vector dda_distances, t_vector player_pos)
+{
+	t_vector	distances;
+	t_vector	player_relative_pos;
+
+	player_relative_pos.x = (player_pos.x - (double)((int) player_pos.x));
+	player_relative_pos.y = (player_pos.y - (double)((int) player_pos.y));
+	if (direction.x < 0)
+		distances.x = player_relative_pos.x * dda_distances.x;
+	else
+		distances.x = (1.0 - player_relative_pos.x) * dda_distances.x;
+	if (direction.y < 0)
+		distances.y = player_relative_pos.y * dda_distances.y;
+	else
+		distances.y = (1.0 - player_relative_pos.y) * dda_distances.y;
+	return (distances);
+}
+
+static t_ray_hit	get_ray_distance_side(t_ray ray, int map[24][24])
+{
+	t_ray_hit	ray_hit;
+
+	while (1)
+	{
+		if (ray.total_distances.x < ray.total_distances.y)
+		{
+			ray.total_distances.x += ray.dda_distances.x;
+			ray.current_tile.x += ray.direction_steps.x;
+			ray_hit.side_hit = 'x';
+		}
+		else
+		{
+			ray.total_distances.y += ray.dda_distances.y;
+			ray.current_tile.y += ray.direction_steps.y;
+			ray_hit.side_hit = 'y';
+		}
+		if (map[ray.current_tile.y][ray.current_tile.x] != 0)
+			break ;
+	}
+	if (ray_hit.side_hit == 'x')
+		ray_hit.distance = ray.total_distances.x - ray.dda_distances.x;
+	else
+		ray_hit.distance = ray.total_distances.y - ray.dda_distances.y;
+	ray_hit.tile_hit = ray.current_tile;
+	return (ray_hit);
+}
+
+
+
+t_ray_hit	get_ray_hit(t_vector direction, int map[24][24], t_vector player_pos)
+{
+	t_ray		ray;
+	t_ray_hit	ray_hit;
+
+	//struct timeval start;
+
+	//print_elapsed("start:", start);
+	ray.direction = direction;
+	ray.current_tile = get_player_current_tile(player_pos);
+	//print_elapsed("get tile:", start);
+	ray.dda_distances = get_dda_distances(ray.direction);
+	//print_elapsed("get dda:", start);
+	ray.direction_steps = get_direction_steps(ray.direction);
+	//print_elapsed("get steps:", start);
+	ray.total_distances = init_base_distances(ray.direction, \
+											ray.dda_distances, player_pos);
+	//print_elapsed("get base distances:", start);
+	ray_hit = get_ray_distance_side(ray, map);
+	//print_elapsed("dda:", start);
+	return (ray_hit);
+}
+
+void	do_render(t_game *game)
+{
+	t_vector	ray_dir;
+	t_vector 	direction;
+	double		dda_x_distance;
+	double		dda_y_distance;
+	double		camera_pos_on_plane;
+
+	direction.x = game->player.direction.x;
+	direction.y = game->player.direction.y;
+	
+	/*struct timeval start;
+	gettimeofday(&start, NULL);
+	print_elapsed("\nstart: ", start);*/
+	for (int x = 0; x < screenWidth; x++)
+	{
+		camera_pos_on_plane = (2.0 * x) / (double) screenWidth - 1;
+		ray_dir.x = direction.x + (game->player.cam_plane.x * camera_pos_on_plane);
+		ray_dir.y = direction.y + (game->player.cam_plane.y * camera_pos_on_plane);
+		t_ray_hit ray_hit = get_ray_hit(ray_dir, worldMap, game->player.pos);
+		if (x == 0)
+		{
+			//printf("ray hit distance: %f\n", ray_hit.distance);
+		}
+		//print_elapsed("\ncalcul: ", start);
+		drawline_from_distance(x, ray_hit.distance, worldMap[ray_hit.tile_hit.y][ray_hit.tile_hit.x], ray_hit.side_hit);
+		//print_elapsed("draw: ", start);
+	}
+	mlx_clear_window(game->mlx, game->window);
+	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0,0);	
+	//print_elapsed("put window: ", start);
+}
+
+int	key_hook(int keycode, t_game *game)
+{
+	game->player.pos.x += 0.5;
+	do_render(game);
+	return (1);
+}
+
+int loop_hook(t_game *game)
+{
+	game->player.pos.x += 0.05;
+	game->player.pos.y += 0.02;
+	do_render(game);
+	return (1);
+}
+
 int main()
 {
 	game.mlx = mlx_init();
@@ -182,190 +363,17 @@ int main()
 	game.main_img.img = mlx_new_image(game.mlx, screenWidth, screenHeight);
 	game.main_img.addr = mlx_get_data_addr(game.main_img.img, &game.main_img.bits_per_pixel, &game.main_img.line_length, &game.main_img.endian);
 	
-	
-	game.player.pos.y = 6.5;
+	game.player.pos.y = 12.5;
 	game.player.pos.x = 1.5;
-	game.player.direction.x = 0.8;
-	game.player.direction.y = 0.2;
-	game.player.cam_plane.x = 0.2;
-	game.player.cam_plane.y = 0.8;
+	game.player.direction.x = 1.0;
+	game.player.direction.y = 0.0;
+	game.player.cam_plane.x = 0.0;
+	game.player.cam_plane.y = 1.0;
 
-
-	t_vector	ray_dir;
-	t_vector 	direction;
-
-	double		dda_x_distance;
-	double		dda_y_distance;
+	do_render(&game);
 	
-	double		camera_pos_on_plane;
-
-	direction.x = game.player.direction.x;
-	direction.y = game.player.direction.y;
-
-	for (int x = 0; x < screenWidth; x++)
-	{
-		// Left of the sreen will have camera pos of -1, mid of 0, and right of 1
-		// This corresponds to the camera X position on the camera plane
-		// the camera "slides" along it to get all ray directions
-		camera_pos_on_plane = (2.0 * x) / (double) screenWidth - 1;
-
-		ray_dir.x = direction.x + (game.player.cam_plane.x * camera_pos_on_plane);
-		ray_dir.y = direction.y + (game.player.cam_plane.y * camera_pos_on_plane);
-		
-		
-		// If we are only traveling on Y axis, then we can tell that to go +1 on X
-		// The distance will be almost infinite, this avoids division by 0
-		
-		//dda_x_distance = get_x_for_1y_step(ray_dir);
-		//dda_y_distance = get_y_for_1x_step(ray_dir);
-		
-		if (ray_dir.x == 0)
-			dda_x_distance = 1E30;
-		else
-			dda_x_distance = fabs(1.0 / ray_dir.x);
-		
-		if(ray_dir.y == 0)
-			dda_y_distance = 1E30;
-		else
-			dda_y_distance = fabs(1.0 / ray_dir.y);
-			
-		//printf("Ray %d direction is (%f, %f), dda_x: %f, dda_y:%f\n", x, ray_dir.x, ray_dir.y, dda_x_distance, dda_y_distance);
-		
-		int curr_tile_x = (int) game.player.pos.x;
-		int curr_tile_y = (int) game.player.pos.y;
-		
-		double	dist_x;
-		double	dist_y;
-
-		int	step_x;
-		int	step_y;
-
-		// Get the coordinate within the tile (between 0-1), then multiply it 
-		// with our "normalized" dda distance
-		// Depending on the side where we go, we should either use the cell coordinate as
-		// it (for instance 0.2) or 1-coord (1-0.2 = 0.8) to get the distance
-		t_vector	player_pos_in_tile;
-
-		player_pos_in_tile.x = (game.player.pos.x - curr_tile_x);
-		player_pos_in_tile.y = (game.player.pos.y - curr_tile_y);
-		if (ray_dir.x < 0)
-		{
-			step_x = -1;
-			dist_x = player_pos_in_tile.x * dda_x_distance;
-		}
-		else
-		{
-			step_x = 1;
-			dist_x = (1.0 - player_pos_in_tile.x) * dda_x_distance;
-		}
-
-		if (ray_dir.y < 0)
-		{
-			step_y = -1;
-			dist_y = player_pos_in_tile.y * dda_y_distance;
-		}
-		else
-		{
-			step_y = 1;
-			dist_y = (1.0 - player_pos_in_tile.y) * dda_y_distance;
-		}
-		//printf("Ray %d initial dist X=%f, Y=%f\n", x, dist_x, dist_y);
-		//printf("DDA Distance x:%f, y:%f\n",dda_x_distance, dda_y_distance);
-		// Actual DDA
-		int		hit = 0;
-		char	side_hit = '\0';
-		/*
-			Always take the nearest hit, once hit is made, remove the distance traveled
-			from the other distance (if we travel on horizontal, remove vertical distance)
-			Once we hit a wall, reset the distance to the original value and continue
-		*/
-		double	total_dist = 0;
-		while (!hit)
-		{
-			//printf("Current tile X:%d, Y:%d  - dist X:%f Y:%f\n", curr_tile_x, curr_tile_y, dist_x, dist_y);
-			if (dist_x < dist_y)
-			{
-				/*dist_y -= dist_x;
-				dist_x = dda_x_distance;
-				total_dist += dist_x;
-				*/
-				dist_x += dda_x_distance;
-				curr_tile_x += step_x;
-				side_hit = 'x';
-			}
-			else
-			{
-				/*
-				dist_x -= dist_y;
-				dist_y = dda_y_distance;
-				total_dist += dist_y;
-				*/
-				dist_y += dda_y_distance;
-				curr_tile_y += step_y;
-				side_hit = 'y';
-			}
-			
-			if (worldMap[curr_tile_y][curr_tile_x] != 0)
-				hit = 1;
-		}
-		/*if (side_hit == 'y')
-		{
-			printf("Ray %d hit a Y aligned wall on (%d, %d)\n", x, curr_tile_x, curr_tile_y);
-		}
-		else if (side_hit == 'x')
-		{
-			printf("Ray %d hit a X aligned wall on (%d, %d)\n", x, curr_tile_x, curr_tile_y);
-		}
-		else
-		{
-			printf("Ray %d did not hit any wall\n", x);
-		}*/
-		
-		double	wall_dist;
-		
-		/*
-			Remove one dda since we have one more than needed
-			Like if we started on tile 1,1, then go to tile 1,2
-			We are actually at the "end" of 1,2 and the wall is at the "start"
-		*/
-		
-		/*double	perp_dist;
-		double current_angle;
-		double	dir_len = sqrt(pow_two(ray_dir.x) + pow_two(ray_dir.y));
-		double	cam_distance = sqrt(pow_two(camera_pos_on_plane * game.player.cam_plane.x) + pow_two(camera_pos_on_plane * game.player.cam_plane.y));
-		double	perp_to_cam_dist = sqrt(pow_two(dir_len) + pow_two(cam_distance));
-		*/
-
-		
-		//printf("Dist X:%f Y:%f, dda X:%f Y:%f\n", dist_x, dist_y, dda_x_distance, dda_y_distance);
-		if (side_hit == 'x')
-		{
-			wall_dist = dist_x /*- dda_x_distance*/;
-			//current_angle = atan(ray_dir.y / ray_dir.x);
-			//perp_dist =  perp_to_cam_dist / (dir_len / wall_dist);
-		}
-		else
-		{
-			wall_dist = dist_y /*- dda_y_distance*/;
-			//perp_dist =  perp_to_cam_dist / (dir_len / wall_dist);
-			//current_angle = atan(ray_dir.x / ray_dir.y);	
-		}
-		//perp_dist = sqrt(pow_two(wall_dist) + pow_two(dir_size));
-
-		//perp_dist = wall_dist * (sin(M_PI_4) sin(current_angle);
-		//wall_dist = sqrt(pow_two(wall_dist), - pow_two())
-		
-		//printf("Ray %d is going %f on y for %f length, total distance: %f\n", x, cam_distance, dir_len, wall_dist);
-		//printf("Wall dist=%f, direction length=%f, walldist/dirlen=%f\n", wall_dist, dir_len, dir_len / wall_dist);
-		//printf("Ray %d, perp_dist = %f, wall dist = %f\n", x, perp_dist, wall_dist);
-		//printf("Cam distance: %f (ray dir: (%f, %f)) wall_dist: %f, dda:x=%f, y=%f, Corrected dist =%f\n", cam_distance, ray_dir.x, ray_dir.y, wall_dist, dda_x_distance, dda_y_distance, sqrt(pow_two(wall_dist) - pow_two(cam_distance)));
-		//printf("Way %d hit (%d, %d) at distance %f\n", x, curr_tile_x, curr_tile_y, wall_dist);
-		//wall_dist *= cos(current_angle);
-
-		drawline_from_distance(x, wall_dist, worldMap[curr_tile_y][curr_tile_x], side_hit);
-		//printf("Ray %d (%f, %f), Wall distance without correction: %f, with correction: %f (angle degree=%f radians=%f)\n", x, ray_dir.x, ray_dir.y, wall_dist, wall_dist*cos(current_angle), current_angle, cos(current_angle));
-		//printf("Ray %d hit (%d ,%d) with an angle of %f and distance of : %f\n", x, curr_tile_x, curr_tile_y, current_angle, wall_dist);
-	}
+	//mlx_key_hook(game.window, &key_hook, &game);
+	mlx_loop_hook(game.mlx, &loop_hook, &game);
 	mlx_loop(game.mlx);
 	
 	//mlx_loop(game.mlx);

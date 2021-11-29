@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/29 16:23:52 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/29 17:26:27 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,15 @@ typedef struct s_player
 	t_vector	cam_plane;
 }	t_player;
 
+typedef struct s_ray
+{
+	t_vector	direction;
+	t_vector	dda_distances;
+	t_vector	total_distances;
+	t_point		current_tile;
+	t_point		direction_steps;
+}	t_ray;
+
 /*
 	Side hit = 'x' OR 'y'
 	Distance = distance to the wall
@@ -54,6 +63,7 @@ typedef struct s_ray_hit
 {
 	char	side_hit;
 	double	distance;
+	t_point	tile_hit;
 }	t_ray_hit;
 
 typedef struct s_game
