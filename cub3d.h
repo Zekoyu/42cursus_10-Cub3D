@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/29 17:26:27 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/30 15:59:05 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,13 @@ typedef struct s_vector
 	double	x;
 	double	y;
 }	t_vector;
+
+typedef struct s_vector3
+{
+	double	x;
+	double	y;
+	double	z;
+}	t_vector3;
 
 typedef struct s_point
 {
@@ -37,11 +44,23 @@ typedef struct s_img_data
 	int		endian;
 }	t_img_data;
 
+typedef struct s_directions
+{
+	int	forward;
+	int	left;
+	int	backward;
+	int	right;
+	int	rotate_l;
+	int	rotate_r;
+}	t_directions;
+
 typedef struct s_player
 {
-	t_vector	pos;
-	t_vector	direction;
-	t_vector	cam_plane;
+	t_vector		pos;
+	t_vector		direction;
+	t_vector		cam_plane;
+	t_vector3		velocity;
+	t_directions	directions;
 }	t_player;
 
 typedef struct s_ray
@@ -68,10 +87,10 @@ typedef struct s_ray_hit
 
 typedef struct s_game
 {
-	void		*mlx;
-	void		*window;
-	t_img_data	main_img;
-	t_player	player;
+	void			*mlx;
+	void			*window;
+	t_img_data		main_img;
+	t_player		player;
 }	t_game;
 
 // Vectors

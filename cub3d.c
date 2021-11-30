@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/29 19:05:17 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/30 17:36:07 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,13 @@
 #define mapHeight 24
 #define screenWidth 1280
 #define screenHeight 720
-#define FOV_DEGREES 90
+#define MOVEMENT_FACTOR 0.075
+#define COS_ROTATION 0.99939082649
+#define SIN_ROTATION 0.03489951165
+#define BOUNDING_BOX_SIDE_SIZE 0.4
 
+// Cos of rotation angle and sin of rotation angle (directly in radians)
+// Current values for 2 degrees = 0,0349066 rad
 int worldMap[mapWidth][mapHeight]=
 {
   {1,1,4,2,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -209,7 +214,7 @@ t_vector	get_dda_distances(t_vector direction)
 	return (res);
 }
 
-t_point	get_player_current_tile(t_vector player_pos)
+t_point	get_pos_current_tile(t_vector player_pos)
 {
 	t_point	res;
 
@@ -294,7 +299,7 @@ t_ray_hit	get_ray_hit(t_vector direction, int map[24][24], t_vector player_pos)
 
 	//print_elapsed("start:", start);
 	ray.direction = direction;
-	ray.current_tile = get_player_current_tile(player_pos);
+	ray.current_tile = get_pos_current_tile(player_pos);
 	//print_elapsed("get tile:", start);
 	ray.dda_distances = get_dda_distances(ray.direction);
 	//print_elapsed("get dda:", start);
@@ -308,6 +313,230 @@ t_ray_hit	get_ray_hit(t_vector direction, int map[24][24], t_vector player_pos)
 	return (ray_hit);
 }
 
+
+
+
+
+/* Moving left / right (rotate direction vector by 90 to get velocity vector)
+	Rotate a vector:
+	x2 = x * cos(90) - y * sin(90)
+	y2 = x * sin(90) + y * cos(90)
+
+	x2 = x * cos(pi/2) - y * sin(pi/2)
+	y2 = x * sin(pi/2) - y * cos(pi/2)
+
+	x2 = x * 0 - y * 1
+	y2 = x * 1 - y * 0
+
+	x2 = 0 - y * 1
+	y2 = x * 1 - 0
+
+	(90 degrees)
+	x2 = -y
+	y2 = x
+
+	(-90 degrees)
+	x2 = y
+	y2 = -x
+*/
+
+/* Rotating left / right
+
+	x2 = x * cos(0.1) - y * sin (0.1)
+	y2 = x * sin(0.1) + y * cos(0.1)
+
+	x2 = x * 0.1 - y * 0.01
+	y2 = x * 0.01 + y * 0.1
+*/
+
+void	add_velocity(t_player *player, double x_direction, double y_direction)
+{
+	player->velocity.x += x_direction * MOVEMENT_FACTOR;
+	player->velocity.y += y_direction * MOVEMENT_FACTOR;
+}
+
+void	remove_velocity(t_player *player, double x_direction, double y_direction)
+{
+	player->velocity.x -= x_direction * MOVEMENT_FACTOR;
+	player->velocity.y -= y_direction * MOVEMENT_FACTOR;
+}
+
+void	reset_velocity(t_player *player)
+{
+	player->velocity.x = 0;
+	player->velocity.y = 0;
+}
+/*
+	Direction 1 = right, -1 = left
+	0.1 radians ~= 5.7 degrees
+	0.995 = cos(0.1)
+	0.0998 = sin(0.1)
+*/
+void	rotate_player(t_player *player, int direction)
+{
+	double	player_x_dir;
+	double	player_y_dir;
+	double	cam_x_dir;
+	double	cam_y_dir;
+
+	reset_velocity(player);
+	player_x_dir = player->direction.x;
+	player_y_dir = player->direction.y;
+	cam_x_dir = player->cam_plane.x;
+	cam_y_dir = player->cam_plane.y;
+	player->direction.x = (player_x_dir * COS_ROTATION - player_y_dir * (SIN_ROTATION * direction));
+	player->direction.y = (player_x_dir * (SIN_ROTATION * direction) + player_y_dir * COS_ROTATION);
+	player->cam_plane.x = (cam_x_dir * COS_ROTATION - cam_y_dir * (SIN_ROTATION * direction));
+	player->cam_plane.y = (cam_x_dir * (SIN_ROTATION * direction) + cam_y_dir * COS_ROTATION);
+	if (player->directions.forward == 1)
+		add_velocity(player, player->direction.x, player->direction.y);
+	if (player->directions.backward == 1)
+		add_velocity(player, -player->direction.x, -player->direction.y);
+	if (player->directions.left == 1)
+		add_velocity(player, player->direction.y, -player->direction.x);
+	if (player->directions.right == 1)
+		add_velocity(player, -player->direction.y, player->direction.x);
+}
+
+
+
+/*
+	Rotate_player function automatically readjust velocity
+*/
+int	key_press_event(int keycode, t_game *game)
+{
+	t_player	*player;
+
+	player = &game->player;
+	if (keycode == KEY_W)
+	{
+		player->directions.forward = 1;
+		add_velocity(player, player->direction.x, player->direction.y);
+	}
+	else if (keycode == KEY_S)
+	{
+		player->directions.backward = 1;
+		add_velocity(player, -player->direction.x, -player->direction.y);
+	}
+	else if (keycode == KEY_A)
+	{
+		player->directions.left = 1;
+		add_velocity(player, player->direction.y, -player->direction.x);
+	}
+	else if (keycode == KEY_D)
+	{
+		player->directions.right = 1;
+		add_velocity(player, -player->direction.y, player->direction.x);
+	}
+	else if (keycode == KEY_ARROW_LEFT)
+	{
+		player->directions.rotate_l = 1;
+		rotate_player(player, -1);
+	}
+	else if (keycode == KEY_ARROW_RIGHT)
+	{
+		player->directions.rotate_r = 1;
+		rotate_player(player, 1);
+	}
+}
+
+
+
+
+
+/* OLD
+	if (player->directions.forward == 1)
+	{
+		player->velocity.x += player->direction.x * MOVEMENT_FACTOR;
+		player->velocity.y += player->direction.y * MOVEMENT_FACTOR;
+	}
+	else if (player->directions.backward == 1)
+	{
+		player->velocity.x += -(player->direction.x * MOVEMENT_FACTOR);
+		player->velocity.y += -(player->direction.y * MOVEMENT_FACTOR);
+	}
+	else if (player->directions.left == 1)
+	{
+		player->velocity.x += (player->direction.y * MOVEMENT_FACTOR);
+		player->velocity.y += -(player->direction.x * MOVEMENT_FACTOR);
+	}
+	else if (player->directions.right == 1)
+	{
+		player->velocity.x += -(player->direction.y * MOVEMENT_FACTOR);
+		player->velocity.y += (player->direction.x * MOVEMENT_FACTOR);
+	}
+	else if (player->directions.rotate_l == 1)
+	{
+		rotate_player(player, -1);
+	}
+	else if (player->directions.rotate_r == 1)
+	{
+		rotate_player(player, 1);
+	}
+*/
+/*
+	Before rotating, remove the actual velocity, rotate it and put it back
+*/
+
+void	add_player_movements(t_player *player)
+{
+	if (player->directions.forward == 1)
+		add_velocity(player, player->direction.x, player->direction.y);
+	else if (player->directions.backward == 1)
+		add_velocity(player, -player->direction.x, -player->direction.y);
+	else if (player->directions.left == 1)
+		add_velocity(player, player->direction.y, -player->direction.x);
+	else if (player->directions.right == 1)
+		add_velocity(player, -player->direction.y, player->direction.x);
+	else if (player->directions.rotate_l == 1)
+	{
+		reset_velocity(player);
+		rotate_player(player, -1);
+	}
+	else if (player->directions.rotate_r == 1)
+	{
+		reset_velocity(player);
+		rotate_player(player, 1);
+	}
+}
+
+int	point_intersects_wall(t_vector point, int map[24][24])
+{
+	t_point	current_tile;
+
+	current_tile = get_pos_current_tile(point);
+	if (map[current_tile.y][current_tile.x] != 0)
+		return (1);
+	return (0);
+}
+
+int	has_intersection_with_wall(t_vector player_pos, int map[24][24])
+{
+	t_vector	bounding_box_bot_left;
+	t_vector	bouding_box_bot_right;
+	t_vector	bounding_box_top_left;
+	t_vector	bouding_box_top_right;
+	t_point		current_tile;
+
+	bounding_box_bot_left.x = player_pos.x - BOUNDING_BOX_SIDE_SIZE / 2;
+	bounding_box_bot_left.y = player_pos.y - BOUNDING_BOX_SIDE_SIZE / 2;
+	bouding_box_bot_right.x = player_pos.x + BOUNDING_BOX_SIDE_SIZE / 2;
+	bouding_box_bot_right.y = player_pos.y - BOUNDING_BOX_SIDE_SIZE / 2;
+	bouding_box_top_right.x = player_pos.x + BOUNDING_BOX_SIDE_SIZE / 2;
+	bouding_box_top_right.y = player_pos.y + BOUNDING_BOX_SIDE_SIZE / 2;
+	bounding_box_top_left.x = player_pos.x - BOUNDING_BOX_SIDE_SIZE / 2;
+	bounding_box_top_left.y = player_pos.y + BOUNDING_BOX_SIDE_SIZE / 2;
+	
+	if (point_intersects_wall(bounding_box_top_left, map) \
+		|| point_intersects_wall(bouding_box_top_right, map) \
+		|| point_intersects_wall(bounding_box_bot_left, map) \
+		|| point_intersects_wall(bouding_box_bot_right, map))
+	{
+		return (1);
+	}
+	return (0);
+}
+
 void	do_render(t_game *game)
 {
 	t_vector	ray_dir;
@@ -319,9 +548,11 @@ void	do_render(t_game *game)
 	direction.x = game->player.direction.x;
 	direction.y = game->player.direction.y;
 	
-	/*struct timeval start;
-	gettimeofday(&start, NULL);
-	print_elapsed("\nstart: ", start);*/
+	/*
+		struct timeval start;
+		gettimeofday(&start, NULL);
+		print_elapsed("\nstart: ", start);
+	*/
 	for (int x = 0; x < screenWidth; x++)
 	{
 		camera_pos_on_plane = (2.0 * x) / (double) screenWidth - 1;
@@ -348,12 +579,70 @@ int	key_hook(int keycode, t_game *game)
 	return (1);
 }
 
+/*
+	If there is an intersection with a wall after going forward (or any side)
+	Revert the movement (pos -= velocity since before we had pos += velocity)
+	But don't reset the rotation, because we canstill look around
+	if we hit a wall
+*/
 int loop_hook(t_game *game)
 {
-	game->player.pos.x += 0.05;
-	game->player.pos.y += 0.02;
+	//printf("current pos (%f, %f), velocity (%f %f)\n", game->player.pos.x, game->player.pos.y, game->player.velocity.x, game->player.velocity.y);
+	if (game->player.directions.rotate_l == 1)
+		rotate_player(&game->player, -1);
+	if (game->player.directions.rotate_r == 1)
+		rotate_player(&game->player, 1);
+	game->player.pos.x += game->player.velocity.x;
+	game->player.pos.y += game->player.velocity.y;
+	if (has_intersection_with_wall(game->player.pos, worldMap))
+	{
+		game->player.pos.y -= game->player.velocity.y;
+		game->player.pos.x -= game->player.velocity.x;
+		/*if (game->player.directions.rotate_r == 1)
+			rotate_player(&game->player, -1);
+		if (game->player.directions.rotate_l == 1)
+			rotate_player(&game->player, 1);
+			*/
+	//	printf("reset pos (%f, %f), velocity (%f %f)\n", game->player.pos.x, game->player.pos.y, game->player.velocity.x, game->player.velocity.y);
+	}
+	
 	do_render(game);
 	return (1);
+}
+
+int	key_release_event(int keycode, t_game *game)
+{
+	t_player	*player;
+
+	player = &game->player;
+	if (keycode == KEY_W)
+	{
+		game->player.directions.forward = 0;
+		remove_velocity(player, player->direction.x, player->direction.y);
+	}
+	else if (keycode == KEY_S)
+	{
+		game->player.directions.backward = 0;
+		remove_velocity(player, -player->direction.x, -player->direction.y);
+	}
+	else if (keycode == KEY_A)
+	{
+		game->player.directions.left = 0;
+		remove_velocity(player, player->direction.y, -player->direction.x);
+	}
+	else if (keycode == KEY_D)
+	{
+		game->player.directions.right = 0;
+		remove_velocity(player, -player->direction.y, player->direction.x);
+	}
+	else if (keycode == KEY_ARROW_LEFT)
+	{
+		game->player.directions.rotate_l = 0;
+	}
+	else if (keycode == KEY_ARROW_RIGHT)
+	{
+		game->player.directions.rotate_r = 0;
+	}
 }
 
 int main()
@@ -373,6 +662,9 @@ int main()
 	do_render(&game);
 	
 	//mlx_key_hook(game.window, &key_hook, &game);
+	mlx_do_key_autorepeatoff(game.mlx);
+	mlx_hook(game.window, 2, 0, &key_press_event, &game);
+	mlx_hook(game.window, 3, 0, &key_release_event, &game);
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
 	mlx_loop(game.mlx);
 	
