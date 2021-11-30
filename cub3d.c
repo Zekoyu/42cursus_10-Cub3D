@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/30 18:24:23 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/30 19:10:52 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,18 @@
 #define screenWidth 1280
 #define screenHeight 720
 #define MOVEMENT_FACTOR 0.075
-#define COS_ROTATION 0.99939082649
-#define SIN_ROTATION 0.03489951165
+#define COS_ROTATION 0.99862953358
+#define SIN_ROTATION 0.05233597865
 #define BOUNDING_BOX_SIDE_SIZE 0.4
 
 // Cos of rotation angle and sin of rotation angle (directly in radians)
-// Current values for 2 degrees = 0,0349066 rad
+// Current values for 
+/*
+	2 degrees	= 0,0349066 	rad		(cos = 0.99939082649, sin = 0.03489951165)
+	3 degrees	= 0,0523599		rad		(cos = 0.99862953358, sin = 0.05233597865)
+	3.5 degrees	= 0.0610865238 	rad		(cos = 0.99813479842, sin = 0.06104853951)
+	5 degrees	= 0,0872665 	rad		(cos = 0.99619469483, sin = 0.08715578)
+*/
 int worldMap[mapWidth][mapHeight]=
 {
   {1,1,4,2,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -602,28 +608,100 @@ int	get_x_mouse_offset(void *window)
 	// If mouse is more than 9/10 or less than 1/10 of the window put it back at center
 	if (offset >= (screenWidth - screenWidth / 10) / 2 || offset <= -(screenWidth - screenWidth / 10) / 2)
 		mlx_mouse_move(window, screenWidth / 2, screenHeight / 2);
-	return (offset);
+	else
+		return (offset);
 }
 
+// If too much offset, we probably went from side to middle
+/*
 int	get_mouse_velocity(void *window)
 {
 	static int	prev_pos = 0;
+	static int smooth_mouse_velo;
 	int	current_pos;
 	int	tmp;
+	int	velo;
 
 	current_pos = get_x_mouse_offset(window);
 	tmp = prev_pos;
 	prev_pos = current_pos;
-	return (current_pos - tmp);
+	velo = current_pos - tmp;
+	//printf("velo: %d, smooth velo: %d\n", velo, smooth_mouse_velo);
+	if (smooth_mouse_velo - velo <= 100)
+	{
+		if (velo < 0)
+			smooth_mouse_velo = velo;
+		else if (velo > 0)
+			smooth_mouse_velo = velo;
+	}
+	else
+	{
+		smooth_mouse_velo -= smooth_mouse_velo % 3;
+		if (smooth_mouse_velo < 0)
+			smooth_mouse_velo += 3;
+		else if (smooth_mouse_velo > 0)
+			smooth_mouse_velo -= 3;
+		return (velo);
+	}
+	smooth_mouse_velo -= smooth_mouse_velo % 3;
+	if (smooth_mouse_velo < 0)
+		smooth_mouse_velo += 3;
+	else if (smooth_mouse_velo > 0)
+		smooth_mouse_velo -= 3;
+	return (smooth_mouse_velo);
+}
+*/
+
+int	get_mouse_velocity(void *window)
+{
+	static int	prev_pos = 0;
+	static int smooth_mouse_velo;
+	int	current_pos;
+	int	tmp;
+	int	velo;
+
+	current_pos = get_x_mouse_offset(window);
+	tmp = prev_pos;
+	prev_pos = current_pos;
+	velo = current_pos - tmp;
+	if ((velo < 0 && velo > -50) || (velo > 0 && velo < 50))
+		smooth_mouse_velo = velo;
+	smooth_mouse_velo -= smooth_mouse_velo % 5;
+	if (smooth_mouse_velo < 0)
+		smooth_mouse_velo -= 5;
+	else if (smooth_mouse_velo > 0)
+		smooth_mouse_velo += 5;
+	return (smooth_mouse_velo);
 }
 
 int loop_hook(t_game *game)
 {
-	printf("mouse velocity: %d\n", get_mouse_velocity(game->window));
+	
 	//mlx_mouse_move(game->window, screenWidth / 2, screenHeight / 2);
 	//printf("current pos (%f, %f), velocity (%f %f)\n", game->player.pos.x, game->player.pos.y, game->player.velocity.x, game->player.velocity.y);
+	int mouse_velo = get_mouse_velocity(game->window);
+	//printf("mouse velocity: %d\n", mouse_velo);
+	
+	if (mouse_velo <= -5)
+	{
+		game->player.directions.rotate_l = 1;
+		game->player.directions.rotate_r = 0;
+	}
+	else if (mouse_velo >= 5)
+	{
+		game->player.directions.rotate_l = 0;
+		game->player.directions.rotate_r = 1;
+	}
+	else
+	{
+		game->player.directions.rotate_l = 0;
+		game->player.directions.rotate_r = 0;
+	}
+
 	if (game->player.directions.rotate_l == 1)
+	{
 		rotate_player(&game->player, -1);
+	}
 	if (game->player.directions.rotate_r == 1)
 		rotate_player(&game->player, 1);
 	game->player.pos.x += game->player.velocity.x;
@@ -686,6 +764,9 @@ int main()
 	game.main_img.img = mlx_new_image(game.mlx, screenWidth, screenHeight);
 	game.main_img.addr = mlx_get_data_addr(game.main_img.img, &game.main_img.bits_per_pixel, &game.main_img.line_length, &game.main_img.endian);
 	
+	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
+	mlx_mouse_hide();
+	
 	game.player.pos.y = 12.5;
 	game.player.pos.x = 1.5;
 	game.player.direction.x = 1.0;
@@ -695,8 +776,9 @@ int main()
 
 	do_render(&game);
 
+	
 	mlx_do_key_autorepeatoff(game.mlx);
-	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
+	
 	mlx_hook(game.window, 2, 0, &key_press_event, &game);
 	mlx_hook(game.window, 3, 0, &key_release_event, &game);
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
