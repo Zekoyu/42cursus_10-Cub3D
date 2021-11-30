@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/30 19:10:52 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/30 19:12:28 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -664,13 +664,13 @@ int	get_mouse_velocity(void *window)
 	tmp = prev_pos;
 	prev_pos = current_pos;
 	velo = current_pos - tmp;
-	if ((velo < 0 && velo > -50) || (velo > 0 && velo < 50))
+	if ((velo < 0 && velo > -150) || (velo > 0 && velo < 150))
 		smooth_mouse_velo = velo;
-	smooth_mouse_velo -= smooth_mouse_velo % 5;
-	if (smooth_mouse_velo < 0)
-		smooth_mouse_velo -= 5;
-	else if (smooth_mouse_velo > 0)
-		smooth_mouse_velo += 5;
+	smooth_mouse_velo -= smooth_mouse_velo % 3;
+	if (smooth_mouse_velo > 0)
+		smooth_mouse_velo -= 3;
+	else if (smooth_mouse_velo < 0)
+		smooth_mouse_velo += 3;
 	return (smooth_mouse_velo);
 }
 
