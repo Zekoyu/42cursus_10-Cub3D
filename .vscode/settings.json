@@ -2,6 +2,7 @@
 	"files.associations": {
 		"cub3d.h": "c",
 		"cmath": "cpp",
-		"complex": "cpp"
+		"complex": "cpp",
+		"mlx.h": "c"
 	}
 }

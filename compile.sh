@@ -1,0 +1,1 @@
+gcc *.c -lmlx -Iminilibx/ -Lminilibx/ -framework OpenGL -framework AppKit -o cub3d

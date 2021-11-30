@@ -6,11 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/30 17:36:07 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/30 18:24:23 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <mlx.h>
+#include "minilibx/mlx.h"
 #include "cub3d.h"
 #include "mlx_keycodes.h"
 #include <stdlib.h>
@@ -407,6 +407,8 @@ int	key_press_event(int keycode, t_game *game)
 {
 	t_player	*player;
 
+	if (keycode == KEY_ESC)
+		exit(0);
 	player = &game->player;
 	if (keycode == KEY_W)
 	{
@@ -585,8 +587,40 @@ int	key_hook(int keycode, t_game *game)
 	But don't reset the rotation, because we canstill look around
 	if we hit a wall
 */
+
+// mlx_mouse_get_pos(window, int *x, int *y)
+int	get_x_mouse_offset(void *window)
+{
+	int	initial_pos;
+	int	current_pos;
+	int	trucinutile;
+	int	offset;
+
+	initial_pos = screenWidth / 2;
+	mlx_mouse_get_pos(window, &current_pos, &trucinutile);
+	offset = current_pos - initial_pos;
+	// If mouse is more than 9/10 or less than 1/10 of the window put it back at center
+	if (offset >= (screenWidth - screenWidth / 10) / 2 || offset <= -(screenWidth - screenWidth / 10) / 2)
+		mlx_mouse_move(window, screenWidth / 2, screenHeight / 2);
+	return (offset);
+}
+
+int	get_mouse_velocity(void *window)
+{
+	static int	prev_pos = 0;
+	int	current_pos;
+	int	tmp;
+
+	current_pos = get_x_mouse_offset(window);
+	tmp = prev_pos;
+	prev_pos = current_pos;
+	return (current_pos - tmp);
+}
+
 int loop_hook(t_game *game)
 {
+	printf("mouse velocity: %d\n", get_mouse_velocity(game->window));
+	//mlx_mouse_move(game->window, screenWidth / 2, screenHeight / 2);
 	//printf("current pos (%f, %f), velocity (%f %f)\n", game->player.pos.x, game->player.pos.y, game->player.velocity.x, game->player.velocity.y);
 	if (game->player.directions.rotate_l == 1)
 		rotate_player(&game->player, -1);
@@ -660,9 +694,9 @@ int main()
 	game.player.cam_plane.y = 1.0;
 
 	do_render(&game);
-	
-	//mlx_key_hook(game.window, &key_hook, &game);
+
 	mlx_do_key_autorepeatoff(game.mlx);
+	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_hook(game.window, 2, 0, &key_press_event, &game);
 	mlx_hook(game.window, 3, 0, &key_release_event, &game);
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
