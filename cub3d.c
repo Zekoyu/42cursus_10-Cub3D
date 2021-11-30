@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/30 19:12:28 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/11/30 19:37:44 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 #define screenWidth 1280
 #define screenHeight 720
 #define MOVEMENT_FACTOR 0.075
-#define COS_ROTATION 0.99862953358
-#define SIN_ROTATION 0.05233597865
+#define COS_ROTATION 0.99691733373
+#define SIN_ROTATION 0.07845909568
 #define BOUNDING_BOX_SIDE_SIZE 0.4
 
 // Cos of rotation angle and sin of rotation angle (directly in radians)
@@ -30,6 +30,7 @@
 	2 degrees	= 0,0349066 	rad		(cos = 0.99939082649, sin = 0.03489951165)
 	3 degrees	= 0,0523599		rad		(cos = 0.99862953358, sin = 0.05233597865)
 	3.5 degrees	= 0.0610865238 	rad		(cos = 0.99813479842, sin = 0.06104853951)
+	4.5 degrees = 0.0785398163	rad		(cos = 0.99691733373, sin = 0.07845909568)
 	5 degrees	= 0,0872665 	rad		(cos = 0.99619469483, sin = 0.08715578)
 */
 int worldMap[mapWidth][mapHeight]=
@@ -446,6 +447,17 @@ int	key_press_event(int keycode, t_game *game)
 		player->directions.rotate_r = 1;
 		rotate_player(player, 1);
 	}
+	else if (keycode == KEY_MINUS) // Increase FOV
+	{
+		game->player.cam_plane.x *= 1.1;
+		game->player.cam_plane.y *= 1.1;
+	}
+	else if (keycode == KEY_PLUS) // Decrease FOV
+	{
+		game->player.cam_plane.x *= 0.9;
+		game->player.cam_plane.y *= 0.9;
+	}
+	printf("%f %f\n", game->player.cam_plane.x, game->player.cam_plane.y);
 }
 
 
@@ -606,6 +618,10 @@ int	get_x_mouse_offset(void *window)
 	mlx_mouse_get_pos(window, &current_pos, &trucinutile);
 	offset = current_pos - initial_pos;
 	// If mouse is more than 9/10 or less than 1/10 of the window put it back at center
+	//printf("mouse y: %d\n", trucinutile);
+	// offset between -1280/2 and 1280/2 => mouse_move 0 = start 1280 = end, so need to add 1280/2
+	if (trucinutile < screenHeight / 4 || trucinutile > screenHeight / 4) // If mouse is in 1st or 4th quarter, center in on y
+		mlx_mouse_move(window, offset + (screenWidth / 2), screenHeight / 2);
 	if (offset >= (screenWidth - screenWidth / 10) / 2 || offset <= -(screenWidth - screenWidth / 10) / 2)
 		mlx_mouse_move(window, screenWidth / 2, screenHeight / 2);
 	else
