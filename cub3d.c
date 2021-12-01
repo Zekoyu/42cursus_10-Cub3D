@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/01 18:52:01 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/01 19:20:57 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 // Should not be set to les than 1
 #define MINIMAP_SIZE_RATIO 3.75
 // Size of one tile represented on the minimap (here it's a square of 5x5)
-#define SIZE_OF_TILE_ON_MINIMAP 7
+#define SIZE_OF_TILE_ON_MINIMAP 10
 // player sprite size on minimap
 #define PLAYER_SIZE_ON_MINIMAP 7
 
@@ -218,10 +218,135 @@ int	min(int a, int b)
 
 t_game		game;
 
+
+void	mlx_put_line_to_img(t_img_data *img,
+	t_point start, t_point end, int color)
+{
+	float		delta_x;
+	float		delta_y;
+	int			pixels_count;
+	float		pixel_x;
+	float		pixel_y;
+
+	delta_x = end.x - start.x;
+	delta_y = end.y - start.y;
+	pixels_count = (int) sqrtl(delta_x * delta_x + delta_y * delta_y);
+	delta_x = delta_x / (float) pixels_count;
+	delta_y = delta_y / (float) pixels_count;
+	pixel_x = start.x;
+	pixel_y = start.y;
+	while (pixels_count)
+	{
+		mlx_put_pixel_img(img, (int) lround(pixel_x),
+			(int) lround(pixel_y), color);
+		pixel_x += delta_x;
+		pixel_y += delta_y;
+		pixels_count--;
+	}
+}
+
+int sign (t_point p1, t_point p2, t_point p3)
+{
+    return ((p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y));
+}
+
+int	is_point_in_triangle(t_point pt, t_point v1, t_point v2, t_point v3)
+{
+    int d1, d2, d3;
+    int has_neg, has_pos;
+
+    d1 = sign(pt, v1, v2);
+    d2 = sign(pt, v2, v3);
+    d3 = sign(pt, v3, v1);
+
+	has_neg = 0;
+	has_pos = 0;
+    if ((d1 < 0) || (d2 < 0) || (d3 < 0))
+		has_neg = 1;
+    if ((d1 > 0) || (d2 > 0) || (d3 > 0))
+		has_pos = 1;
+
+	//printf("pt %d %d has_pos: %d, neg: %d\n",pt.x, pt.y, has_pos, has_neg);
+	if (has_neg && has_pos)
+		return(0);
+	return (1);
+}
+
+int	get_min_y(t_point t1, t_point t2, t_point t3)
+{
+	int	y1;
+	int	y2;
+	int	y3;
+
+	y1 = t1.y;
+	y2 = t2.y;
+	y3 = t3.y;
+	if (y1 <= y2 && y1 <= y3)
+		return (y1);
+	else if (y2 <= y1 && y2 <= y3)
+		return (y2);
+	else
+		return (y3);
+}
+
+int	get_max_y(t_point t1, t_point t2, t_point t3)
+{
+	int	y1;
+	int	y2;
+	int	y3;
+
+	y1 = t1.y;
+	y2 = t2.y;
+	y3 = t3.y;
+	if (y1 >= y2 && y1 >= y3)
+		return (y1);
+	else if (y2 >= y1 && y2 >= y3)
+		return (y2);
+	else
+		return (y3);
+}
+
+int	get_min_x(t_point t1, t_point t2, t_point t3)
+{
+	int	x1;
+	int	x2;
+	int	x3;
+
+	x1 = t1.x;
+	x2 = t2.x;
+	x3 = t3.x;
+	if (x1 <= x2 && x1 <= x3)
+		return (x1);
+	else if (x2 <= x1 && x2 <= x3)
+		return (x2);
+	else
+		return (x3);
+}
+
+int	get_max_x(t_point t1, t_point t2, t_point t3)
+{
+	int	x1;
+	int	x2;
+	int	x3;
+
+	x1 = t1.x;
+	x2 = t2.x;
+	x3 = t3.x;
+	if (x1 >= x2 && x1 >= x3)
+		return (x1);
+	else if (x2 >= x1 && x2 >= x3)
+		return (x2);
+	else
+		return (x3);
+}
+
 void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, int x, int y)
 {	
 	t_vector	normalized_dir;
 	t_vector	perp_dir;
+	t_point		t1;
+	t_point		t2;
+	t_point		top;
 	int			i;
 
 	double vec_len = sqrt(pow_two(player_dir.x) + pow_two(player_dir.y));
@@ -234,19 +359,41 @@ void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, int x, int y)
 	i = 0;
 	while (i < PLAYER_SIZE_ON_MINIMAP)
 	{
-		mlx_put_pixel_img(img, (int) player_dir.x + x, (int) player_dir.y + y, 0x00FF8855);
+		//mlx_put_pixel_img(img, (int) player_dir.x + x, (int) player_dir.y + y, 0x00FF8855);
 		player_dir.x += normalized_dir.x;
 		player_dir.y += normalized_dir.y;
 		i++;
 	}
+	top.x = player_dir.x + x;
+	top.y = player_dir.y + y;
 	i = 0;
-	while (i < PLAYER_SIZE_ON_MINIMAP / 2)
+	while (i < (int)((float) PLAYER_SIZE_ON_MINIMAP / 2.5))
 	{
-		mlx_put_pixel_img(img, (int) perp_dir.x + x, (int) perp_dir.y + y, 0x00FF8855);
-		mlx_put_pixel_img(img, (int) -perp_dir.x + x, (int) -perp_dir.y + y, 0x00FF8855);
+		//mlx_put_pixel_img(img, (int) perp_dir.x + x, (int) perp_dir.y + y, 0x00FF8855);
+		//mlx_put_pixel_img(img, (int) -perp_dir.x + x, (int) -perp_dir.y + y, 0x00FF8855);
 		perp_dir.x += (-normalized_dir.y);
 		perp_dir.y += (normalized_dir.x);
 		i++;
+	}
+	t1.x = perp_dir.x + x;
+	t1.y = perp_dir.y + y;
+	t2.x = -perp_dir.x + x;
+	t2.y = -perp_dir.y + y;
+	t_point	pt;
+	//printf("t1 %d %d   t2 %d %d    top %d %d\n", t1.x, t1.y, t2.x, t2.y, top.x, top.y);
+	//printf("x- min: %d max; %d  -- y- min:%d max:%d\n", get_min_x(t1, t2, top),get_max_x(t1, t2, top), get_min_y(t1, t2, top),get_max_y(t1, t2, top));
+	for (int i = get_min_x(t1, t2, top); i <= get_max_x(t1, t2, top); i++)
+	{
+		for (int j = get_min_y(t1, t2, top); j <= get_max_y(t1, t2, top); j++)
+		{
+			/*pt.x = perp_dir.x - i + x;
+			pt.y = perp_dir.y - j + y;
+			*/
+			pt.x = i;
+			pt.y = j;
+			if (is_point_in_triangle(pt, t1, t2, top))
+				mlx_put_pixel_img(img, pt.x, pt.y, 0x00FF8855);
+		}
 	}
 }
 
