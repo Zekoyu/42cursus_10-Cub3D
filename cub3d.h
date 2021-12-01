@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/01 12:02:59 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/01 15:18:23 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ typedef struct s_player
 	t_vector		cam_plane;
 	t_vector3		velocity;
 	t_directions	directions;
+	double			speed;
+	int				height;
 }	t_player;
 
 typedef struct s_ray

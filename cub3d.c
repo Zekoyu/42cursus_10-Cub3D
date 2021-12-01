@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/01 12:16:46 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/01 15:22:49 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,15 @@
 #define COS_ROTATION 0.99691733373
 #define SIN_ROTATION 0.07845909568
 #define BOUNDING_BOX_SIDE_SIZE 0.4
+#define SPEED_MULTIPLIER 1.5
 // Ratio compared to the size of the screen (here it takes 1/10 of the screen)
-#define MINIMAP_SIZE_RATIO 8
+// map will remain squared (take min(width/ratio), (height/ratio))
+// Should not be set to les than 1
+#define MINIMAP_SIZE_RATIO 3.75
 // Size of one tile represented on the minimap (here it's a square of 5x5)
 #define SIZE_OF_TILE_ON_MINIMAP 7
+// player sprite size on minimap
+#define PLAYER_SIZE_ON_MINIMAP 7
 
 // Cos of rotation angle and sin of rotation angle (directly in radians)
 // Current values for 
@@ -114,38 +119,86 @@ t_point	get_pos_current_tile(t_vector player_pos)
 	return (res);
 }
 
+t_point	get_pos_current_tile_floor(t_vector player_pos)
+{
+	t_point	res;
+
+	res.x = (int) floor(player_pos.x);
+	res.y = (int) floor(player_pos.y);
+	return (res);
+}
+
+int	min(int a, int b)
+{
+	if (a < b)
+		return (a);
+	return (b);
+}
 
 t_game		game;
 
+void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, int x, int y)
+{	
+	t_vector	normalized_dir;
+	t_vector	perp_dir;
+	int			i;
+
+	double vec_len = sqrt(pow_two(player_dir.x) + pow_two(player_dir.y));
+	player_dir.x /= vec_len;
+	player_dir.y /= vec_len;
+	perp_dir.x = -player_dir.y;
+	perp_dir.y = player_dir.x;
+	normalized_dir.x = player_dir.x;
+	normalized_dir.y = player_dir.y;
+	i = 0;
+	while (i < PLAYER_SIZE_ON_MINIMAP)
+	{
+		mlx_put_pixel_img(img, (int) player_dir.x + x, (int) player_dir.y + y, 0x00FF8855);
+		player_dir.x += normalized_dir.x;
+		player_dir.y += normalized_dir.y;
+		i++;
+	}
+	i = 0;
+	while (i < PLAYER_SIZE_ON_MINIMAP / 2)
+	{
+		mlx_put_pixel_img(img, (int) perp_dir.x + x, (int) perp_dir.y + y, 0x00FF8855);
+		mlx_put_pixel_img(img, (int) -perp_dir.x + x, (int) -perp_dir.y + y, 0x00FF8855);
+		perp_dir.x += (-normalized_dir.y);
+		perp_dir.y += (normalized_dir.x);
+		i++;
+	}
+}
+
 void	add_minimap(int map[24][24])
 {
-	t_point		minimap_size;
+	int			minimap_size;
 	t_vector	current_pos;
-	double		x_offset_every_px;
-	double		y_offset_every_px;
+	double		offset_every_px;
 	t_point		current_tile;
 
 	int x = 0;
 	int y = 0;
-	minimap_size.x = screenWidth / MINIMAP_SIZE_RATIO;
-	minimap_size.y = screenHeight / MINIMAP_SIZE_RATIO;
-	current_pos.x = game.player.pos.x - ((double) minimap_size.x / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
-	current_pos.y = game.player.pos.y - ((double) minimap_size.y / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
-	x_offset_every_px = ((double) minimap_size.x / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size.x;
-	y_offset_every_px = ((double) minimap_size.y / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size.y;
+	minimap_size = min(screenHeight / MINIMAP_SIZE_RATIO, screenWidth / MINIMAP_SIZE_RATIO);
+	current_pos.x = game.player.pos.x - ((double) minimap_size / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
+	current_pos.y = game.player.pos.y - ((double) minimap_size / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
+	offset_every_px = ((double) minimap_size / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size;
 	//printf("current_pos: (%f, %f)\n", current_pos.x, current_pos.y);
-	//printf("current offset: (%f, %f)\n", x_offset_every_px, y_offset_every_px);
-	//printf("minimap size: (%d, %d)\n", minimap_size.x, minimap_size.y);
-	while (y < minimap_size.y)
+	//printf("current offset: (%f, %f)\n", offset_every_px, offset_every_px);
+	//printf("minimap size: (%d, %d)\n", minimap_size, minimap_size);
+	while (y < minimap_size)
 	{
 		x = 0;
-		current_pos.x = game.player.pos.x - ((double) minimap_size.x / SIZE_OF_TILE_ON_MINIMAP) / 2;
-		while (x < minimap_size.x)
+		current_pos.x = game.player.pos.x - ((double) minimap_size / SIZE_OF_TILE_ON_MINIMAP) / 2;
+		while (x < minimap_size)
 		{
-			current_tile = get_pos_current_tile(current_pos);
+			// If we are at pos -0, truncating will give 0, floor will give -1
+			// So when we were on -x and -y, walls would actually appear 2x thicccer
+			// That's why I use floor only for this function (since i think it's more intensive)
+			current_tile = get_pos_current_tile_floor(current_pos);
 			//printf("current_pos: (%f, %f), x:%d, y:%d\n", current_pos.x, current_pos.y, x, y);
 			//printf("current tile: %d %d\n", current_tile.x, current_tile.y);
 			mlx_put_pixel_img(&game.minimap_img, x, y, 0x88FFFFFF);
+			//printf("x_pos:%f, floored:%d\n", current_pos.x, current_tile.x);
 			if (current_tile.x >= 0 && current_tile.y >= 0 && current_tile.x < 24 && current_tile.y < 24)
 			{
 				//printf("current tile: %d %d\n", current_tile.x, current_tile.y);
@@ -157,23 +210,27 @@ void	add_minimap(int map[24][24])
 					mlx_put_pixel_img(&game.minimap_img, x, y, 0x00ff00bb);
 				}
 			}
-			current_pos.x += x_offset_every_px;
+			
+			current_pos.x += offset_every_px;
 			x++;
 		}
-		current_pos.y += y_offset_every_px;
+		current_pos.y += offset_every_px;
 		y++;
 	}
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 - 1, minimap_size.y / 2 + -1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2, minimap_size.y / 2 + -1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 + 1, minimap_size.y / 2 + -1, 0x0080FFFF);
+	draw_player_pos_dir(game.player.direction, &game.minimap_img, minimap_size / 2, minimap_size / 2);
+	/*
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2 - 1, minimap_size / 2 + -1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2, minimap_size / 2 + -1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2 + 1, minimap_size / 2 + -1, 0x0080FFFF);
 
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 - 1, minimap_size.y / 2 + -0, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2, minimap_size.y / 2, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 + 1, minimap_size.y / 2, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2 - 1, minimap_size / 2 + -0, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2, minimap_size / 2, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2 + 1, minimap_size / 2, 0x0080FFFF);
 
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 - 1, minimap_size.y / 2 + 1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2, minimap_size.y / 2 + 1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 + 1, minimap_size.y / 2 + 1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2 - 1, minimap_size / 2 + 1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2, minimap_size / 2 + 1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size / 2 + 1, minimap_size / 2 + 1, 0x0080FFFF);
+	*/
 }
 
 void	drawline_from_distance(int x, double distance, int wall_type, char side)
@@ -185,10 +242,10 @@ void	drawline_from_distance(int x, double distance, int wall_type, char side)
 	gettimeofday(&start, NULL);
 	print_elapsed("start: ", start);*/
 
-	int drawStart = -line_height / 2 + screenHeight / 2;
+	int drawStart = -line_height / 2 + screenHeight / 2 + game.player.height;
     if(drawStart < 0)
 		drawStart = 0;
-    int drawEnd = line_height / 2 + screenHeight / 2;
+    int drawEnd = line_height / 2 + screenHeight / 2 + game.player.height;
 	if(drawEnd >= screenHeight)
 		drawEnd = screenHeight - 1;
 	
@@ -503,6 +560,10 @@ int	key_press_event(int keycode, t_game *game)
 		player->directions.right = 1;
 		add_velocity(player, -player->direction.y, player->direction.x);
 	}
+	else if (keycode == KEY_SHFT)
+	{
+		player->speed *= (double) SPEED_MULTIPLIER;
+	}
 	else if (keycode == KEY_ARROW_LEFT)
 	{
 		player->directions.rotate_l = 1;
@@ -660,12 +721,6 @@ void	do_render(t_game *game)
 	//print_elapsed("put window: ", start);
 }
 
-int	key_hook(int keycode, t_game *game)
-{
-	game->player.pos.x += 0.5;
-	do_render(game);
-	return (1);
-}
 
 /*
 	If there is an intersection with a wall after going forward (or any side)
@@ -788,12 +843,12 @@ int loop_hook(t_game *game)
 	}
 	if (game->player.directions.rotate_r == 1)
 		rotate_player(&game->player, 1);
-	game->player.pos.x += game->player.velocity.x;
-	game->player.pos.y += game->player.velocity.y;
+	game->player.pos.x += game->player.velocity.x * game->player.speed;
+	game->player.pos.y += game->player.velocity.y * game->player.speed;
 	if (has_intersection_with_wall(game->player.pos, worldMap))
 	{
-		game->player.pos.y -= game->player.velocity.y;
-		game->player.pos.x -= game->player.velocity.x;
+		game->player.pos.y -= game->player.velocity.y * game->player.speed;
+		game->player.pos.x -= game->player.velocity.x * game->player.speed;
 		/*if (game->player.directions.rotate_r == 1)
 			rotate_player(&game->player, -1);
 		if (game->player.directions.rotate_l == 1)
@@ -830,6 +885,10 @@ int	key_release_event(int keycode, t_game *game)
 	{
 		game->player.directions.right = 0;
 		remove_velocity(player, -player->direction.y, player->direction.x);
+	}
+	else if (keycode == KEY_SHFT)
+	{
+		player->speed /= (double) SPEED_MULTIPLIER;
 	}
 	else if (keycode == KEY_ARROW_LEFT)
 	{
@@ -868,6 +927,8 @@ int main()
 	game.player.direction.y = 0.0;
 	game.player.cam_plane.x = 0.0;
 	game.player.cam_plane.y = 0.66;
+	game.player.speed = 1.0;
+	game.player.height = 0;
 
 	do_render(&game);
 
