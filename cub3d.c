@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/01 15:22:49 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/01 16:38:26 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,10 +242,10 @@ void	drawline_from_distance(int x, double distance, int wall_type, char side)
 	gettimeofday(&start, NULL);
 	print_elapsed("start: ", start);*/
 
-	int drawStart = -line_height / 2 + screenHeight / 2 + game.player.height;
+	int drawStart = -line_height / 2 + screenHeight / 2;
     if(drawStart < 0)
 		drawStart = 0;
-    int drawEnd = line_height / 2 + screenHeight / 2 + game.player.height;
+    int drawEnd = line_height / 2 + screenHeight / 2;
 	if(drawEnd >= screenHeight)
 		drawEnd = screenHeight - 1;
 	
@@ -417,8 +417,6 @@ static t_ray_hit	get_ray_distance_side(t_ray ray, int map[24][24])
 	ray_hit.tile_hit = ray.current_tile;
 	return (ray_hit);
 }
-
-
 
 t_ray_hit	get_ray_hit(t_vector direction, int map[24][24], t_vector player_pos)
 {
@@ -684,6 +682,11 @@ int	has_intersection_with_wall(t_vector player_pos, int map[24][24])
 	return (0);
 }
 
+double	get_vector_length(t_vector vector)
+{
+	return (sqrt(pow_two(vector.x) + pow_two(vector.y)));
+}
+
 void	do_render(t_game *game)
 {
 	t_vector	ray_dir;
@@ -706,12 +709,56 @@ void	do_render(t_game *game)
 		ray_dir.x = direction.x + (game->player.cam_plane.x * camera_pos_on_plane);
 		ray_dir.y = direction.y + (game->player.cam_plane.y * camera_pos_on_plane);
 		t_ray_hit ray_hit = get_ray_hit(ray_dir, worldMap, game->player.pos);
-		if (x == 0)
+
+
+
+		double	wall_pos_hit;
+		double	rel_player_pos;
+		if (ray_hit.side_hit == 'x')
 		{
-			//printf("ray hit distance: %f\n", ray_hit.distance);
+			wall_pos_hit = game->player.pos.y + ray_hit.distance * ray_dir.y;
+			/*
+			double x_offset = (ray_hit.distance /  get_vector_length(get_dda_distances(ray_dir))) * get_dda_x_distance(ray_dir);
+			// x_offset - floor(x_offset) = value between 0 and 1
+			//printf("Ray %d, player pos x - x offset: %f\n", x, game->player.pos.x - x_offset);
+			rel_player_pos = game->player.pos.x - (double)((int)game->player.pos.x);
+			wall_pos_hit = rel_player_pos - floor(rel_player_pos);
+			*/
 		}
+		else
+		{
+			wall_pos_hit = game->player.pos.x + ray_hit.distance * ray_dir.x;
+
+			/*
+			double y_offset = (ray_hit.distance /  get_vector_length(get_dda_distances(ray_dir))) * get_dda_y_distance(ray_dir);
+			rel_player_pos = game->player.pos.y - y_offset;
+			wall_pos_hit = rel_player_pos - floor(rel_player_pos);
+			printf("Ray %d, wall pos hit = %f\n", x, wall_pos_hit);
+			//wall_pos_hit = y_offset - floor(y_offset);
+			*/
+		}
+		wall_pos_hit = wall_pos_hit - floor(wall_pos_hit);
+		//printf("Ray %d wallX: %f\n", x, wall_pos_hit);
+		int color = 0;
+
+		if (wall_pos_hit >= 0.0 && wall_pos_hit < 0.2) // white
+			color = 0x00FFFFFF;
+		else if (wall_pos_hit >= 0.2 && wall_pos_hit < 0.4) // blue
+			color = 0x004287f5;
+		else if (wall_pos_hit >= 0.4 && wall_pos_hit < 0.6) // pink
+			color = 0x00f542ad;
+		else if (wall_pos_hit >= 0.6 && wall_pos_hit < 0.8) // green
+			color = 0x0042f593;
+		else if (wall_pos_hit >= 0.8 && wall_pos_hit < 1.0) // moche
+			color = 0x00d9ad2b;
+		//printf("ray %d Offset: %f\n", x, wall_pos_hit);
+		
+		//if (x == 0)
+		//{
+		//	//printf("ray hit distance: %f\n", ray_hit.distance);
+		//}
 		//print_elapsed("\ncalcul: ", start);
-		drawline_from_distance(x, ray_hit.distance, worldMap[ray_hit.tile_hit.y][ray_hit.tile_hit.x], ray_hit.side_hit);
+		drawline_from_distance(x, ray_hit.distance, /*worldMap[ray_hit.tile_hit.y][ray_hit.tile_hit.x]*/color, ray_hit.side_hit);
 		//print_elapsed("draw: ", start);
 	}
 	add_minimap(worldMap);
@@ -928,7 +975,6 @@ int main()
 	game.player.cam_plane.x = 0.0;
 	game.player.cam_plane.y = 0.66;
 	game.player.speed = 1.0;
-	game.player.height = 0;
 
 	do_render(&game);
 

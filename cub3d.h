@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/01 15:18:23 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/01 15:44:02 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ typedef struct s_player
 	t_vector3		velocity;
 	t_directions	directions;
 	double			speed;
-	int				height;
 }	t_player;
 
 typedef struct s_ray
@@ -82,9 +81,9 @@ typedef struct s_ray
 */
 typedef struct s_ray_hit
 {
-	char	side_hit;
-	double	distance;
-	t_point	tile_hit;
+	char		side_hit;
+	double		distance;
+	t_point		tile_hit;
 }	t_ray_hit;
 
 typedef struct s_game
