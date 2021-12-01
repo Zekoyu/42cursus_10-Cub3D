@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/30 15:59:05 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/01 12:02:59 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,7 @@ typedef struct s_game
 	void			*mlx;
 	void			*window;
 	t_img_data		main_img;
+	t_img_data		minimap_img;
 	t_player		player;
 }	t_game;
 

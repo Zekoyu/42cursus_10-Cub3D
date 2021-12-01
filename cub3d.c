@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/11/30 19:37:44 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/01 12:16:46 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,10 @@
 #define COS_ROTATION 0.99691733373
 #define SIN_ROTATION 0.07845909568
 #define BOUNDING_BOX_SIDE_SIZE 0.4
+// Ratio compared to the size of the screen (here it takes 1/10 of the screen)
+#define MINIMAP_SIZE_RATIO 8
+// Size of one tile represented on the minimap (here it's a square of 5x5)
+#define SIZE_OF_TILE_ON_MINIMAP 7
 
 // Cos of rotation angle and sin of rotation angle (directly in radians)
 // Current values for 
@@ -101,7 +105,76 @@ double	pow_two(double num)
 	return (num * num);
 }
 
+t_point	get_pos_current_tile(t_vector player_pos)
+{
+	t_point	res;
+
+	res.x = (int) player_pos.x;
+	res.y = (int) player_pos.y;
+	return (res);
+}
+
+
 t_game		game;
+
+void	add_minimap(int map[24][24])
+{
+	t_point		minimap_size;
+	t_vector	current_pos;
+	double		x_offset_every_px;
+	double		y_offset_every_px;
+	t_point		current_tile;
+
+	int x = 0;
+	int y = 0;
+	minimap_size.x = screenWidth / MINIMAP_SIZE_RATIO;
+	minimap_size.y = screenHeight / MINIMAP_SIZE_RATIO;
+	current_pos.x = game.player.pos.x - ((double) minimap_size.x / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
+	current_pos.y = game.player.pos.y - ((double) minimap_size.y / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
+	x_offset_every_px = ((double) minimap_size.x / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size.x;
+	y_offset_every_px = ((double) minimap_size.y / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size.y;
+	//printf("current_pos: (%f, %f)\n", current_pos.x, current_pos.y);
+	//printf("current offset: (%f, %f)\n", x_offset_every_px, y_offset_every_px);
+	//printf("minimap size: (%d, %d)\n", minimap_size.x, minimap_size.y);
+	while (y < minimap_size.y)
+	{
+		x = 0;
+		current_pos.x = game.player.pos.x - ((double) minimap_size.x / SIZE_OF_TILE_ON_MINIMAP) / 2;
+		while (x < minimap_size.x)
+		{
+			current_tile = get_pos_current_tile(current_pos);
+			//printf("current_pos: (%f, %f), x:%d, y:%d\n", current_pos.x, current_pos.y, x, y);
+			//printf("current tile: %d %d\n", current_tile.x, current_tile.y);
+			mlx_put_pixel_img(&game.minimap_img, x, y, 0x88FFFFFF);
+			if (current_tile.x >= 0 && current_tile.y >= 0 && current_tile.x < 24 && current_tile.y < 24)
+			{
+				//printf("current tile: %d %d\n", current_tile.x, current_tile.y);
+				
+				if (map[current_tile.y][current_tile.x] != 0)
+				{
+					//printf("put pixel %d %d\n",x,y);
+					
+					mlx_put_pixel_img(&game.minimap_img, x, y, 0x00ff00bb);
+				}
+			}
+			current_pos.x += x_offset_every_px;
+			x++;
+		}
+		current_pos.y += y_offset_every_px;
+		y++;
+	}
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 - 1, minimap_size.y / 2 + -1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2, minimap_size.y / 2 + -1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 + 1, minimap_size.y / 2 + -1, 0x0080FFFF);
+
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 - 1, minimap_size.y / 2 + -0, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2, minimap_size.y / 2, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 + 1, minimap_size.y / 2, 0x0080FFFF);
+
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 - 1, minimap_size.y / 2 + 1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2, minimap_size.y / 2 + 1, 0x0080FFFF);
+	mlx_put_pixel_img(&game.main_img, minimap_size.x / 2 + 1, minimap_size.y / 2 + 1, 0x0080FFFF);
+}
 
 void	drawline_from_distance(int x, double distance, int wall_type, char side)
 {
@@ -221,14 +294,7 @@ t_vector	get_dda_distances(t_vector direction)
 	return (res);
 }
 
-t_point	get_pos_current_tile(t_vector player_pos)
-{
-	t_point	res;
 
-	res.x = (int) player_pos.x;
-	res.y = (int) player_pos.y;
-	return (res);
-}
 
 t_point	get_direction_steps(t_vector direction)
 {
@@ -457,7 +523,7 @@ int	key_press_event(int keycode, t_game *game)
 		game->player.cam_plane.x *= 0.9;
 		game->player.cam_plane.y *= 0.9;
 	}
-	printf("%f %f\n", game->player.cam_plane.x, game->player.cam_plane.y);
+	//printf("%f %f\n", game->player.cam_plane.x, game->player.cam_plane.y);
 }
 
 
@@ -587,8 +653,10 @@ void	do_render(t_game *game)
 		drawline_from_distance(x, ray_hit.distance, worldMap[ray_hit.tile_hit.y][ray_hit.tile_hit.x], ray_hit.side_hit);
 		//print_elapsed("draw: ", start);
 	}
+	add_minimap(worldMap);
 	mlx_clear_window(game->mlx, game->window);
-	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0,0);	
+	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0,0);
+	mlx_put_image_to_window(game->mlx, game->window, game->minimap_img.img, 0, 0);
 	//print_elapsed("put window: ", start);
 }
 
@@ -698,12 +766,12 @@ int loop_hook(t_game *game)
 	int mouse_velo = get_mouse_velocity(game->window);
 	//printf("mouse velocity: %d\n", mouse_velo);
 	
-	if (mouse_velo <= -5)
+	if (mouse_velo <= -2)
 	{
 		game->player.directions.rotate_l = 1;
 		game->player.directions.rotate_r = 0;
 	}
-	else if (mouse_velo >= 5)
+	else if (mouse_velo >= 2)
 	{
 		game->player.directions.rotate_l = 0;
 		game->player.directions.rotate_r = 1;
@@ -780,6 +848,17 @@ int main()
 	game.main_img.img = mlx_new_image(game.mlx, screenWidth, screenHeight);
 	game.main_img.addr = mlx_get_data_addr(game.main_img.img, &game.main_img.bits_per_pixel, &game.main_img.line_length, &game.main_img.endian);
 	
+	game.minimap_img.img = mlx_new_image(game.mlx, screenWidth, screenHeight);
+	game.minimap_img.addr = mlx_get_data_addr(game.minimap_img.img, &game.minimap_img.bits_per_pixel, &game.minimap_img.line_length, &game.minimap_img.endian);
+	
+	for (int x = 0; x < screenWidth; x++)
+	{
+		for (int y = 0; y < screenHeight; y++)
+		{
+			mlx_put_pixel_img(&game.minimap_img, x, y, 0xFF000000);
+		}
+	}
+
 	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_mouse_hide();
 	
@@ -788,7 +867,7 @@ int main()
 	game.player.direction.x = 1.0;
 	game.player.direction.y = 0.0;
 	game.player.cam_plane.x = 0.0;
-	game.player.cam_plane.y = 1.0;
+	game.player.cam_plane.y = 0.66;
 
 	do_render(&game);
 
