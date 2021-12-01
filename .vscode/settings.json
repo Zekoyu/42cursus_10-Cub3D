@@ -3,6 +3,7 @@
 		"cub3d.h": "c",
 		"cmath": "cpp",
 		"complex": "cpp",
-		"mlx.h": "c"
+		"mlx.h": "c",
+		"*.xpm": "c"
 	}
 }
