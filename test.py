@@ -10,16 +10,20 @@ def uncomment(s):
     return s[2+s.find('/*'):s.rfind('*/')]
 
 def col(c):
-    color = c.split(' ')
-    colore = (c[1])
-    if (colore == ' '):
-        value = (color[1])
+    color = c.split()
+    colore = ' '
+    if (c[1] == ' '):
+        colore = " "
     else:
-        value = color[2]
+        colore = (color[0])[1:]
+
+    value = color[2]
+    #print("c:" , c, "-- color array:", color)
     value = value.replace("#", "0x00")
     value = value[:-3]
     #print("color: '" + colore + "' value:",value)
     #sys.stderr.write("%s: %s %s %s\n"%(c.strip(),color[0], color[1], value))
+    
     return colore, value
 
 # Open the xpm file for reading
@@ -27,7 +31,7 @@ xpm = open(sys.argv[1])
 
 # Read in lines until we fidn the start of the array
 meta = [xpm.readline()]
-while not meta[-1].startswith("static char *gromacs_xpm[]"):
+while not meta[-1].startswith("static char *"):
     meta.append(xpm.readline())
 
 # The next line will contain the dimensions of the array
@@ -39,11 +43,13 @@ nx, ny, nc, nb = [int(i) for i in unquote(dim).split()]
 # Each pixel is encoded by dim[3] bytes, and a comment
 # at the end of the line contains the corresponding value
 colors = dict([col(xpm.readline()) for i in range(nc)])
+sys.stdout.write("int texture[" + str(ny) + "][" + str(nx) + "] = {\n")
+print("colors[""]=",colors["  "])
 for i in xpm:
     if i.startswith("/*"):
         continue
     j = unquote(i)
     z = [colors[j[k:k+nb]] for k in range(0,nx,nb)]
-    sys.stdout.write(",".join(z)+"\n")
-
-###
+    sys.stdout.write("{")
+    sys.stdout.write(",".join(z)+"}\n")
+sys.stdout.write("}")

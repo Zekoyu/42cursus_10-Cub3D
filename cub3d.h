@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/01 15:44:02 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/02 13:50:13 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,9 @@ typedef struct s_game
 	void			*window;
 	t_img_data		main_img;
 	t_img_data		minimap_img;
+	void			*shotgun_img;
+	int				shotgun_height;
+	int				shotgun_width;
 	t_player		player;
 }	t_game;
 
