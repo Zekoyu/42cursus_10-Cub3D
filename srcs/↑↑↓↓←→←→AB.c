@@ -1,0 +1,45 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ↑↑↓↓←→←→AB.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/02 22:50:11 by mframbou          #+#    #+#             */
+/*   Updated: 2021/12/02 22:53:21 by mframbou         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "cub3d.h"
+
+/*
+	UUDDLRLRAB
+	↑↑↓↓←→←→AB
+*/
+int	is_uuddlrlrab_complete(int code[10])
+{
+	return (code[0] == KEY_W && code[1] == KEY_W
+		&& code[2] == KEY_S && code[3] == KEY_S
+		&& code[4] == KEY_A && code[5] == KEY_D
+		&& code[6] == KEY_A && code[7] == KEY_D
+		&& code[8] == MOUSE_LEFT && code[9] == MOUSE_RIGHT);
+}
+
+int	check_uuddlrlrab(int keycode)
+{
+	static int	code[10];
+	int			i;
+
+	i = 1;
+	while (i < 10)
+	{
+		code[i - 1] = code[i];
+		i++;
+	}
+	code[9] = keycode;
+	if (is_uuddlrlrab_complete(code))
+	{
+		return (1);
+	}
+	return (0);
+}

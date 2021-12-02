@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 16:44:39 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/02 23:12:51 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,23 +15,7 @@
 #include "mlx_keycodes.h"
 #include <stdlib.h>
 
-#define mapWidth 39
-#define mapHeight 24
-#define screenWidth 1920
-#define screenHeight 1080
-#define MOVEMENT_FACTOR 0.075
-#define COS_ROTATION 0.99691733373
-#define SIN_ROTATION 0.07845909568
-#define BOUNDING_BOX_SIDE_SIZE 0.4
-#define SPEED_MULTIPLIER 1.5
-// Ratio compared to the size of the screen (here it takes 1/10 of the screen)
-// map will remain squared (take min(width/ratio), (height/ratio))
-// Should not be set to les than 1
-#define MINIMAP_SIZE_RATIO 3.75
-// Size of one tile represented on the minimap (here it's a square of 5x5)
-#define SIZE_OF_TILE_ON_MINIMAP 10
-// player sprite size on minimap
-#define PLAYER_SIZE_ON_MINIMAP 10
+
 
 void	do_render(t_game *game);
 
@@ -345,38 +329,9 @@ int crossTex[normalTexHeight][normalTexWidth]=
 	V
 */
 
+/* TODO: Remove this ?
 #include <sys/time.h>
 #include <stdio.h>
-
-
-int	is_cheat_code_complete(int cheatcode[10])
-{
-	return (cheatcode[0] == KEY_W && cheatcode[1] == KEY_W
-		&& cheatcode[2] == KEY_S && cheatcode[3] == KEY_S
-		&& cheatcode[4] == KEY_A && cheatcode[5] == KEY_D
-		&& cheatcode[6] == KEY_A && cheatcode[7] == KEY_D
-		&& cheatcode[8] == MOUSE_LEFT && cheatcode[9] == MOUSE_RIGHT);
-}
-
-int	check_cheat_code(int keycode)
-{
-	static int	cheatcode[10];
-	int			i;
-
-	i = 1;
-	while (i < 10)
-	{
-		cheatcode[i - 1] = cheatcode[i];
-		i++;
-	}
-	cheatcode[9] = keycode;
-	if (is_cheat_code_complete(cheatcode))
-	{
-		return (1);
-	}
-	return (0);
-}
-
 void print_elapsed(char str[], struct timeval start)
 {
 	struct timeval now;
@@ -386,34 +341,18 @@ void print_elapsed(char str[], struct timeval start)
 	int diff_u = now.tv_usec - start.tv_usec;
 	printf("%s %d elapsed\n", str, (diff_s * 1000 * 1000 + diff_u));
 }
+*/
 
-void	mlx_put_pixel_img(t_img_data *img, int x, int y, int color)
-{
-	char	*dst;
-	struct timeval start;
-
-	//gettimeofday(&start, NULL);
-	//print_elapsed("start put pixel: ", start);
-	
-	dst = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
-	
-	//((unsigned int*) img->addr)[y * screenWidth + x] = color; // maybe faster ?
-
-	*((unsigned int *)dst) = color;
-	//print_elapsed("end put pixel: ", start);
-}
-
+/* "gngngn fait un lerp"
 inline double	ft_lerp(double min, double max, double val)
 {
 	return (min + val * (max - min));
 }
+*/
 
 #include <stdio.h>
 
-double	pow_two(double num)
-{
-	return (num * num);
-}
+
 
 t_point	get_pos_current_tile(t_vector player_pos)
 {
@@ -424,21 +363,6 @@ t_point	get_pos_current_tile(t_vector player_pos)
 	return (res);
 }
 
-t_point	get_pos_current_tile_floor(t_vector player_pos)
-{
-	t_point	res;
-
-	res.x = (int) floor(player_pos.x);
-	res.y = (int) floor(player_pos.y);
-	return (res);
-}
-
-int	min(int a, int b)
-{
-	if (a < b)
-		return (a);
-	return (b);
-}
 
 
 
@@ -469,231 +393,17 @@ void	mlx_put_line_to_img(t_img_data *img,
 	}
 }
 
-int sign (t_point p1, t_point p2, t_point p3)
-{
-    return ((p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y));
-}
 
-int	is_point_in_triangle(t_point pt, t_point v1, t_point v2, t_point v3)
-{
-    int d1, d2, d3;
-    int has_neg, has_pos;
 
-    d1 = sign(pt, v1, v2);
-    d2 = sign(pt, v2, v3);
-    d3 = sign(pt, v3, v1);
 
-	has_neg = 0;
-	has_pos = 0;
-    if ((d1 < 0) || (d2 < 0) || (d3 < 0))
-		has_neg = 1;
-    if ((d1 > 0) || (d2 > 0) || (d3 > 0))
-		has_pos = 1;
-
-	//printf("pt %d %d has_pos: %d, neg: %d\n",pt.x, pt.y, has_pos, has_neg);
-	if (has_neg && has_pos)
-		return(0);
-	return (1);
-}
-
-int	get_min_y(t_point t1, t_point t2, t_point t3)
-{
-	int	y1;
-	int	y2;
-	int	y3;
-
-	y1 = t1.y;
-	y2 = t2.y;
-	y3 = t3.y;
-	if (y1 <= y2 && y1 <= y3)
-		return (y1);
-	else if (y2 <= y1 && y2 <= y3)
-		return (y2);
-	else
-		return (y3);
-}
-
-int	get_max_y(t_point t1, t_point t2, t_point t3)
-{
-	int	y1;
-	int	y2;
-	int	y3;
-
-	y1 = t1.y;
-	y2 = t2.y;
-	y3 = t3.y;
-	if (y1 >= y2 && y1 >= y3)
-		return (y1);
-	else if (y2 >= y1 && y2 >= y3)
-		return (y2);
-	else
-		return (y3);
-}
-
-int	get_min_x(t_point t1, t_point t2, t_point t3)
-{
-	int	x1;
-	int	x2;
-	int	x3;
-
-	x1 = t1.x;
-	x2 = t2.x;
-	x3 = t3.x;
-	if (x1 <= x2 && x1 <= x3)
-		return (x1);
-	else if (x2 <= x1 && x2 <= x3)
-		return (x2);
-	else
-		return (x3);
-}
-
-int	get_max_x(t_point t1, t_point t2, t_point t3)
-{
-	int	x1;
-	int	x2;
-	int	x3;
-
-	x1 = t1.x;
-	x2 = t2.x;
-	x3 = t3.x;
-	if (x1 >= x2 && x1 >= x3)
-		return (x1);
-	else if (x2 >= x1 && x2 >= x3)
-		return (x2);
-	else
-		return (x3);
-}
-
-void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, int x, int y)
-{	
-	t_vector	normalized_dir;
-	t_vector	perp_dir;
-	t_point		t1;
-	t_point		t2;
-	t_point		top;
-	int			i;
-
-	double vec_len = sqrt(pow_two(player_dir.x) + pow_two(player_dir.y));
-	player_dir.x /= vec_len;
-	player_dir.y /= vec_len;
-	perp_dir.x = -player_dir.y;
-	perp_dir.y = player_dir.x;
-	normalized_dir.x = player_dir.x;
-	normalized_dir.y = player_dir.y;
-	i = 0;
-	while (i < PLAYER_SIZE_ON_MINIMAP)
-	{
-		//mlx_put_pixel_img(img, (int) player_dir.x + x, (int) player_dir.y + y, 0x00FF8855);
-		player_dir.x += normalized_dir.x;
-		player_dir.y += normalized_dir.y;
-		i++;
-	}
-	top.x = player_dir.x + x;
-	top.y = player_dir.y + y;
-	i = 0;
-	while (i < (int)((float) PLAYER_SIZE_ON_MINIMAP / 2.5))
-	{
-		//mlx_put_pixel_img(img, (int) perp_dir.x + x, (int) perp_dir.y + y, 0x00FF8855);
-		//mlx_put_pixel_img(img, (int) -perp_dir.x + x, (int) -perp_dir.y + y, 0x00FF8855);
-		perp_dir.x += (-normalized_dir.y);
-		perp_dir.y += (normalized_dir.x);
-		i++;
-	}
-	t1.x = perp_dir.x + x;
-	t1.y = perp_dir.y + y;
-	t2.x = -perp_dir.x + x;
-	t2.y = -perp_dir.y + y;
-	t_point	pt;
-	//printf("t1 %d %d   t2 %d %d    top %d %d\n", t1.x, t1.y, t2.x, t2.y, top.x, top.y);
-	//printf("x- min: %d max; %d  -- y- min:%d max:%d\n", get_min_x(t1, t2, top),get_max_x(t1, t2, top), get_min_y(t1, t2, top),get_max_y(t1, t2, top));
-	for (int i = get_min_x(t1, t2, top); i <= get_max_x(t1, t2, top); i++)
-	{
-		for (int j = get_min_y(t1, t2, top); j <= get_max_y(t1, t2, top); j++)
-		{
-			/*pt.x = perp_dir.x - i + x;
-			pt.y = perp_dir.y - j + y;
-			*/
-			pt.x = i;
-			pt.y = j;
-			if (is_point_in_triangle(pt, t1, t2, top))
-				mlx_put_pixel_img(img, pt.x, pt.y, 0x00FF8855);
-		}
-	}
-}
-
-void	add_minimap(int map[mapHeight][mapWidth])
-{
-	int			minimap_size;
-	t_vector	current_pos;
-	double		offset_every_px;
-	t_point		current_tile;
-
-	int x = 0;
-	int y = 0;
-	minimap_size = min(screenHeight / MINIMAP_SIZE_RATIO, screenWidth / MINIMAP_SIZE_RATIO);
-	current_pos.x = game.player.pos.x - ((double) minimap_size / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
-	current_pos.y = game.player.pos.y - ((double) minimap_size / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
-	offset_every_px = ((double) minimap_size / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size;
-	//printf("current_pos: (%f, %f)\n", current_pos.x, current_pos.y);
-	//printf("current offset: (%f, %f)\n", offset_every_px, offset_every_px);
-	//printf("minimap size: (%d, %d)\n", minimap_size, minimap_size);
-	while (y < minimap_size)
-	{
-		x = 0;
-		current_pos.x = game.player.pos.x - ((double) minimap_size / SIZE_OF_TILE_ON_MINIMAP) / 2;
-		while (x < minimap_size)
-		{
-			// If we are at pos -0, truncating will give 0, floor will give -1
-			// So when we were on -x and -y, walls would actually appear 2x thicccer
-			// That's why I use floor only for this function (since i think it's more intensive)
-			current_tile = get_pos_current_tile_floor(current_pos);
-			//printf("current_pos: (%f, %f), x:%d, y:%d\n", current_pos.x, current_pos.y, x, y);
-			//printf("current tile: %d %d\n", current_tile.x, current_tile.y);
-			mlx_put_pixel_img(&game.minimap_img, x, y, 0x88FFFFFF);
-			//printf("x_pos:%f, floored:%d\n", current_pos.x, current_tile.x);
-
-			// TODO: Do better (replace 24 with actual "parsed" size)
-			if (current_tile.x >= 0 && current_tile.y >= 0 && current_tile.x < 24 && current_tile.y < 24)
-			{
-				//printf("current tile: %d %d\n", current_tile.x, current_tile.y);
-				
-				if (map[current_tile.y][current_tile.x] != 0)
-				{
-					//printf("put pixel %d %d\n",x,y);
-					
-					mlx_put_pixel_img(&game.minimap_img, x, y, 0x00ff00bb);
-				}
-			}
-			
-			current_pos.x += offset_every_px;
-			x++;
-		}
-		current_pos.y += offset_every_px;
-		y++;
-	}
-	draw_player_pos_dir(game.player.direction, &game.minimap_img, minimap_size / 2, minimap_size / 2);
-	/*
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2 - 1, minimap_size / 2 + -1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2, minimap_size / 2 + -1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2 + 1, minimap_size / 2 + -1, 0x0080FFFF);
-
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2 - 1, minimap_size / 2 + -0, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2, minimap_size / 2, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2 + 1, minimap_size / 2, 0x0080FFFF);
-
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2 - 1, minimap_size / 2 + 1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2, minimap_size / 2 + 1, 0x0080FFFF);
-	mlx_put_pixel_img(&game.main_img, minimap_size / 2 + 1, minimap_size / 2 + 1, 0x0080FFFF);
-	*/
-}
 
 void	drawline_from_distance(int x, double wall_pos_hit, t_ray_hit ray_hit, t_vector ray_dir)
 {
 	int	line_height = round(((double)screenHeight / ray_hit.distance));
 	unsigned int	color = 0x00000FFF;
 
-	struct timeval start;
-	gettimeofday(&start, NULL);
+	//struct timeval start;
+	//gettimeofday(&start, NULL);
 	//print_elapsed("start put img: ", start);
 
 	int drawStart = -line_height / 2 + screenHeight / 2;
@@ -875,7 +585,7 @@ void	drawline_from_distance(int x, double wall_pos_hit, t_ray_hit ray_hit, t_vec
 double	get_y_for_1x_step(t_vector direction)
 {
 	if (direction.y != 0)
-		return (sqrt(1 + pow_two(direction.x) / pow_two(direction.y)));
+		return (sqrt(1 + power_two(direction.x) / power_two(direction.y)));
 	else
 		return (10E35);
 }
@@ -888,7 +598,7 @@ double	get_y_for_1x_step(t_vector direction)
 double	get_x_for_1y_step(t_vector direction)
 {
 	if (direction.x != 0)
-		return (sqrt(1 + pow_two(direction.y) / pow_two(direction.x)));
+		return (sqrt(1 + power_two(direction.y) / power_two(direction.x)));
 	else
 		return (10E35);
 }
@@ -1145,69 +855,11 @@ void	teleport_player(t_player *player)
 	//printf("End of teleportation\n");
 }
 
+
+
 /*
 	Rotate_player function automatically readjust velocity
 */
-int	key_press_event(int keycode, t_game *game)
-{
-	t_player	*player;
-
-	if (check_cheat_code(keycode))
-		teleport_player(&game->player);
-	if (keycode == KEY_ESC)
-		exit(0);
-	player = &game->player;
-	if (keycode == KEY_W)
-	{
-		player->directions.forward = 1;
-		add_velocity(player, player->direction.x, player->direction.y);
-	}
-	else if (keycode == KEY_S)
-	{
-		player->directions.backward = 1;
-		add_velocity(player, -player->direction.x, -player->direction.y);
-	}
-	else if (keycode == KEY_A)
-	{
-		player->directions.left = 1;
-		add_velocity(player, player->direction.y, -player->direction.x);
-	}
-	else if (keycode == KEY_D)
-	{
-		player->directions.right = 1;
-		add_velocity(player, -player->direction.y, player->direction.x);
-	}
-	else if (keycode == KEY_SHFT)
-	{
-		player->speed *= (double) SPEED_MULTIPLIER;
-	}
-	else if (keycode == KEY_CTRL)
-	{
-		player->speed /= (double) SPEED_MULTIPLIER;
-	}
-	else if (keycode == KEY_ARROW_LEFT)
-	{
-		player->directions.rotate_l = 1;
-		rotate_player(player, -1);
-	}
-	else if (keycode == KEY_ARROW_RIGHT)
-	{
-		player->directions.rotate_r = 1;
-		rotate_player(player, 1);
-	}
-	else if (keycode == KEY_MINUS) // Increase FOV
-	{
-		game->player.cam_plane.x *= 1.1;
-		game->player.cam_plane.y *= 1.1;
-	}
-	else if (keycode == KEY_PLUS) // Decrease FOV
-	{
-		game->player.cam_plane.x *= 0.9;
-		game->player.cam_plane.y *= 0.9;
-	}
-	//printf("%f %f\n", game->player.cam_plane.x, game->player.cam_plane.y);
-}
-
 
 
 
@@ -1307,7 +959,7 @@ int	has_intersection_with_wall(t_vector player_pos, int map[mapHeight][mapWidth]
 
 double	get_vector_length(t_vector vector)
 {
-	return (sqrt(pow_two(vector.x) + pow_two(vector.y)));
+	return (sqrt(power_two(vector.x) + power_two(vector.y)));
 }
 
 void	do_render(t_game *game)
@@ -1582,52 +1234,9 @@ int loop_hook(t_game *game)
 	return (1);
 }
 
-int	key_release_event(int keycode, t_game *game)
-{
-	t_player	*player;
-
-	player = &game->player;
-	if (keycode == KEY_W)
-	{
-		game->player.directions.forward = 0;
-		remove_velocity(player, player->direction.x, player->direction.y);
-	}
-	else if (keycode == KEY_S)
-	{
-		game->player.directions.backward = 0;
-		remove_velocity(player, -player->direction.x, -player->direction.y);
-	}
-	else if (keycode == KEY_A)
-	{
-		game->player.directions.left = 0;
-		remove_velocity(player, player->direction.y, -player->direction.x);
-	}
-	else if (keycode == KEY_D)
-	{
-		game->player.directions.right = 0;
-		remove_velocity(player, -player->direction.y, player->direction.x);
-	}
-	else if (keycode == KEY_SHFT)
-	{
-		player->speed /= (double) SPEED_MULTIPLIER;
-	}
-	else if (keycode == KEY_CTRL)
-	{
-		player->speed *= (double) SPEED_MULTIPLIER;
-	}
-	else if (keycode == KEY_ARROW_LEFT)
-	{
-		game->player.directions.rotate_l = 0;
-	}
-	else if (keycode == KEY_ARROW_RIGHT)
-	{
-		game->player.directions.rotate_r = 0;
-	}
-}
-
 int	mouse_hook(int keycode)
 {
-	if (check_cheat_code(keycode))
+	if (check_uuddlrlrab(keycode))
 		teleport_player(&game.player);
 }
 
@@ -1668,7 +1277,7 @@ int main()
 
 	mlx_do_key_autorepeatoff(game.mlx);
 	
-	mlx_hook(game.window, 2, 0, &key_press_event, &game);
+	mlx_hook(game.window, 2, 0, &key_press_handler, &game);
 	mlx_hook(game.window, 3, 0, &key_release_event, &game);
 
 	mlx_mouse_hook(game.window, &mouse_hook, NULL);

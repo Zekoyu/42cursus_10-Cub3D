@@ -4,6 +4,8 @@
 		"cmath": "cpp",
 		"complex": "cpp",
 		"mlx.h": "c",
-		"*.xpm": "c"
+		"*.xpm": "c",
+		"math.h": "c",
+		"stdio.h": "c"
 	}
 }
