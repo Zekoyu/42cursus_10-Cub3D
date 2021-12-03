@@ -3,19 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 23:12:51 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/03 17:08:07 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minilibx/mlx.h"
 #include "cub3d.h"
-#include "mlx_keycodes.h"
-#include <stdlib.h>
-
-
 
 void	do_render(t_game *game);
 
@@ -226,10 +221,10 @@ int worldMap[mapHeight][mapWidth]=
   {4,0,0,0,0,0,4,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {1,0,0,0,0,0,4,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {1,0,0,0,0,0,4,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0},
+  {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+  {1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -754,97 +749,13 @@ t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector
 	y2 = x * 0.01 + y * 0.1
 */
 
-void	add_velocity(t_player *player, double x_direction, double y_direction)
-{
-	player->velocity.x += x_direction * MOVEMENT_FACTOR;
-	player->velocity.y += y_direction * MOVEMENT_FACTOR;
-}
-
-void	remove_velocity(t_player *player, double x_direction, double y_direction)
-{
-	player->velocity.x -= x_direction * MOVEMENT_FACTOR;
-	player->velocity.y -= y_direction * MOVEMENT_FACTOR;
-}
-
-void	reset_velocity(t_player *player)
-{
-	player->velocity.x = 0;
-	player->velocity.y = 0;
-}
 /*
 	Direction 1 = right, -1 = left
 	0.1 radians ~= 5.7 degrees
 	0.995 = cos(0.1)
 	0.0998 = sin(0.1)
 */
-void	rotate_player(t_player *player, int direction)
-{
-	double	player_x_dir;
-	double	player_y_dir;
-	double	cam_x_dir;
-	double	cam_y_dir;
 
-	reset_velocity(player);
-	player_x_dir = player->direction.x;
-	player_y_dir = player->direction.y;
-	cam_x_dir = player->cam_plane.x;
-	cam_y_dir = player->cam_plane.y;
-	player->direction.x = (player_x_dir * COS_ROTATION - player_y_dir * (SIN_ROTATION * direction));
-	player->direction.y = (player_x_dir * (SIN_ROTATION * direction) + player_y_dir * COS_ROTATION);
-	player->cam_plane.x = (cam_x_dir * COS_ROTATION - cam_y_dir * (SIN_ROTATION * direction));
-	player->cam_plane.y = (cam_x_dir * (SIN_ROTATION * direction) + cam_y_dir * COS_ROTATION);
-	if (player->directions.forward == 1)
-		add_velocity(player, player->direction.x, player->direction.y);
-	if (player->directions.backward == 1)
-		add_velocity(player, -player->direction.x, -player->direction.y);
-	if (player->directions.left == 1)
-		add_velocity(player, player->direction.y, -player->direction.x);
-	if (player->directions.right == 1)
-		add_velocity(player, -player->direction.y, player->direction.x);
-}
-
-void	do_the_spin(t_player *player)
-{
-	t_vector	player_dir;
-	t_vector	cam_dir;
-	double		current_cos;
-	double		current_sin;
-	double		current_angle;
-
-	reset_velocity(player);
-
-	for (int i = 0; i < 100; i++)
-	{
-		player->pos.x += 0.2;
-		printf("going forward\n");
-		do_render(&game);
-		usleep(5000);
-	}
-
-	/*current_angle = 0.01;
-	while (current_angle < M_PI)
-	{
-		current_cos = cos(current_angle);
-		current_sin = sin(current_angle);
-
-		//player_dir.x = player->direction.x;
-		//player_dir.y = player->direction.y;
-		//cam_dir.x = player->cam_plane.x;
-		//cam_dir.y = player->cam_plane.y;
-		//player->direction.x = (player_dir.x * current_cos - player_dir.y * current_sin );
-		//player->direction.y = (player_dir.x * current_sin + player_dir.y * current_cos);
-		//player->cam_plane.x = (cam_dir.x * current_cos - cam_dir.y * current_sin);
-		//player->cam_plane.y = (cam_dir.x * current_sin + cam_dir.y * current_cos);
-
-		rotate_player(player, -1);
-
-		printf("old dir: (%f, %f), new dir: (%f, %f)\n", player_dir.x, player_dir.y, game.player.direction.x, game.player.direction.y);
-		do_render(&game);
-		printf("Current angle: %f\n", current_angle);
-		current_angle *= 1.2;
-		//usleep(10000);
-	}*/
-}
 
 int teleport_test = 0;
 void	teleport_player(t_player *player)
@@ -1000,6 +911,7 @@ void	do_render(t_game *game)
 		game->player.cam_plane.x = (cam_dir.x * current_cos - cam_dir.y * current_sin);
 		game->player.cam_plane.y = (cam_dir.x * current_sin + cam_dir.y * current_cos);
 
+		reset_velocity(&game->player);
 		current_angle *= multiplier;
 		if (teleport_test == 1)
 		{
@@ -1019,6 +931,10 @@ void	do_render(t_game *game)
 				multiplier = 1.07;
 				teleport_test = 0;
 				current_angle = 0.007;
+				{
+					reset_velocity(&game->player);
+					add_player_movements(&game->player);
+				}
 			}
 		}
 	}
@@ -1081,7 +997,7 @@ void	do_render(t_game *game)
 
 	//printf("last ray hit distance: %f, side: %c\n", ray_hit.distance, ray_hit.side_hit);
 
-	add_minimap(worldMap);
+	add_minimap(&game->minimap_img, worldMap, game->player);
 	mlx_clear_window(game->mlx, game->window);
 	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0,0);
 	mlx_put_image_to_window(game->mlx, game->window, game->minimap_img.img, 0, 0);
@@ -1248,15 +1164,16 @@ int main()
 	game.main_img.img = mlx_new_image(game.mlx, screenWidth, screenHeight);
 	game.main_img.addr = mlx_get_data_addr(game.main_img.img, &game.main_img.bits_per_pixel, &game.main_img.line_length, &game.main_img.endian);
 	
-	game.minimap_img.img = mlx_new_image(game.mlx, screenWidth, screenHeight);
+	int minimap_size_px = min(screenHeight / MINIMAP_SIZE_RATIO, screenWidth / MINIMAP_SIZE_RATIO);
+	game.minimap_img.img = mlx_new_image(game.mlx, minimap_size_px, minimap_size_px);
 	game.minimap_img.addr = mlx_get_data_addr(game.minimap_img.img, &game.minimap_img.bits_per_pixel, &game.minimap_img.line_length, &game.minimap_img.endian);
 	
-	game.shotgun_img =  mlx_png_file_to_image(game.mlx, "scaled_sprites/shotgun.png", &game.shotgun_width, &game.shotgun_height);
+	//game.shotgun_img =  mlx_png_file_to_image(game.mlx, "scaled_sprites/shotgun.png", &game.shotgun_width, &game.shotgun_height);
 
-
-	for (int x = 0; x < screenWidth; x++)
+	
+	for (int x = 0; x < minimap_size_px; x++)
 	{
-		for (int y = 0; y < screenHeight; y++)
+		for (int y = 0; y < minimap_size_px; y++)
 		{
 			mlx_put_pixel_img(&game.minimap_img, x, y, 0xFF000000);
 		}
@@ -1272,13 +1189,13 @@ int main()
 	game.player.cam_plane.x = 0.0;
 	game.player.cam_plane.y = 0.66;
 	game.player.speed = 1.0;
-
+	
 	do_render(&game);
-
+	
 	mlx_do_key_autorepeatoff(game.mlx);
 	
 	mlx_hook(game.window, 2, 0, &key_press_handler, &game);
-	mlx_hook(game.window, 3, 0, &key_release_event, &game);
+	mlx_hook(game.window, 3, 0, &key_release_handler, &game);
 
 	mlx_mouse_hook(game.window, &mouse_hook, NULL);
 	

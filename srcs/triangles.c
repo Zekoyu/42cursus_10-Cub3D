@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   triangles.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:28:57 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 23:52:00 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/03 16:00:48 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ t_point	get_triangle_side_point(t_vector normalized_player_dir)
 	normalized_perpendicular_dir.y = normalized_player_dir.x;
 	current_pos.x = normalized_perpendicular_dir.x;
 	current_pos.y = normalized_perpendicular_dir.y;
-	while (i < PLAYER_SIZE_ON_MINIMAP)
+	while (i < PLAYER_SIZE_ON_MINIMAP / 2.5)
 	{
 		current_pos.x += normalized_perpendicular_dir.x;
 		current_pos.y += normalized_perpendicular_dir.y;

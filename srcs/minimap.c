@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minimap.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:09:51 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 23:51:55 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/03 17:05:53 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ static void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, t_point po
 	t_point		current_px;
 	t_point		target_px;
 
-	double player_dir_len = sqrt(pow_two(player_dir.x) + pow_two(player_dir.y));
+	double player_dir_len = sqrt(power_two(player_dir.x) + power_two(player_dir.y));
 	player_dir.x /= player_dir_len;
 	player_dir.y /= player_dir_len;
 	top = get_triangle_front_point(player_dir);
@@ -44,13 +44,42 @@ static void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, t_point po
 	current_px.y = get_min_y(t1, t2, top) - 1;
 	target_px.x = get_max_x(t1, t2, top);
 	target_px.y = get_max_y(t1, t2, top);
-	while (++(current_px.x) <= target_px.x)
+	while (++current_px.x <= target_px.x)
 	{
-		while (++(current_px.y) <= target_px.y)
-		{
+		current_px.y = get_min_y(t1, t2, top) - 1;
+		while (++current_px.y <= target_px.y)
 			if (is_point_in_triangle(current_px, t1, t2, top))
 				mlx_put_pixel_img(img, current_px.x + pos.x, current_px.y + pos.y, color);
+	}
+}
+
+
+static void	put_minimap_pixels(t_img_data *minimap_img, double pixel_offset, t_vector start_pos, int map[mapHeight][mapWidth])
+{
+	t_point		current_px;
+	t_point		current_tile;
+	t_vector	current_pos;
+	int			minimap_size_px;
+
+	minimap_size_px = min(screenHeight / MINIMAP_SIZE_RATIO, screenWidth / MINIMAP_SIZE_RATIO);
+	current_px.y = 0;
+	current_pos.y = start_pos.y;
+	while (current_px.y < minimap_size_px)
+	{
+		current_px.x = 0;
+		current_pos.x = start_pos.x;
+		while (current_px.x < minimap_size_px)
+		{
+			current_tile = get_pos_current_tile_floor(current_pos);
+			mlx_put_pixel_img(minimap_img, current_px.x, current_px.y, MINIMAP_BACKGROUND_COLOR);
+			if (current_tile.x >= 0 && current_tile.y >= 0 && current_tile.x < 24 && current_tile.y < 24)
+				if (map[current_tile.y][current_tile.x] != 0)
+					mlx_put_pixel_img(minimap_img, current_px.x, current_px.y, MINIMAP_FOREGROUND_COLOR);
+			current_pos.x += pixel_offset;
+			current_px.x++;
 		}
+		current_pos.y += pixel_offset;
+		current_px.y++;
 	}
 }
 
@@ -74,43 +103,19 @@ static void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, t_point po
 	Start position = (playerPos - minimap_size in game coordinates) / 2 (so player is centered)
 	Minimap is always a square (ratio of the screen size)
 */
-void	add_minimap(void *minimap_img, int map[mapHeight][mapWidth], t_player player)
+void	add_minimap(t_img_data *minimap_img, int map[mapHeight][mapWidth], t_player player)
 {
-	int			minimap_size_px;
-	t_vector	current_pos;
 	double		offset_every_px;
-	t_point		current_tile;
-	t_point		curr_px;
+	t_vector	current_pos;
+	t_point		triangle_pos;
+	int			minimap_size_px;
 
-	curr_px.x = 0;
-	curr_px.y = 0;
 	minimap_size_px = min(screenHeight / MINIMAP_SIZE_RATIO, screenWidth / MINIMAP_SIZE_RATIO);
 	current_pos.x = player.pos.x - ((double) minimap_size_px / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
 	current_pos.y = player.pos.y - ((double) minimap_size_px / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
 	offset_every_px = ((double) minimap_size_px / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size_px;
-	while (curr_px.y < minimap_size_px)
-	{
-		curr_px.x = 0;
-		while (curr_px.x < minimap_size_px)
-		{
-			current_tile = get_pos_current_tile_floor(current_pos);
-			mlx_put_pixel_img(minimap_img, curr_px.x, curr_px.y, 0x88FFFFFF);
-
-			// TODO: Do better (replace 24 with actual "parsed" size)
-			if (current_tile.x >= 0 && current_tile.y >= 0 && current_tile.x < 24 && current_tile.y < 24)
-				if (map[current_tile.y][current_tile.x] != 0)
-					mlx_put_pixel_img(minimap_img, curr_px.x, curr_px.y, 0x00ff00bb);
-			if (curr_px.y % 2 == 0)
-				current_pos.x += offset_every_px;
-			else
-				current_pos.x -= offset_every_px;
-			curr_px.x++;
-		}
-		current_pos.y += offset_every_px;
-		curr_px.y++;
-	}
-
-	t_point triangle_pos = {minimap_size_px / 2, minimap_size_px / 2};
-	draw_player_pos_dir(player.direction, minimap_img, triangle_pos, 0x00FF8855);
+	put_minimap_pixels(minimap_img, offset_every_px, current_pos, map);
+	triangle_pos.x = minimap_size_px / 2;
+	triangle_pos.y = minimap_size_px / 2;
+	draw_player_pos_dir(player.direction, minimap_img, triangle_pos, MINIMAP_PLAYER_COLOR);
 }
-

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 23:50:41 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/03 16:51:36 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include <math.h>
 # include <stdlib.h>
 # include "mlx_keycodes.h"
-
+#include "../minilibx/mlx.h"
 
 #  define mapWidth 39
 #  define mapHeight 24
@@ -34,8 +34,10 @@
 //Size of one tile represented on the minimap (here it's a square of 5x5)
 #  define SIZE_OF_TILE_ON_MINIMAP 10
 //player sprite size on minimap
-#  define PLAYER_SIZE_ON_MINIMAP 10
-
+#  define PLAYER_SIZE_ON_MINIMAP 12
+#  define MINIMAP_BACKGROUND_COLOR 0x88FFFFFF
+#  define MINIMAP_FOREGROUND_COLOR 0x00FF00BB
+#  define MINIMAP_PLAYER_COLOR 0x00FF8855
 /*
 	Structs
 */
@@ -130,7 +132,7 @@ int			check_uuddlrlrab(int keycode);
 
 // Key handling
 int			key_press_handler(int keycode, t_game *game);
-int			hey_release_handler(int keycode, t_game *game);
+int			key_release_handler(int keycode, t_game *game);
 
 
 // MLX Utils
@@ -141,7 +143,7 @@ int			min(int a, int b);
 double		power_two(double num);
 
 // Minimap
-void		add_minimap(void *minimap_img, int map[mapHeight][mapWidth], t_player player);
+void		add_minimap(t_img_data *minimap_img, int map[mapHeight][mapWidth], t_player player);
 // Triangles (for minimap)
 t_point		get_triangle_front_point(t_vector normalized_player_dir);
 t_point		get_triangle_side_point(t_vector normalized_player_dir);
@@ -153,5 +155,14 @@ int			get_max_y(t_point t1, t_point t2, t_point t3);
 int			get_min_x(t_point t1, t_point t2, t_point t3);
 int			get_min_y(t_point t1, t_point t2, t_point t3);
 
+// Velocity
+void	add_velocity(t_player *player, double x_direction, double y_direction);
+void	remove_velocity(t_player *player, double x_direction, double y_direction);
+void	reset_velocity(t_player *player);
+void	rotate_player(t_player *player, int direction);
+
+
+// ↑↑↓↓←→←→AB
+void	teleport_player(t_player *player);
 
 #endif
