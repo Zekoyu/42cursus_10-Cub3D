@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/03 17:08:07 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 18:39:26 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,6 +316,29 @@ int crossTex[normalTexHeight][normalTexWidth]=
 	{0x0034291E,0x0055493B,0x007B6F61,0x00736758,0x0030261B,0x004D4134,0x00534739,0x0055493B,0x00574B3D,0x00564A3C,0x00493D30,0x00403529,0x0031261C,0x00392E23,0x00403529,0x00534739,0x004E4235,0x00534739,0x00584C3E,0x00372C21,0x00564A3C,0x0055493B,0x00524638,0x00493D30,0x0034291E,0x0055493B,0x00776B5D,0x0055493B,0x0054483A,0x00504437,0x0054483A,0x00524638},
 	{0x00362B20,0x00524638,0x00736758,0x00796D5F,0x0034291E,0x00504437,0x00534739,0x00574B3D,0x00584C3E,0x00493D30,0x0044392C,0x0034291E,0x003F3428,0x003E3327,0x00473B2F,0x00534739,0x00564A3C,0x00534739,0x00574B3D,0x005A4E40,0x00372C21,0x0044392C,0x004B3F32,0x004B3F32,0x0030261B,0x00574B3D,0x00796D5F,0x0054483A,0x00504437,0x0055493B,0x00534739,0x00584C3E}
 };
+
+
+int 			N_tex_x;
+int				N_tex_y;
+char			*N_tex;
+
+int 			S_tex_x;
+int				S_tex_y;
+char			*S_tex;
+
+int 			E_tex_x;
+int				E_tex_y;
+char			*E_tex;
+
+int 			W_tex_x;
+int				W_tex_y;
+char			*W_tex;
+
+unsigned int *	W_tex_addr;
+unsigned int *	S_tex_addr;
+unsigned int *	N_tex_addr;
+unsigned int *	E_tex_addr;
+
 /*	     X
 	+-------->
 	|
@@ -324,9 +347,10 @@ int crossTex[normalTexHeight][normalTexWidth]=
 	V
 */
 
-/* TODO: Remove this ?
+ //TODO: Remove this ?
 #include <sys/time.h>
 #include <stdio.h>
+
 void print_elapsed(char str[], struct timeval start)
 {
 	struct timeval now;
@@ -336,7 +360,7 @@ void print_elapsed(char str[], struct timeval start)
 	int diff_u = now.tv_usec - start.tv_usec;
 	printf("%s %d elapsed\n", str, (diff_s * 1000 * 1000 + diff_u));
 }
-*/
+
 
 /* "gngngn fait un lerp"
 inline double	ft_lerp(double min, double max, double val)
@@ -346,7 +370,6 @@ inline double	ft_lerp(double min, double max, double val)
 */
 
 #include <stdio.h>
-
 
 
 t_point	get_pos_current_tile(t_vector player_pos)
@@ -360,243 +383,33 @@ t_point	get_pos_current_tile(t_vector player_pos)
 
 
 
+// LEGACY CHAD CODE
+// /*
+// 	Return the Y needed to go from X to X+1 based on the given direction
+// 	If the vector is going straight top / bottom, then the needed Y to go to the next
+// 	X is infinite (since it's going straight it will never encounter any horizontal lines)
+// 	So return a very very high value
+// */
+// double	get_y_for_1x_step(t_vector direction)
+// {
+// 	if (direction.y != 0)
+// 		return (sqrt(1 + power_two(direction.x) / power_two(direction.y)));
+// 	else
+// 		return (10E35);
+// }
 
-
-void	mlx_put_line_to_img(t_img_data *img,
-	t_point start, t_point end, int color)
-{
-	float		delta_x;
-	float		delta_y;
-	int			pixels_count;
-	float		pixel_x;
-	float		pixel_y;
-
-	delta_x = end.x - start.x;
-	delta_y = end.y - start.y;
-	pixels_count = (int) sqrtl(delta_x * delta_x + delta_y * delta_y);
-	delta_x = delta_x / (float) pixels_count;
-	delta_y = delta_y / (float) pixels_count;
-	pixel_x = start.x;
-	pixel_y = start.y;
-	while (pixels_count)
-	{
-		mlx_put_pixel_img(img, (int) lround(pixel_x),
-			(int) lround(pixel_y), color);
-		pixel_x += delta_x;
-		pixel_y += delta_y;
-		pixels_count--;
-	}
-}
-
-
-
-
-
-void	drawline_from_distance(int x, double wall_pos_hit, t_ray_hit ray_hit, t_vector ray_dir)
-{
-	int	line_height = round(((double)screenHeight / ray_hit.distance));
-	unsigned int	color = 0x00000FFF;
-
-	//struct timeval start;
-	//gettimeofday(&start, NULL);
-	//print_elapsed("start put img: ", start);
-
-	int drawStart = -line_height / 2 + screenHeight / 2;
-    int drawEnd = line_height / 2 + screenHeight / 2;
-	
-	
-	//print_elapsed("calculs: ", start);
-	/*switch(wall_type)
-	{
-		case 1:
-			color = 0x00FF0000;
-			break; //red
-        case 2:
-			color = 0x0000FF00;
-			break; //green
-        case 3:
-			color = 0x000000FF;
-			break; //blue
-        case 4:
-			color = 0x00FFFFFF;
-			break; //white
-        default:
-			color = wall_type;
-			break; //yellow
-	}*/
-	
-	if (ray_hit.side_hit == 'y')
-		color = color | 0x88000000;
-	//print_elapsed("colors: ", start);
-	int y = 0;
-
-	//unsigned int	*img_addr;
-
-	if (ray_hit.tile_hit.x > (double) 24 - 1.0 || ray_hit.tile_hit.y > (double) 24 - 1.0)
-	{
-			//img_addr = (unsigned int *) game.main_img.addr;
-			int textureX = (1.0 - wall_pos_hit) * (double) texWidth;
-			if(ray_hit.side_hit == 'x' && ray_dir.x > 0)
-				textureX = (double) texWidth - textureX - 1.0;
-			if(ray_hit.side_hit == 'y' && ray_dir.y < 0)
-				textureX = (double) texWidth - textureX - 1.0;
-			double stepY = 1.0 * (double) texHeight / (double) line_height;
-			double textureY = 0.0 ; // start from middle of texture and go either top or down way
-			
-			/*if (drawStart < 0)
-			{
-				// divide by two since same overlap on top and bottom
-				//textureY = ((double)-drawStart / (double)screenHeight) / 2.0 * 32.0;
-				//printf("-%d / %d * 32.0 = %f\n", drawStart, screenHeight, textureY);
-			}*/
-			
-			/*if (x == screenWidth / 2)
-			{
-				printf("drawstart: %d, line height: %d, distance: %f\n" ,drawStart, line_height, ray_hit.distance);
-				printf("textureY start: %f, step: %f\n", textureY, stepY);
-			}*/
-
-			// If the texture is bigger than the screen, just "simulate" going x (until start of screen)
-			// and adding a step each time, so just "move" on texture (0 - drawstart) times
-			if (drawStart < 0)
-			{
-				textureY += (stepY * -drawStart);
-			}
-			if(drawStart < 0)
-				drawStart = 0;
-
-			if(drawEnd >= screenHeight)
-				drawEnd = screenHeight - 1;
-				
-			//print_elapsed("calculs put img: ", start);
-			while (y < drawStart)
-			{
-				//img_addr[x + y * screenWidth] = 0x00231570;
-				//y++;
-
-				//((unsigned int*) game.main_img.addr)[y++ * screenWidth + x] = 0x00231570; not faster
-				mlx_put_pixel_img(&game.main_img, x, y++, 0x00231570);
-			}
-			//print_elapsed("sky: ", start);
-			while (y <= drawEnd)
-			{
-				//img_addr[x + y * screenWidth] = color;
-				//y++;
-				if (textureY > (double) (texHeight - 1))
-					textureY = (double) (texHeight - 1);
-				if (textureX > (double) (texWidth - 1))
-					textureX = (double) (texWidth - 1);
-				int texColor = gigaChad[(int) textureY][textureX];
-
-				//((unsigned int*) game.main_img.addr)[y++ * screenWidth + x] = texColor; not faster
-				mlx_put_pixel_img(&game.main_img, x, y++, texColor);
-
-				textureY += stepY;
-			}
-	}
-	else
-	{
-			//img_addr = (unsigned int *) game.main_img.addr;
-			int textureX = (1.0 - wall_pos_hit) * (double) normalTexWidth;
-			if(ray_hit.side_hit == 'x' && ray_dir.x > 0)
-				textureX = (double) normalTexWidth - textureX - 1.0;
-			if(ray_hit.side_hit == 'y' && ray_dir.y < 0)
-				textureX = (double) normalTexWidth - textureX - 1.0;
-			double stepY = 1.0 * (double) normalTexHeight / (double) line_height;
-			double textureY = 0.0 ; // start from middle of texture and go either top or down way
-			
-			/*if (drawStart < 0)
-			{
-				// divide by two since same overlap on top and bottom
-				//textureY = ((double)-drawStart / (double)screenHeight) / 2.0 * 32.0;
-				//printf("-%d / %d * 32.0 = %f\n", drawStart, screenHeight, textureY);
-			}*/
-			
-			/*if (x == screenWidth / 2)
-			{
-				printf("drawstart: %d, line height: %d, distance: %f\n" ,drawStart, line_height, ray_hit.distance);
-				printf("textureY start: %f, step: %f\n", textureY, stepY);
-			}*/
-
-			// If the texture is bigger than the screen, just "simulate" going x (until start of screen)
-			// and adding a step each time, so just "move" on texture (0 - drawstart) times
-			if (drawStart < 0)
-			{
-				textureY += (stepY * -drawStart);
-			}
-			if(drawStart < 0)
-				drawStart = 0;
-
-			if(drawEnd >= screenHeight)
-				drawEnd = screenHeight - 1;
-				
-			//print_elapsed("calculs put img: ", start);
-			while (y < drawStart)
-			{
-				//img_addr[x + y * screenWidth] = 0x00231570;
-				//y++;
-
-				//((unsigned int*) game.main_img.addr)[y++ * screenWidth + x] = 0x00231570; not faster
-				mlx_put_pixel_img(&game.main_img, x, y++, 0x00231570);
-			}
-			//print_elapsed("sky: ", start);
-			while (y <= drawEnd)
-			{
-				//img_addr[x + y * screenWidth] = color;
-				//y++;
-				if (textureY > (double) (normalTexHeight - 1))
-					textureY = (double) (normalTexHeight - 1);
-				if (textureX > (double) (normalTexWidth - 1))
-					textureX = (double) (normalTexWidth - 1);
-				int texColor = crossTex[(int) textureY][textureX];
-
-				//((unsigned int*) game.main_img.addr)[y++ * screenWidth + x] = texColor; not faster
-				mlx_put_pixel_img(&game.main_img, x, y++, texColor);
-
-				textureY += stepY;
-			}
-	}
-
-	//print_elapsed("tex: ", start);
-	while (y < screenHeight)
-	{
-		//img_addr[x + y * screenWidth] = 0x00ede482;
-		//y++;
-
-		//((unsigned int*) game.main_img.addr)[y++ * screenWidth + x] = 0x00ede482; not faster
-		mlx_put_pixel_img(&game.main_img, x, y++, 0x00ede482);
-	}
-	//print_elapsed("floor: ", start);
-	//print_elapsed("put pixels: ", start);
-	// Around 10us using mlx put pixel to put all pixels for a line (start 0 calculs 2 colors 4 put pixels 14)
-}
-
-/*
-	Return the Y needed to go from X to X+1 based on the given direction
-	If the vector is going straight top / bottom, then the needed Y to go to the next
-	X is infinite (since it's going straight it will never encounter any horizontal lines)
-	So return a very very high value
-*/
-double	get_y_for_1x_step(t_vector direction)
-{
-	if (direction.y != 0)
-		return (sqrt(1 + power_two(direction.x) / power_two(direction.y)));
-	else
-		return (10E35);
-}
-
-/*
-	Return the X needed to go fmor Y to Y+1 based on the given direction
-	If the vector is going straight right / left, then the needed X to go to the next
-	Y is infinite (since it's going straight it will never encounter any vertical lines)
-*/
-double	get_x_for_1y_step(t_vector direction)
-{
-	if (direction.x != 0)
-		return (sqrt(1 + power_two(direction.y) / power_two(direction.x)));
-	else
-		return (10E35);
-}
+// /*
+// 	Return the X needed to go fmor Y to Y+1 based on the given direction
+// 	If the vector is going straight right / left, then the needed X to go to the next
+// 	Y is infinite (since it's going straight it will never encounter any vertical lines)
+// */
+// double	get_x_for_1y_step(t_vector direction)
+// {
+// 	if (direction.x != 0)
+// 		return (sqrt(1 + power_two(direction.y) / power_two(direction.x)));
+// 	else
+// 		return (10E35);
+// }
 
 static double get_dda_x_distance(t_vector direction)
 {
@@ -880,16 +693,18 @@ void	do_render(t_game *game)
 	double		dda_x_distance;
 	double		dda_y_distance;
 	double		camera_pos_on_plane;
-
+	
 	direction.x = game->player.direction.x;
 	direction.y = game->player.direction.y;
 	
 	//printf("Rendering (pos: %f, %f)\n", game->player.pos.x, game->player.pos.y);
+
 	/*
-		struct timeval start;
-		gettimeofday(&start, NULL);
-		print_elapsed("\nstart: ", start);
+	struct timeval start;
+	gettimeofday(&start, NULL);
+	print_elapsed("start: ", start);
 	*/
+
 	static double current_angle = 0.007;
 	static double multiplier = 1.07;
 	if (teleport_test != 0)
@@ -917,7 +732,6 @@ void	do_render(t_game *game)
 		{
 			if (current_angle > M_PI * 2)
 			{
-				
 				teleport_test = -1;
 				multiplier = 0.93;
 			}
@@ -939,18 +753,20 @@ void	do_render(t_game *game)
 		}
 	}
 	t_ray_hit ray_hit;
+	
 	for (int x = 0; x < screenWidth; x++)
 	{
 		/*
 		struct timeval start;
 		gettimeofday(&start, NULL);
 		print_elapsed("start:", start);
-*/
+		*/
+
 		camera_pos_on_plane = (2.0 * x) / (double) screenWidth - 1;
 		ray_dir.x = direction.x + (game->player.cam_plane.x * camera_pos_on_plane);
 		ray_dir.y = direction.y + (game->player.cam_plane.y * camera_pos_on_plane);
 		ray_hit = get_ray_hit(ray_dir, worldMap, game->player.pos);
-
+		
 		double	wall_pos_hit;
 		double	rel_player_pos;
 		if (ray_hit.side_hit == 'x')
@@ -988,16 +804,18 @@ void	do_render(t_game *game)
 		//{
 		//	//printf("ray hit distance: %f\n", ray_hit.distance);
 		//}
-		//print_elapsed("\ncalcul: ", start);
+		//print_elapsed("calcul: ", start);
 		//drawline_from_distance(x, ray_hit.distance, wall_pos_hit/*worldMap[ray_hit.tile_hit.y][ray_hit.tile_hit.x]*/, ray_hit.side_hit);
-		drawline_from_distance(x, wall_pos_hit, ray_hit, ray_dir);
+		ray_hit.direction = ray_dir;
+		drawline_from_distance(x, wall_pos_hit, ray_hit, game);
 		//print_elapsed("Time to add to image (us):", start);
 		//print_elapsed("draw: ", start);
 	}
 
 	//printf("last ray hit distance: %f, side: %c\n", ray_hit.distance, ray_hit.side_hit);
-
+	//print_elapsed("calculs: ", start);
 	add_minimap(&game->minimap_img, worldMap, game->player);
+	//print_elapsed("calculs minimap: ", start);
 	mlx_clear_window(game->mlx, game->window);
 	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0,0);
 	mlx_put_image_to_window(game->mlx, game->window, game->minimap_img.img, 0, 0);
@@ -1170,7 +988,31 @@ int main()
 	
 	//game.shotgun_img =  mlx_png_file_to_image(game.mlx, "scaled_sprites/shotgun.png", &game.shotgun_width, &game.shotgun_height);
 
+
 	
+	game.n_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./N_tex.xpm", &N_tex_x, &N_tex_y);
+	game.s_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./S_tex.xpm", &S_tex_x, &S_tex_y);
+	game.e_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./E_tex.xpm", &E_tex_x, &E_tex_y);
+	game.w_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./W_tex.xpm", &W_tex_x, &W_tex_y);
+
+	game.n_tex.height = N_tex_y;
+	game.n_tex.width = N_tex_x;
+
+	game.s_tex.height = S_tex_y;
+	game.s_tex.width = S_tex_x;
+
+	game.e_tex.height = E_tex_y;
+	game.e_tex.width = E_tex_x;
+
+	game.w_tex.height = W_tex_y;
+	game.w_tex.width = W_tex_x;
+	
+	game.n_tex.image.addr = mlx_get_data_addr(game.n_tex.image.img, &game.n_tex.image.bits_per_pixel, &game.n_tex.image.line_length, &game.n_tex.image.endian);
+	game.s_tex.image.addr = mlx_get_data_addr(game.s_tex.image.img, &game.s_tex.image.bits_per_pixel, &game.s_tex.image.line_length, &game.s_tex.image.endian);
+	game.e_tex.image.addr = mlx_get_data_addr(game.e_tex.image.img, &game.e_tex.image.bits_per_pixel, &game.e_tex.image.line_length, &game.e_tex.image.endian);
+	game.w_tex.image.addr = mlx_get_data_addr(game.w_tex.image.img, &game.w_tex.image.bits_per_pixel, &game.w_tex.image.line_length, &game.w_tex.image.endian);
+	
+
 	for (int x = 0; x < minimap_size_px; x++)
 	{
 		for (int y = 0; y < minimap_size_px; y++)
@@ -1178,10 +1020,9 @@ int main()
 			mlx_put_pixel_img(&game.minimap_img, x, y, 0xFF000000);
 		}
 	}
-
+	
 	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_mouse_hide();
-	
 	game.player.pos.y = 12.5;
 	game.player.pos.x = 1.5;
 	game.player.direction.x = 1.0;
@@ -1201,6 +1042,4 @@ int main()
 	
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
 	mlx_loop(game.mlx);
-	
-	//mlx_loop(game.mlx);
 }

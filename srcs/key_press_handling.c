@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   key_press_handling.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 22:52:06 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 23:06:31 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 18:20:29 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
   ^  /|\  /|\      ^     /|\     ^	   /|\
  /|\              /|\           /|\
 */
-static int	key_press_handler_3(int keycode, t_player *player)
+static void	key_press_handler_3(int keycode, t_player *player)
 {
 	if (keycode == KEY_MINUS) // Increase FOV
 	{
@@ -37,7 +37,7 @@ static int	key_press_handler_3(int keycode, t_player *player)
 	}
 }
 
-static int	key_press_handler_2(int keycode, t_player *player)
+static void	key_press_handler_2(int keycode, t_player *player)
 {
 	if (keycode == KEY_D)
 	{
@@ -46,11 +46,11 @@ static int	key_press_handler_2(int keycode, t_player *player)
 	}
 	else if (keycode == KEY_SHFT)
 	{
-		player->speed *= (double) SPEED_MULTIPLIER;
+		player->speed *= (double) SPRINT_SPEED_MULTIPLIER;
 	}
 	else if (keycode == KEY_CTRL)
 	{
-		player->speed /= (double) SPEED_MULTIPLIER;
+		player->speed /= (double) SPRINT_SPEED_MULTIPLIER * 2.0;
 	}
 	else if (keycode == KEY_ARROW_LEFT)
 	{
@@ -90,4 +90,5 @@ int	key_press_handler(int keycode, t_game *game)
 	}
 	else
 		key_press_handler_2(keycode, player);
+	return (69);
 }

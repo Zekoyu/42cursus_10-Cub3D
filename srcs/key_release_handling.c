@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 22:59:52 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/03 15:23:18 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 18:21:19 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,20 @@
   ^  /|\  /|\      ^     /|\     ^	   /|\
  /|\              /|\           /|\
 */
-static int	key_release_handler_2(int keycode, t_player *player)
+static void	key_release_handler_2(int keycode, t_player *player)
 {
-	if (keycode == KEY_SHFT)
+	if (keycode == KEY_D)
 	{
-		player->speed /= (double) SPEED_MULTIPLIER;
+		player->directions.right = 0;
+		remove_velocity(player, -player->direction.y, player->direction.x);
+	}
+	else if (keycode == KEY_SHFT)
+	{
+		player->speed /= (double) SPRINT_SPEED_MULTIPLIER;
 	}
 	else if (keycode == KEY_CTRL)
 	{
-		player->speed *= (double) SPEED_MULTIPLIER;
+		player->speed *= (double) SPRINT_SPEED_MULTIPLIER * 2.0;
 	}
 	else if (keycode == KEY_ARROW_LEFT)
 	{
@@ -59,11 +64,7 @@ int	key_release_handler(int keycode, t_game *game)
 		player->directions.left = 0;
 		remove_velocity(player, player->direction.y, -player->direction.x);
 	}
-	else if (keycode == KEY_D)
-	{
-		player->directions.right = 0;
-		remove_velocity(player, -player->direction.y, player->direction.x);
-	}
 	else
 		key_release_handler_2(keycode, player);
+	return (69);
 }

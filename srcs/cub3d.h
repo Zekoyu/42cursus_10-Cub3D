@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/03 16:51:36 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 18:40:24 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,13 @@
 
 #  define mapWidth 39
 #  define mapHeight 24
-#  define screenWidth 1920
-#  define screenHeight 1080
+#  define screenWidth 1280
+#  define screenHeight 720
 #  define MOVEMENT_FACTOR 0.075
 #  define COS_ROTATION 0.99691733373
 #  define SIN_ROTATION 0.07845909568
 #  define BOUNDING_BOX_SIDE_SIZE 0.4
-#  define SPEED_MULTIPLIER 1.5
+#  define SPRINT_SPEED_MULTIPLIER 1.5
 //Ratio compared to the size of the screen (here it takes 1/10 of the screen)
 //map will remain squared (take min(width/ratio), (height/ratio))
 //Should not be set to les than 1
@@ -38,6 +38,8 @@
 #  define MINIMAP_BACKGROUND_COLOR 0x88FFFFFF
 #  define MINIMAP_FOREGROUND_COLOR 0x00FF00BB
 #  define MINIMAP_PLAYER_COLOR 0x00FF8855
+#  define SKY_COLOR 0x00231570
+#  define FLOOR_COLOR 0x00ede482
 /*
 	Structs
 */
@@ -108,8 +110,25 @@ typedef struct s_ray_hit
 {
 	char		side_hit;
 	double		distance;
+	double		wall_pos_hit;
 	t_point		tile_hit;
+	t_vector	direction;
 }	t_ray_hit;
+
+typedef struct s_texture
+{
+	t_img_data	image;
+	int			width;
+	int			height;
+}	t_texture;
+
+typedef struct s_draw_coords
+{
+	int	screen_x;
+	int	line_height;
+	int	draw_start;
+	int	draw_end;
+}	t_draw_coords;
 
 typedef struct s_game
 {
@@ -119,6 +138,14 @@ typedef struct s_game
 	int				**map;
 	void			*mlx;
 	void			*window;
+	int				width;
+	int				height;
+	int				floor_color;
+	int				ceil_color;
+	t_texture		n_tex;
+	t_texture		s_tex;
+	t_texture		e_tex;
+	t_texture		w_tex;
 }	t_game;
 
 // Vectors
@@ -161,8 +188,10 @@ void	remove_velocity(t_player *player, double x_direction, double y_direction);
 void	reset_velocity(t_player *player);
 void	rotate_player(t_player *player, int direction);
 
-
 // ↑↑↓↓←→←→AB
 void	teleport_player(t_player *player);
+
+// Rendering
+void	drawline_from_distance(int x, double wall_pos_hit, t_ray_hit ray_hit, t_game *game);
 
 #endif
