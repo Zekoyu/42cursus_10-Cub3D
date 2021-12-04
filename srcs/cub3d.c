@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 18:59:44 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 19:21:13 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -318,6 +318,15 @@ int crossTex[normalTexHeight][normalTexWidth]=
 };
 
 
+/* 
+"gngngn fait un lerp" #orondarnaque
+inline double	ft_lerp(double min, double max, double val)
+{
+	return (min + val * (max - min));
+}
+*/
+
+
 int 			N_tex_x;
 int				N_tex_y;
 char			*N_tex;
@@ -347,6 +356,8 @@ unsigned int *	E_tex_addr;
 	V
 */
 
+/* -=-=-=-=-= Actually very useful =-=-=-=-=-=-
+
  //TODO: Remove this ?
 #include <sys/time.h>
 #include <stdio.h>
@@ -360,30 +371,10 @@ void print_elapsed(char str[], struct timeval start)
 	int diff_u = now.tv_usec - start.tv_usec;
 	printf("%s %d elapsed\n", str, (diff_s * 1000 * 1000 + diff_u));
 }
-
-
-/* "gngngn fait un lerp"
-inline double	ft_lerp(double min, double max, double val)
-{
-	return (min + val * (max - min));
-}
 */
 
-#include <stdio.h>
-
-
-t_point	get_pos_current_tile(t_vector player_pos)
-{
-	t_point	res;
-
-	res.x = (int) player_pos.x;
-	res.y = (int) player_pos.y;
-	return (res);
-}
-
-
-
-// LEGACY CHAD CODE
+// -=-=-=-= LEGACY CHAD CODE =-=-=-=-
+//
 // /*
 // 	Return the Y needed to go from X to X+1 based on the given direction
 // 	If the vector is going straight top / bottom, then the needed Y to go to the next
@@ -410,129 +401,6 @@ t_point	get_pos_current_tile(t_vector player_pos)
 // 	else
 // 		return (10E35);
 // }
-
-static double get_dda_x_distance(t_vector direction)
-{
-	if (direction.x == 0)
-		return (1E30);
-	else
-		return (fabs(1.0 / direction.x));
-}
-
-static double get_dda_y_distance(t_vector direction)
-{
-	if (direction.y == 0)
-		return (1E30);
-	else
-		return (fabs(1.0 / direction.y));
-}
-
-t_vector	get_dda_distances(t_vector direction)
-{
-	t_vector	res;
-
-	res.x = get_dda_x_distance(direction);
-	res.y = get_dda_y_distance(direction);
-	return (res);
-}
-
-
-
-t_point	get_direction_steps(t_vector direction)
-{
-	t_point	step;
-
-	if (direction.x < 0)
-		step.x = -1;
-	else
-		step.x = 1;
-	if (direction.y < 0)
-		step.y = -1;
-	else
-		step.y = 1;
-	return (step);
-}
-
-// player position relative to the tile (between 0-1; 0-1)
-// if ray is going left, then relative position = distance from left (default)
-// if ray is going right, relative position = distance from right (1 - position)
-t_vector	init_base_distances(t_vector direction, t_vector dda_distances, t_vector player_pos)
-{
-	t_vector	distances;
-	t_vector	player_relative_pos;
-
-	player_relative_pos.x = (player_pos.x - (double)((int) player_pos.x));
-	player_relative_pos.y = (player_pos.y - (double)((int) player_pos.y));
-	if (direction.x < 0)
-		distances.x = player_relative_pos.x * dda_distances.x;
-	else
-		distances.x = (1.0 - player_relative_pos.x) * dda_distances.x;
-	if (direction.y < 0)
-		distances.y = player_relative_pos.y * dda_distances.y;
-	else
-		distances.y = (1.0 - player_relative_pos.y) * dda_distances.y;
-	return (distances);
-}
-
-/*
-	Here we can afford an infinite loop
-	because of the subject specifying that map should be enclosed with walls.
-	So the ray should always hit if we get to this step
-*/
-static t_ray_hit	get_ray_distance_side(t_ray ray, int map[mapHeight][mapWidth])
-{
-	t_ray_hit	ray_hit;
-
-	while (1)
-	{
-		if (ray.total_distances.x < ray.total_distances.y)
-		{
-			ray.total_distances.x += ray.dda_distances.x;
-			ray.current_tile.x += ray.direction_steps.x;
-			ray_hit.side_hit = 'x';
-		}
-		else
-		{
-			ray.total_distances.y += ray.dda_distances.y;
-			ray.current_tile.y += ray.direction_steps.y;
-			ray_hit.side_hit = 'y';
-		}
-		if (map[ray.current_tile.y][ray.current_tile.x] != 0)
-			break ;
-	}
-	if (ray_hit.side_hit == 'x')
-		ray_hit.distance = ray.total_distances.x - ray.dda_distances.x;
-	else
-		ray_hit.distance = ray.total_distances.y - ray.dda_distances.y;
-	ray_hit.tile_hit = ray.current_tile;
-	return (ray_hit);
-}
-
-/*
-	Wall pos hit = position between 0-1 where our ray hit.
-	This value is used for texture projection
-*/
-t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector player_pos)
-{
-	t_ray		ray;
-	t_ray_hit	ray_hit;
-
-	ray.direction = direction;
-	ray.current_tile = get_pos_current_tile(player_pos);
-	ray.dda_distances = get_dda_distances(ray.direction);
-	ray.direction_steps = get_direction_steps(ray.direction);
-	ray.total_distances = init_base_distances(ray.direction, \
-											ray.dda_distances, player_pos);
-	ray_hit = get_ray_distance_side(ray, map);
-	ray_hit.direction = direction;
-	if (ray_hit.side_hit == 'x')
-		ray_hit.wall_pos_hit = player_pos.y + ray_hit.distance * ray_hit.direction.y;
-	else
-		ray_hit.wall_pos_hit = player_pos.x + ray_hit.distance * ray_hit.direction.x;
-	ray_hit.wall_pos_hit = ray_hit.wall_pos_hit - floor(ray_hit.wall_pos_hit);
-	return (ray_hit);
-}
-
 
 
 
@@ -588,110 +456,11 @@ void	teleport_player(t_player *player)
 
 
 
-/*
-	Rotate_player function automatically readjust velocity
-*/
 
 
 
 
-/* OLD
-	if (player->directions.forward == 1)
-	{
-		player->velocity.x += player->direction.x * MOVEMENT_FACTOR;
-		player->velocity.y += player->direction.y * MOVEMENT_FACTOR;
-	}
-	else if (player->directions.backward == 1)
-	{
-		player->velocity.x += -(player->direction.x * MOVEMENT_FACTOR);
-		player->velocity.y += -(player->direction.y * MOVEMENT_FACTOR);
-	}
-	else if (player->directions.left == 1)
-	{
-		player->velocity.x += (player->direction.y * MOVEMENT_FACTOR);
-		player->velocity.y += -(player->direction.x * MOVEMENT_FACTOR);
-	}
-	else if (player->directions.right == 1)
-	{
-		player->velocity.x += -(player->direction.y * MOVEMENT_FACTOR);
-		player->velocity.y += (player->direction.x * MOVEMENT_FACTOR);
-	}
-	else if (player->directions.rotate_l == 1)
-	{
-		rotate_player(player, -1);
-	}
-	else if (player->directions.rotate_r == 1)
-	{
-		rotate_player(player, 1);
-	}
-*/
-/*
-	Before rotating, remove the actual velocity, rotate it and put it back
-*/
 
-void	add_player_movements(t_player *player)
-{
-	if (player->directions.forward == 1)
-		add_velocity(player, player->direction.x, player->direction.y);
-	else if (player->directions.backward == 1)
-		add_velocity(player, -player->direction.x, -player->direction.y);
-	else if (player->directions.left == 1)
-		add_velocity(player, player->direction.y, -player->direction.x);
-	else if (player->directions.right == 1)
-		add_velocity(player, -player->direction.y, player->direction.x);
-	else if (player->directions.rotate_l == 1)
-	{
-		reset_velocity(player);
-		rotate_player(player, -1);
-	}
-	else if (player->directions.rotate_r == 1)
-	{
-		reset_velocity(player);
-		rotate_player(player, 1);
-	}
-}
-
-int	point_intersects_wall(t_vector point, int map[mapHeight][mapWidth])
-{
-	t_point	current_tile;
-
-	current_tile = get_pos_current_tile(point);
-	if (map[current_tile.y][current_tile.x] != 0)
-		return (1);
-	return (0);
-}
-
-int	has_intersection_with_wall(t_vector player_pos, int map[mapHeight][mapWidth])
-{
-	t_vector	bounding_box_bot_left;
-	t_vector	bouding_box_bot_right;
-	t_vector	bounding_box_top_left;
-	t_vector	bouding_box_top_right;
-	t_point		current_tile;
-
-	bounding_box_bot_left.x = player_pos.x - BOUNDING_BOX_SIDE_SIZE / 2;
-	bounding_box_bot_left.y = player_pos.y - BOUNDING_BOX_SIDE_SIZE / 2;
-	bouding_box_bot_right.x = player_pos.x + BOUNDING_BOX_SIDE_SIZE / 2;
-	bouding_box_bot_right.y = player_pos.y - BOUNDING_BOX_SIDE_SIZE / 2;
-	bouding_box_top_right.x = player_pos.x + BOUNDING_BOX_SIDE_SIZE / 2;
-	bouding_box_top_right.y = player_pos.y + BOUNDING_BOX_SIDE_SIZE / 2;
-	bounding_box_top_left.x = player_pos.x - BOUNDING_BOX_SIDE_SIZE / 2;
-	bounding_box_top_left.y = player_pos.y + BOUNDING_BOX_SIDE_SIZE / 2;
-	
-	if (point_intersects_wall(bounding_box_top_left, map) \
-		|| point_intersects_wall(bouding_box_top_right, map) \
-		|| point_intersects_wall(bounding_box_bot_left, map) \
-		|| point_intersects_wall(bouding_box_bot_right, map))
-	{
-		return (1);
-	}
-	return (0);
-}
-
-double	get_vector_length(t_vector vector)
-{
-	return (sqrt(power_two(vector.x) + power_two(vector.y)));
-}
 
 void	do_render(t_game *game)
 {
@@ -805,15 +574,17 @@ void	do_render(t_game *game)
 	//print_elapsed("put window: ", start);
 }
 
-
-/*
-	If there is an intersection with a wall after going forward (or any side)
-	Revert the movement (pos -= velocity since before we had pos += velocity)
-	But don't reset the rotation, because we canstill look around
-	if we hit a wall
-*/
-
 // mlx_mouse_get_pos(window, int *x, int *y)
+/*
+	If mouse is almost outside the app in X (in the bounds of 10-90% of the screen height)
+	Put it back to the center
+
+	If the mouse is "almost" outside the app in Y (in the bounds of 25-75% of the screen height)
+	we reset it as well so that it does not go over applications or something like that
+	(only reset it on Y axis)
+
+	The offset is between -Width/2 (= left), 0 = middle, +Width/2 = right
+*/
 int	get_x_mouse_offset(void *window)
 {
 	int	initial_pos;
@@ -824,9 +595,6 @@ int	get_x_mouse_offset(void *window)
 	initial_pos = screenWidth / 2;
 	mlx_mouse_get_pos(window, &current_pos, &trucinutile);
 	offset = current_pos - initial_pos;
-	// If mouse is more than 9/10 or less than 1/10 of the window put it back at center
-	//printf("mouse y: %d\n", trucinutile);
-	// offset between -1280/2 and 1280/2 => mouse_move 0 = start 1280 = end, so need to add 1280/2
 	if (trucinutile < screenHeight / 4 || trucinutile > screenHeight / 4) // If mouse is in 1st or 4th quarter, center in on y
 		mlx_mouse_move(window, offset + (screenWidth / 2), screenHeight / 2);
 	if (offset >= (screenWidth - screenWidth / 10) / 2 || offset <= -(screenWidth - screenWidth / 10) / 2)
@@ -834,46 +602,6 @@ int	get_x_mouse_offset(void *window)
 	else
 		return (offset);
 }
-
-// If too much offset, we probably went from side to middle
-/*
-int	get_mouse_velocity(void *window)
-{
-	static int	prev_pos = 0;
-	static int smooth_mouse_velo;
-	int	current_pos;
-	int	tmp;
-	int	velo;
-
-	current_pos = get_x_mouse_offset(window);
-	tmp = prev_pos;
-	prev_pos = current_pos;
-	velo = current_pos - tmp;
-	//printf("velo: %d, smooth velo: %d\n", velo, smooth_mouse_velo);
-	if (smooth_mouse_velo - velo <= 100)
-	{
-		if (velo < 0)
-			smooth_mouse_velo = velo;
-		else if (velo > 0)
-			smooth_mouse_velo = velo;
-	}
-	else
-	{
-		smooth_mouse_velo -= smooth_mouse_velo % 3;
-		if (smooth_mouse_velo < 0)
-			smooth_mouse_velo += 3;
-		else if (smooth_mouse_velo > 0)
-			smooth_mouse_velo -= 3;
-		return (velo);
-	}
-	smooth_mouse_velo -= smooth_mouse_velo % 3;
-	if (smooth_mouse_velo < 0)
-		smooth_mouse_velo += 3;
-	else if (smooth_mouse_velo > 0)
-		smooth_mouse_velo -= 3;
-	return (smooth_mouse_velo);
-}
-*/
 
 int	get_mouse_velocity(void *window)
 {
@@ -897,14 +625,19 @@ int	get_mouse_velocity(void *window)
 	return (smooth_mouse_velo);
 }
 
+
+/*
+	If there is an intersection with a wall after going forward (or any side)
+	Revert the movement (pos -= velocity since before we had pos += velocity)
+	But don't reset the rotation, because we canstill look around
+	if we hit a wall
+
+	Since we do this before the render, the player will not "glitch out" in and out the wall
+*/
 int loop_hook(t_game *game)
 {
 
-	//mlx_mouse_move(game->window, screenWidth / 2, screenHeight / 2);
-	//printf("current pos (%f, %f), velocity (%f %f)\n", game->player.pos.x, game->player.pos.y, game->player.velocity.x, game->player.velocity.y);
 	int mouse_velo = get_mouse_velocity(game->window);
-	//printf("mouse velocity: %d\n", mouse_velo);
-	
 	if (mouse_velo <= -2)
 	{
 		game->player.directions.rotate_l = 1;
@@ -920,7 +653,6 @@ int loop_hook(t_game *game)
 		game->player.directions.rotate_l = 0;
 		game->player.directions.rotate_r = 0;
 	}
-
 	if (game->player.directions.rotate_l == 1)
 	{
 		rotate_player(&game->player, -1);
@@ -933,20 +665,8 @@ int loop_hook(t_game *game)
 	{
 		game->player.pos.y -= game->player.velocity.y * game->player.speed;
 		game->player.pos.x -= game->player.velocity.x * game->player.speed;
-		/*if (game->player.directions.rotate_r == 1)
-			rotate_player(&game->player, -1);
-		if (game->player.directions.rotate_l == 1)
-			rotate_player(&game->player, 1);
-			*/
-	//	printf("reset pos (%f, %f), velocity (%f %f)\n", game->player.pos.x, game->player.pos.y, game->player.velocity.x, game->player.velocity.y);
 	}
-	
-	
-	//struct timeval start;
-	//gettimeofday(&start, NULL);
-	
 	do_render(game);
-	//print_elapsed("Time to render (ms):", start);
 	return (1);
 }
 

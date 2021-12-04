@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 18:56:22 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 19:20:01 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,14 +151,10 @@ double		degrees_to_radians(double angle);
 double		get_x_direction(double angle);
 double		get_y_direction(double angle);
 
-// ↑↑↓↓←→←→AB
-int			is_uuddlrlrab_complete(int code[10]);
-int			check_uuddlrlrab(int keycode);
 
 // Key handling
 int			key_press_handler(int keycode, t_game *game);
 int			key_release_handler(int keycode, t_game *game);
-
 
 // MLX Utils
 void		mlx_put_pixel_img(t_img_data *img, int x, int y, int color);
@@ -169,10 +165,16 @@ double		power_two(double num);
 
 // Minimap
 void		add_minimap(t_img_data *minimap_img, int map[mapHeight][mapWidth], t_player player);
+
 // Triangles (for minimap)
 t_point		get_triangle_front_point(t_vector normalized_player_dir);
 t_point		get_triangle_side_point(t_vector normalized_player_dir);
 int			is_point_in_triangle(t_point pt, t_point v1, t_point v2, t_point v3);
+
+// ↑↑↓↓←→←→AB
+int			is_uuddlrlrab_complete(int code[10]);
+int			check_uuddlrlrab(int keycode);
+
 
 // Point utils
 int			get_max_x(t_point t1, t_point t2, t_point t3);
@@ -180,16 +182,27 @@ int			get_max_y(t_point t1, t_point t2, t_point t3);
 int			get_min_x(t_point t1, t_point t2, t_point t3);
 int			get_min_y(t_point t1, t_point t2, t_point t3);
 
-// Velocity
-void	add_velocity(t_player *player, double x_direction, double y_direction);
-void	remove_velocity(t_player *player, double x_direction, double y_direction);
-void	reset_velocity(t_player *player);
-void	rotate_player(t_player *player, int direction);
+// Movements
+void		add_velocity(t_player *player, double x_direction, double y_direction);
+void		remove_velocity(t_player *player, double x_direction, double y_direction);
+void		reset_velocity(t_player *player);
+void		rotate_player(t_player *player, int direction);
+void		add_player_movements(t_player *player);
 
 // ↑↑↓↓←→←→AB
-void	teleport_player(t_player *player);
+void		teleport_player(t_player *player);
 
 // Rendering
-void	drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game);
+void		drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game);
+
+// DDA Algorithm
+t_vector	get_dda_distances(t_vector direction);
+t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector player_pos);
+
+// Coordinates manipulation
+t_point		get_pos_current_tile(t_vector player_pos);
+
+// Hitbox
+int			has_intersection_with_wall(t_vector player_pos, int map[mapHeight][mapWidth]);
 
 #endif
