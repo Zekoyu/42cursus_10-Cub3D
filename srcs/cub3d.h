@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 18:40:24 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 18:56:22 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,6 @@
 #  define MINIMAP_BACKGROUND_COLOR 0x88FFFFFF
 #  define MINIMAP_FOREGROUND_COLOR 0x00FF00BB
 #  define MINIMAP_PLAYER_COLOR 0x00FF8855
-#  define SKY_COLOR 0x00231570
-#  define FLOOR_COLOR 0x00ede482
 /*
 	Structs
 */
@@ -192,6 +190,6 @@ void	rotate_player(t_player *player, int direction);
 void	teleport_player(t_player *player);
 
 // Rendering
-void	drawline_from_distance(int x, double wall_pos_hit, t_ray_hit ray_hit, t_game *game);
+void	drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game);
 
 #endif

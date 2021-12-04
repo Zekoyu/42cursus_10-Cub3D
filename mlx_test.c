@@ -29,18 +29,19 @@ int main()
 	int png_width;
 	int png_height;
 
+	/*
 	struct timeval start;
-
 	gettimeofday(&start, NULL);
 	print_elapsed("start:", start);
+	*/
 
 	void *img_test = mlx_png_file_to_image(game.mlx, "test_png.png", &png_width, &png_height);
 
-	print_elapsed("png to image:", start);
+	//print_elapsed("png to image:", start);
 
 	if (img_test)
 		mlx_put_image_to_window(game.mlx, game.window, img_test, 0, 0);
 	
-	print_elapsed("iamge to window:", start);
+	//print_elapsed("iamge to window:", start);
 	mlx_loop(game.mlx);
 }

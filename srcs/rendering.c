@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:18:29 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 18:40:15 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 18:59:18 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,8 @@ static void	draw_special_texture(t_draw_coords draw_coords, t_ray_hit ray_hit, t
 	If the texture is bigger than the screen, just "simulate" going x (until start of screen)
 	and adding a step each time, so just "move" on texture ((0 - drawstart) = steps till drawstart = 0) times
 */
-static void	draw_texture(t_draw_coords draw_coords, t_texture texture, t_ray_hit ray_hit, t_img_data *img)
+#include <stdio.h>
+static void	draw_texture(t_draw_coords draw_coords, t_texture texture, t_ray_hit ray_hit, t_game *game)
 {
 	int				texture_x;
 	double			texture_y;
@@ -104,12 +105,12 @@ static void	draw_texture(t_draw_coords draw_coords, t_texture texture, t_ray_hit
 	if (draw_coords.draw_start < 0)
 	{
 		draw_coords.draw_start = 0;
-		draw_coords.draw_end = screenHeight - 1;
+		draw_coords.draw_end = game->height - 1;
 	}
 	while (draw_coords.draw_start < draw_coords.draw_end)
-	{
+	{	
 		current_px_color = ((unsigned int *) texture.image.addr)[(int) texture_y * texture.width + texture_x];
-		mlx_put_pixel_img(img, draw_coords.screen_x, draw_coords.draw_start++, current_px_color);
+		mlx_put_pixel_img(&game->main_img, draw_coords.screen_x, draw_coords.draw_start++, current_px_color);
 		texture_y += y_tex_step;
 	}
 }
@@ -135,35 +136,42 @@ static char	get_side_hit_orientation(t_ray_hit ray_hit)
 	}
 }
 
-void	drawline_from_distance(int x, double wall_pos_hit, t_ray_hit ray_hit, t_game *game)
+static void	draw_texture_depending_on_orientation (t_draw_coords draw_coords, \
+												t_ray_hit ray_hit, t_game *game)
+{
+	char	orientation;
+
+	orientation = get_side_hit_orientation(ray_hit);
+	if (orientation == 'N')
+		draw_texture(draw_coords, game->n_tex, ray_hit, game);
+	else if (orientation == 'S')
+		draw_texture(draw_coords, game->s_tex, ray_hit, game);
+	else if (orientation == 'E')
+		draw_texture(draw_coords, game->e_tex, ray_hit, game);
+	else if (orientation == 'W')
+		draw_texture(draw_coords, game->w_tex, ray_hit, game);
+}
+void	drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game)
 {
 	t_draw_coords	draw_coords;
-
-	draw_coords.line_height = round(((double)screenHeight / ray_hit.distance));
-	draw_coords.draw_start = -draw_coords.line_height / 2 + screenHeight / 2;
-    draw_coords.draw_end = draw_coords.line_height / 2 + screenHeight / 2;
+	char			orientation;
+	
+	draw_coords.line_height = round(((double)game->height / ray_hit.distance));
+	draw_coords.draw_start = -draw_coords.line_height / 2 + game->height / 2;
+    draw_coords.draw_end = draw_coords.line_height / 2 + game->height / 2;
 	draw_coords.screen_x = x;
 	int y = 0;
-	printf("start: %d, end : %d\n", draw_coords.draw_start, draw_coords.draw_end);
 	while (y < draw_coords.draw_start)
-		mlx_put_pixel_img(&game->main_img, x, y++, SKY_COLOR);
+		mlx_put_pixel_img(&game->main_img, x, y++, game->ceil_color);
 	if (ray_hit.tile_hit.x > (double) 24 - 1.0 || ray_hit.tile_hit.y > (double) 24 - 1.0)
+	{
 		draw_special_texture(draw_coords, ray_hit, &game->main_img, game);
+	}
 	else
 	{
-		char orientation;
-		ray_hit.wall_pos_hit = wall_pos_hit;
-		orientation = get_side_hit_orientation(ray_hit);
-		if (orientation == 'N')
-			draw_texture(draw_coords, game->n_tex, ray_hit, &game->main_img);
-		else if (orientation == 'S')
-			draw_texture(draw_coords, game->s_tex, ray_hit, &game->main_img);
-		else if (orientation == 'E')
-			draw_texture(draw_coords, game->e_tex, ray_hit, &game->main_img);
-		else if (orientation == 'W')
-			draw_texture(draw_coords, game->w_tex, ray_hit, &game->main_img);
+		draw_texture_depending_on_orientation(draw_coords, ray_hit, game);
 	}
 	y = draw_coords.draw_end;
-	while (y < screenHeight)
-		mlx_put_pixel_img(&game->main_img, x, y++, FLOOR_COLOR);
+	while (y < game->height)
+		mlx_put_pixel_img(&game->main_img, x, y++, game->floor_color);
 }

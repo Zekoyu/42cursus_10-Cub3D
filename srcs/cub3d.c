@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 18:39:26 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/04 18:59:44 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -474,6 +474,11 @@ t_vector	init_base_distances(t_vector direction, t_vector dda_distances, t_vecto
 	return (distances);
 }
 
+/*
+	Here we can afford an infinite loop
+	because of the subject specifying that map should be enclosed with walls.
+	So the ray should always hit if we get to this step
+*/
 static t_ray_hit	get_ray_distance_side(t_ray ray, int map[mapHeight][mapWidth])
 {
 	t_ray_hit	ray_hit;
@@ -503,26 +508,28 @@ static t_ray_hit	get_ray_distance_side(t_ray ray, int map[mapHeight][mapWidth])
 	return (ray_hit);
 }
 
+/*
+	Wall pos hit = position between 0-1 where our ray hit.
+	This value is used for texture projection
+*/
 t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector player_pos)
 {
 	t_ray		ray;
 	t_ray_hit	ray_hit;
 
-	//struct timeval start;
-
-	//print_elapsed("start:", start);
 	ray.direction = direction;
 	ray.current_tile = get_pos_current_tile(player_pos);
-	//print_elapsed("get tile:", start);
 	ray.dda_distances = get_dda_distances(ray.direction);
-	//print_elapsed("get dda:", start);
 	ray.direction_steps = get_direction_steps(ray.direction);
-	//print_elapsed("get steps:", start);
 	ray.total_distances = init_base_distances(ray.direction, \
 											ray.dda_distances, player_pos);
-	//print_elapsed("get base distances:", start);
 	ray_hit = get_ray_distance_side(ray, map);
-	//print_elapsed("dda:", start);
+	ray_hit.direction = direction;
+	if (ray_hit.side_hit == 'x')
+		ray_hit.wall_pos_hit = player_pos.y + ray_hit.distance * ray_hit.direction.y;
+	else
+		ray_hit.wall_pos_hit = player_pos.x + ray_hit.distance * ray_hit.direction.x;
+	ray_hit.wall_pos_hit = ray_hit.wall_pos_hit - floor(ray_hit.wall_pos_hit);
 	return (ray_hit);
 }
 
@@ -767,32 +774,7 @@ void	do_render(t_game *game)
 		ray_dir.y = direction.y + (game->player.cam_plane.y * camera_pos_on_plane);
 		ray_hit = get_ray_hit(ray_dir, worldMap, game->player.pos);
 		
-		double	wall_pos_hit;
-		double	rel_player_pos;
-		if (ray_hit.side_hit == 'x')
-		{
-			wall_pos_hit = game->player.pos.y + ray_hit.distance * ray_dir.y;
-			/*
-			double x_offset = (ray_hit.distance /  get_vector_length(get_dda_distances(ray_dir))) * get_dda_x_distance(ray_dir);
-			// x_offset - floor(x_offset) = value between 0 and 1
-			//printf("Ray %d, player pos x - x offset: %f\n", x, game->player.pos.x - x_offset);
-			rel_player_pos = game->player.pos.x - (double)((int)game->player.pos.x);
-			wall_pos_hit = rel_player_pos - floor(rel_player_pos);
-			*/
-		}
-		else
-		{
-			wall_pos_hit = game->player.pos.x + ray_hit.distance * ray_dir.x;
-
-			/*
-			double y_offset = (ray_hit.distance /  get_vector_length(get_dda_distances(ray_dir))) * get_dda_y_distance(ray_dir);
-			rel_player_pos = game->player.pos.y - y_offset;
-			wall_pos_hit = rel_player_pos - floor(rel_player_pos);
-			printf("Ray %d, wall pos hit = %f\n", x, wall_pos_hit);
-			//wall_pos_hit = y_offset - floor(y_offset);
-			*/
-		}
-		wall_pos_hit = wall_pos_hit - floor(wall_pos_hit);
+		
 		//printf("Ray %d wallX: %f\n", x, wall_pos_hit);
 
 		// texture size is 32*32
@@ -806,8 +788,8 @@ void	do_render(t_game *game)
 		//}
 		//print_elapsed("calcul: ", start);
 		//drawline_from_distance(x, ray_hit.distance, wall_pos_hit/*worldMap[ray_hit.tile_hit.y][ray_hit.tile_hit.x]*/, ray_hit.side_hit);
-		ray_hit.direction = ray_dir;
-		drawline_from_distance(x, wall_pos_hit, ray_hit, game);
+		drawline_from_distance(x, ray_hit, game);
+		
 		//print_elapsed("Time to add to image (us):", start);
 		//print_elapsed("draw: ", start);
 	}
@@ -1012,6 +994,12 @@ int main()
 	game.e_tex.image.addr = mlx_get_data_addr(game.e_tex.image.img, &game.e_tex.image.bits_per_pixel, &game.e_tex.image.line_length, &game.e_tex.image.endian);
 	game.w_tex.image.addr = mlx_get_data_addr(game.w_tex.image.img, &game.w_tex.image.bits_per_pixel, &game.w_tex.image.line_length, &game.w_tex.image.endian);
 	
+
+	game.width = screenWidth;
+	game.height = screenHeight;
+
+	game.ceil_color = 0x00231570;
+	game.floor_color = 0x00ede482;
 
 	for (int x = 0; x < minimap_size_px; x++)
 	{
