@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 19:20:01 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/05 00:57:25 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ typedef struct s_img_data
 {
 	void	*img;
 	char	*addr;
-	int		bits_per_pixel;
+	int		bpp;
 	int		line_length;
 	int		endian;
 }	t_img_data;
@@ -155,6 +155,10 @@ double		get_y_direction(double angle);
 // Key handling
 int			key_press_handler(int keycode, t_game *game);
 int			key_release_handler(int keycode, t_game *game);
+
+// Mouse handling
+int			mouse_hook(int keycode, t_game *game);
+int			get_mouse_velocity(void *window);
 
 // MLX Utils
 void		mlx_put_pixel_img(t_img_data *img, int x, int y, int color);

@@ -24,7 +24,7 @@ int main()
 	game.mlx = mlx_init();
 	game.window = mlx_new_window(game.mlx, width, height, "Cub3D");
 	game.main_img.img = mlx_new_image(game.mlx, width, height);
-	game.main_img.addr = mlx_get_data_addr(game.main_img.img, &game.main_img.bits_per_pixel, &game.main_img.line_length, &game.main_img.endian);
+	game.main_img.addr = mlx_get_data_addr(game.main_img.img, &game.main_img.bpp, &game.main_img.line_length, &game.main_img.endian);
 
 	int png_width;
 	int png_height;

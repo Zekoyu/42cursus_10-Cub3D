@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 19:22:25 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/05 01:22:47 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -575,55 +575,6 @@ void	do_render(t_game *game)
 }
 
 // mlx_mouse_get_pos(window, int *x, int *y)
-/*
-	If mouse is almost outside the app in X (in the bounds of 10-90% of the screen height)
-	Put it back to the center
-
-	If the mouse is "almost" outside the app in Y (in the bounds of 25-75% of the screen height)
-	we reset it as well so that it does not go over applications or something like that
-	(only reset it on Y axis)
-
-	The offset is between -Width/2 (= left), 0 = middle, +Width/2 = right
-*/
-int	get_x_mouse_offset(void *window)
-{
-	int	initial_pos;
-	int	current_pos;
-	int	trucinutile;
-	int	offset;
-
-	initial_pos = screenWidth / 2;
-	mlx_mouse_get_pos(window, &current_pos, &trucinutile);
-	offset = current_pos - initial_pos;
-	if (trucinutile < screenHeight / 4 || trucinutile > screenHeight / 4) // If mouse is in 1st or 4th quarter, center in on y
-		mlx_mouse_move(window, offset + (screenWidth / 2), screenHeight / 2);
-	if (offset >= (screenWidth - screenWidth / 10) / 2 || offset <= -(screenWidth - screenWidth / 10) / 2)
-		mlx_mouse_move(window, screenWidth / 2, screenHeight / 2);
-	else
-		return (offset);
-}
-
-int	get_mouse_velocity(void *window)
-{
-	static int	prev_pos = 0;
-	static int smooth_mouse_velo;
-	int	current_pos;
-	int	tmp;
-	int	velo;
-
-	current_pos = get_x_mouse_offset(window);
-	tmp = prev_pos;
-	prev_pos = current_pos;
-	velo = current_pos - tmp;
-	if ((velo < 0 && velo > -150) || (velo > 0 && velo < 150))
-		smooth_mouse_velo = velo;
-	smooth_mouse_velo -= smooth_mouse_velo % 3;
-	if (smooth_mouse_velo > 0)
-		smooth_mouse_velo -= 3;
-	else if (smooth_mouse_velo < 0)
-		smooth_mouse_velo += 3;
-	return (smooth_mouse_velo);
-}
 
 
 /*
@@ -670,74 +621,215 @@ int loop_hook(t_game *game)
 	return (1);
 }
 
-int	mouse_hook(int keycode)
+
+
+void	free_textures(t_game *game)
 {
-	if (check_uuddlrlrab(keycode))
-		teleport_player(&game.player);
+	if (game->n_tex.image.img)
+		free(game->n_tex.image.img);
+	if (game->s_tex.image.img)
+		free(game->s_tex.image.img);
+	if (game->e_tex.image.img)
+		free(game->e_tex.image.img);
+	if (game->w_tex.image.img)
+		free(game->w_tex.image.img);
 }
 
+/*
+	We get 4 texture (N-S-E-W) in an array since norminette limits to 4 args
+*/
+int	load_textures(t_game *game, char *textures_files[4])
+{
+	int	x_size;
+	int	y_size;
+
+	game->n_tex.image.img = mlx_xpm_file_to_image(game->mlx, textures_files[0], &x_size, &y_size);
+	game->n_tex.height = y_size;
+	game->n_tex.width = x_size;
+	game->s_tex.image.img = mlx_xpm_file_to_image(game->mlx, textures_files[1], &x_size, &y_size);
+	game->s_tex.height = y_size;
+	game->s_tex.width = x_size;
+	game->e_tex.image.img = mlx_xpm_file_to_image(game->mlx, textures_files[2], &x_size, &y_size);
+	game->e_tex.height = y_size;
+	game->e_tex.width = x_size;
+	game->w_tex.image.img = mlx_xpm_file_to_image(game->mlx, textures_files[3], &x_size, &y_size);
+	game->w_tex.height = y_size;
+	game->w_tex.width = x_size;
+	if (!game->n_tex.image.img || !game->s_tex.image.img || !game->e_tex.image.img || !game->w_tex.image.img)
+	{
+		free_textures(game);
+		return (-1);
+	}
+	return (0);
+}
+
+int	init_textures_addresses(t_game *game)
+{
+	char	*addr;
+
+	game->n_tex.image.addr = mlx_get_data_addr(game->n_tex.image.img, \
+				&game->n_tex.image.bpp, &game->n_tex.image.line_length, \
+				&game->n_tex.image.endian);
+	game->s_tex.image.addr = mlx_get_data_addr(game->s_tex.image.img, \
+				&game->s_tex.image.bpp, &game->s_tex.image.line_length, \
+				&game->s_tex.image.endian);
+	game->e_tex.image.addr = mlx_get_data_addr(game->e_tex.image.img, \
+				&game->e_tex.image.bpp, &game->e_tex.image.line_length, \
+				&game->e_tex.image.endian);
+	game->w_tex.image.addr = mlx_get_data_addr(game->w_tex.image.img, \
+				&game->w_tex.image.bpp, &game->w_tex.image.line_length, \
+				&game->w_tex.image.endian);
+	if (!game->n_tex.image.addr || !game->s_tex.image.addr \
+	|| !game->e_tex.image.addr || !game->w_tex.image.addr)
+	{
+		free_textures(game);
+		free_minimap(game);
+		return (-1);
+	}
+	return (0);
+}
+
+void	free_minimap(t_game *game)
+{
+	if (!game->minimap_img.img)
+		return ;
+	if (!game->minimap_img.addr)
+	{
+		mlx_destroy_image(game->mlx, game->minimap_img.img);
+		return ;
+	}
+}
+
+/*
+	Initialize every pixel transparent
+*/
+int	init_minimap(t_game *game)
+{
+	int	minimap_size_px;
+	int	x;
+	int	y;
+
+	minimap_size_px = min(game->height / MINIMAP_SIZE_RATIO, \
+							game->width / MINIMAP_SIZE_RATIO);
+	game->minimap_img.img = mlx_new_image(game->mlx, minimap_size_px,\
+											minimap_size_px);
+	game->minimap_img.addr = mlx_get_data_addr(game->minimap_img.img, \
+					&game->minimap_img.bpp, &game->minimap_img.line_length, \
+					&game->minimap_img.endian);
+	if (!game->minimap_img.img || !game->minimap_img.addr)
+	{
+		free_minimap(game);
+		return (-1);
+	}
+	x = -1;
+	while (++x < minimap_size_px)
+	{
+		y = -1;
+		while (++y < minimap_size_px)
+			mlx_put_pixel_img(&game->minimap_img, x, y, 0xFF000000);
+	}
+	return (0);
+}
+
+void	free_main_win(t_game *game)
+{
+	if (game->window)
+		mlx_destroy_window(game->mlx, game->window);
+}
+
+void	free_main_img(t_game *game)
+{
+	if (!game->main_img.img)
+		return ;
+	if (!game->main_img.addr)
+	{
+		mlx_destroy_window(game->main_img.img);
+		return ;
+	}
+}
+
+int	init_main_mlx_window_img(t_game *game, int width, int height, char *win_name)
+{
+	game->mlx = mlx_init();
+	if (!game->mlx)
+		return (-1);
+	game->window = mlx_new_window(game->mlx, width, height, win_name);
+	if (!game->window)
+		return (-1);
+	game->main_img.img = mlx_new_image(game->mlx, width, height);
+	if (!game->main_img.img)
+	{
+		free_main_win(game);
+		return (-1);
+	}
+	game->main_img.addr = mlx_get_data_addr(game->main_img.img, \
+											&game->main_img.bpp, \
+											&game->main_img.line_length, \
+											&game->main_img.endian);
+	if (!game->main_img.addr)
+	{
+		free_main_win(game);
+		free_main_img(game);
+		return (-1);
+	}
+	return (0);
+}
+
+int	init_mlx_images_and_textures(t_game *game, char *textures_files[4])
+{
+	if (!init_minimap(&game))
+	{
+		free_main_win(&game);
+		free_main_img(&game);
+		return (-1);
+	}
+	if (!load_textures(&game, textures_files) || init_textures_addresses(&game))
+	{
+		free_main_win(&game);
+		free_main_img(&game);
+		free_minimap(&game);
+		return (-1);
+	}
+	return (0);
+}
+
+void	init_game(t_game *game)
+{
+	game->width = screenWidth;
+	game->height = screenHeight;
+
+	game->ceil_color = 0x00231570;
+	game->floor_color = 0x00ede482;
+
+	game->player.pos.y = 12.5;
+	game->player.pos.x = 1.5;
+
+	game->player.direction.x = 1.0;
+	game->player.direction.y = 0.0;
+
+	game->player.cam_plane.x = 0.0;
+	game->player.cam_plane.y = 0.66;
+
+	game->player.speed = 1.0;
+}
 
 int main()
 {
-	game.mlx = mlx_init();
-	game.window = mlx_new_window(game.mlx, screenWidth, screenHeight, "Cub3D");
-	game.main_img.img = mlx_new_image(game.mlx, screenWidth, screenHeight);
-	game.main_img.addr = mlx_get_data_addr(game.main_img.img, &game.main_img.bits_per_pixel, &game.main_img.line_length, &game.main_img.endian);
-	
-	int minimap_size_px = min(screenHeight / MINIMAP_SIZE_RATIO, screenWidth / MINIMAP_SIZE_RATIO);
-	game.minimap_img.img = mlx_new_image(game.mlx, minimap_size_px, minimap_size_px);
-	game.minimap_img.addr = mlx_get_data_addr(game.minimap_img.img, &game.minimap_img.bits_per_pixel, &game.minimap_img.line_length, &game.minimap_img.endian);
-	
-	//game.shotgun_img =  mlx_png_file_to_image(game.mlx, "scaled_sprites/shotgun.png", &game.shotgun_width, &game.shotgun_height);
-
-
-	
-	game.n_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./N_tex.xpm", &N_tex_x, &N_tex_y);
-	game.s_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./S_tex.xpm", &S_tex_x, &S_tex_y);
-	game.e_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./E_tex.xpm", &E_tex_x, &E_tex_y);
-	game.w_tex.image.img = mlx_xpm_file_to_image(game.mlx, "./W_tex.xpm", &W_tex_x, &W_tex_y);
-
-	game.n_tex.height = N_tex_y;
-	game.n_tex.width = N_tex_x;
-
-	game.s_tex.height = S_tex_y;
-	game.s_tex.width = S_tex_x;
-
-	game.e_tex.height = E_tex_y;
-	game.e_tex.width = E_tex_x;
-
-	game.w_tex.height = W_tex_y;
-	game.w_tex.width = W_tex_x;
-	
-	game.n_tex.image.addr = mlx_get_data_addr(game.n_tex.image.img, &game.n_tex.image.bits_per_pixel, &game.n_tex.image.line_length, &game.n_tex.image.endian);
-	game.s_tex.image.addr = mlx_get_data_addr(game.s_tex.image.img, &game.s_tex.image.bits_per_pixel, &game.s_tex.image.line_length, &game.s_tex.image.endian);
-	game.e_tex.image.addr = mlx_get_data_addr(game.e_tex.image.img, &game.e_tex.image.bits_per_pixel, &game.e_tex.image.line_length, &game.e_tex.image.endian);
-	game.w_tex.image.addr = mlx_get_data_addr(game.w_tex.image.img, &game.w_tex.image.bits_per_pixel, &game.w_tex.image.line_length, &game.w_tex.image.endian);
-	
-
-	game.width = screenWidth;
-	game.height = screenHeight;
-
-	game.ceil_color = 0x00231570;
-	game.floor_color = 0x00ede482;
-
-	for (int x = 0; x < minimap_size_px; x++)
+	char textures_files[4] =
 	{
-		for (int y = 0; y < minimap_size_px; y++)
-		{
-			mlx_put_pixel_img(&game.minimap_img, x, y, 0xFF000000);
-		}
-	}
+		"./N_tex.xpm",
+		"./S_tex.xpm",
+		"./E_tex.xpm",
+		"./W_tex.xpm"
+	};
 	
+	if (!init_main_mlx_window_img(&game, screenWidth, screenHeight, "Cub3D"))
+		return (-1);
+	if (!init_mlx_images_and_textures(&game, textures_files))
+		return (-1);
+
 	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_mouse_hide();
-	game.player.pos.y = 12.5;
-	game.player.pos.x = 1.5;
-	game.player.direction.x = 1.0;
-	game.player.direction.y = 0.0;
-	game.player.cam_plane.x = 0.0;
-	game.player.cam_plane.y = 0.66;
-	game.player.speed = 1.0;
 	
 	do_render(&game);
 	
@@ -746,7 +838,7 @@ int main()
 	mlx_hook(game.window, 2, 0, &key_press_handler, &game);
 	mlx_hook(game.window, 3, 0, &key_release_handler, &game);
 
-	mlx_mouse_hook(game.window, &mouse_hook, NULL);
+	mlx_mouse_hook(game.window, &mouse_hook, &game);
 	
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
 	mlx_loop(game.mlx);
