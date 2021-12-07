@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 19:21:03 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 20:00:20 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -838,7 +838,7 @@ int main()
 	if (init_mlx_images_and_textures(&game, (char **)textures_files))
 		return (-1);
 
-	add_door(6, 5);
+	add_door(6, 8);
 	
 	int	x_size;
 	int	y_size;
@@ -867,6 +867,14 @@ int main()
 	game.test2.image.addr = mlx_get_data_addr(game.test2.image.img, \
 				&game.test2.image.bpp, &game.test2.image.line_length, \
 				&game.test2.image.endian);
+
+	game.door.image.img = mlx_xpm_file_to_image(game.mlx, "./door_tex.xpm", &x_size, &y_size);
+	game.door.height = y_size;
+	game.door.width = x_size;
+
+	game.door.image.addr = mlx_get_data_addr(game.door.image.img, \
+				&game.door.image.bpp, &game.door.image.line_length, \
+				&game.door.image.endian);
 
 	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_mouse_hide();

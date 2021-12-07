@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 18:41:40 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 19:44:02 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,7 @@ typedef struct s_game
 	t_texture		w_tex;
 	t_texture		test1;
 	t_texture		test2;
+	t_texture		door;
 }	t_game;
 
 // Vectors

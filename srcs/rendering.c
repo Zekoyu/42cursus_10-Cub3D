@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:18:29 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 15:48:44 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 19:59:57 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,37 @@ static void	draw_texture(t_draw_coords draw_coords, t_texture texture, t_ray_hit
 		texture_x = (texture.width - 1) - texture_x;
 	else if (ray_hit.side_hit == 'y' && ray_hit.direction.y < 0)
 		texture_x = (texture.width - 1) - texture_x;
+	texture_y = 0.0;
+	y_tex_step = (double) (texture.height - 1) / (double) draw_coords.line_height;
+	if (draw_coords.draw_start < 0)
+		texture_y += -(y_tex_step * draw_coords.draw_start);
+	if (draw_coords.draw_start < 0)
+	{
+		draw_coords.draw_start = 0;
+		draw_coords.draw_end = game->height - 1;
+	}
+	while (draw_coords.draw_start < draw_coords.draw_end)
+	{	
+		current_px_color = ((unsigned int *) texture.image.addr)[(int) texture_y * texture.width + texture_x];
+		mlx_put_pixel_img(&game->main_img, draw_coords.screen_x, draw_coords.draw_start++, current_px_color);
+		texture_y += y_tex_step;
+	}
+}
+
+/*
+	For doors, don't flip the textue if seeing from another side
+	(handle need to be the same side either way)
+*/
+static void	draw_door_texture(t_draw_coords draw_coords, t_texture texture, t_ray_hit ray_hit, t_game *game)
+{
+	int				texture_x;
+	double			texture_y;
+	double			y_tex_step;
+	unsigned int	current_px_color;
+	float			door_pos;
+
+	door_pos = 1.0 - get_door(ray_hit.tile_hit)->closed;
+	texture_x = (int) round(((ray_hit.wall_pos_hit) + door_pos) * (double) (texture.width - 1));
 	texture_y = 0.0;
 	y_tex_step = (double) (texture.height - 1) / (double) draw_coords.line_height;
 	if (draw_coords.draw_start < 0)
@@ -97,7 +128,9 @@ static void	draw_texture_depending_on_orientation (t_draw_coords draw_coords, \
 	char	orientation;
 
 	orientation = get_side_hit_orientation(ray_hit);
-	if (orientation == 'N')
+	if (is_door(ray_hit.tile_hit))
+		draw_door_texture(draw_coords, game->door, ray_hit, game);
+	else if (orientation == 'N')
 		draw_texture(draw_coords, game->n_tex, ray_hit, game);
 	else if (orientation == 'S')
 		draw_texture(draw_coords, game->s_tex, ray_hit, game);
