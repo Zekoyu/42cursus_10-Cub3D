@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:09:51 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/03 17:05:53 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 12:36:07 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,10 @@ static t_point	get_pos_current_tile_floor(t_vector player_pos)
 /*
 	X and Y = center of shortest side (middle of shortest side = player pos)
 	Techniquo dé crasso = start from x - 1 and do ++x
+
+	Triangle is always centered so offset will always be minimap_size / 2
 */
-static void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, t_point pos, int color)
+static void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, int minimap_size, int color)
 {	
 	t_point		t1;
 	t_point		t2;
@@ -49,7 +51,8 @@ static void	draw_player_pos_dir(t_vector player_dir, t_img_data *img, t_point po
 		current_px.y = get_min_y(t1, t2, top) - 1;
 		while (++current_px.y <= target_px.y)
 			if (is_point_in_triangle(current_px, t1, t2, top))
-				mlx_put_pixel_img(img, current_px.x + pos.x, current_px.y + pos.y, color);
+				if (current_px.x + minimap_size / 2 >= 0 && current_px.x + minimap_size / 2 < minimap_size && current_px.y + minimap_size / 2 >= 0 && current_px.y + minimap_size / 2 < minimap_size)
+					mlx_put_pixel_img(img, current_px.x + minimap_size / 2, current_px.y + minimap_size / 2, color);
 	}
 }
 
@@ -107,7 +110,6 @@ void	add_minimap(t_img_data *minimap_img, int map[mapHeight][mapWidth], t_player
 {
 	double		offset_every_px;
 	t_vector	current_pos;
-	t_point		triangle_pos;
 	int			minimap_size_px;
 
 	minimap_size_px = min(screenHeight / MINIMAP_SIZE_RATIO, screenWidth / MINIMAP_SIZE_RATIO);
@@ -115,7 +117,5 @@ void	add_minimap(t_img_data *minimap_img, int map[mapHeight][mapWidth], t_player
 	current_pos.y = player.pos.y - ((double) minimap_size_px / (double) SIZE_OF_TILE_ON_MINIMAP) / 2.0;
 	offset_every_px = ((double) minimap_size_px / (double) SIZE_OF_TILE_ON_MINIMAP) / (double) minimap_size_px;
 	put_minimap_pixels(minimap_img, offset_every_px, current_pos, map);
-	triangle_pos.x = minimap_size_px / 2;
-	triangle_pos.y = minimap_size_px / 2;
-	draw_player_pos_dir(player.direction, minimap_img, triangle_pos, MINIMAP_PLAYER_COLOR);
+	draw_player_pos_dir(player.direction, minimap_img, minimap_size_px, MINIMAP_PLAYER_COLOR);
 }

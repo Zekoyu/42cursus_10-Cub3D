@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   mouse_handling.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 23:53:25 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 23:58:46 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 17:20:30 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 int	mouse_hook(int keycode, t_game *game)
 {
 	if (check_uuddlrlrab(keycode))
-		teleport_player(game->player);
+		teleport_player(&game->player);
+	return (69420);
 }
 
 /*
@@ -42,8 +43,7 @@ static int	get_x_mouse_offset(void *window)
 		mlx_mouse_move(window, offset + (screenWidth / 2), screenHeight / 2);
 	if (offset >= (screenWidth - screenWidth / 10) / 2 || offset <= -(screenWidth - screenWidth / 10) / 2)
 		mlx_mouse_move(window, screenWidth / 2, screenHeight / 2);
-	else
-		return (offset);
+	return (offset);
 }
 
 /*

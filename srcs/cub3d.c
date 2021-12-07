@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/05 01:22:47 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 17:19:35 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@ void	do_render(t_game *game);
 	5 degrees	= 0,0872665 	rad		(cos = 0.99619469483, sin = 0.08715578)
 */
 
+
+void *animation[51];
+int animation_index = 0;
 
 #define texHeight 180
 #define texWidth 320
@@ -326,28 +329,6 @@ inline double	ft_lerp(double min, double max, double val)
 }
 */
 
-
-int 			N_tex_x;
-int				N_tex_y;
-char			*N_tex;
-
-int 			S_tex_x;
-int				S_tex_y;
-char			*S_tex;
-
-int 			E_tex_x;
-int				E_tex_y;
-char			*E_tex;
-
-int 			W_tex_x;
-int				W_tex_y;
-char			*W_tex;
-
-unsigned int *	W_tex_addr;
-unsigned int *	S_tex_addr;
-unsigned int *	N_tex_addr;
-unsigned int *	E_tex_addr;
-
 /*	     X
 	+-------->
 	|
@@ -455,13 +436,6 @@ void	teleport_player(t_player *player)
 }
 
 
-
-
-
-
-
-
-
 void	do_render(t_game *game)
 {
 	t_vector	ray_dir;
@@ -480,11 +454,11 @@ void	do_render(t_game *game)
 	gettimeofday(&start, NULL);
 	print_elapsed("start: ", start);
 	*/
-
+	
 	static double current_angle = 0.007;
 	static double multiplier = 1.07;
 	if (teleport_test != 0)
-	{		
+	{
 		t_vector	player_dir;
 		t_vector	cam_dir;
 		double		current_cos;
@@ -529,7 +503,7 @@ void	do_render(t_game *game)
 		}
 	}
 	t_ray_hit ray_hit;
-	
+	//printf("start\n");
 	for (int x = 0; x < screenWidth; x++)
 	{
 		/*
@@ -537,7 +511,6 @@ void	do_render(t_game *game)
 		gettimeofday(&start, NULL);
 		print_elapsed("start:", start);
 		*/
-
 		camera_pos_on_plane = (2.0 * x) / (double) screenWidth - 1;
 		ray_dir.x = direction.x + (game->player.cam_plane.x * camera_pos_on_plane);
 		ray_dir.y = direction.y + (game->player.cam_plane.y * camera_pos_on_plane);
@@ -564,12 +537,17 @@ void	do_render(t_game *game)
 	}
 
 	//printf("last ray hit distance: %f, side: %c\n", ray_hit.distance, ray_hit.side_hit);
-	//print_elapsed("calculs: ", start);
+	//print_elapsed("calculs: ", start);	
+
 	add_minimap(&game->minimap_img, worldMap, game->player);
+
+	
 	//print_elapsed("calculs minimap: ", start);
 	mlx_clear_window(game->mlx, game->window);
 	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0,0);
 	mlx_put_image_to_window(game->mlx, game->window, game->minimap_img.img, 0, 0);
+
+	//printf("end\n");
 	//mlx_put_image_to_window(game->mlx, game->window, game->shotgun_img, screenWidth / 2 - game->shotgun_width / 2, screenHeight - game->shotgun_height);
 	//print_elapsed("put window: ", start);
 }
@@ -587,7 +565,6 @@ void	do_render(t_game *game)
 */
 int loop_hook(t_game *game)
 {
-
 	int mouse_velo = get_mouse_velocity(game->window);
 	if (mouse_velo <= -2)
 	{
@@ -618,6 +595,13 @@ int loop_hook(t_game *game)
 		game->player.pos.x -= game->player.velocity.x * game->player.speed;
 	}
 	do_render(game);
+	if ((game->player.velocity.x != 0.0 || game->player.velocity.y != 0.0) && game->player.speed > 1.0 && animation[animation_index] != NULL)
+	{
+		mlx_put_image_to_window(game->mlx, game->window, animation[animation_index++], 0, 0);
+		if (animation_index > 50)
+			animation_index = 0;
+	}
+	add_curent_frame();
 	return (1);
 }
 
@@ -638,7 +622,7 @@ void	free_textures(t_game *game)
 /*
 	We get 4 texture (N-S-E-W) in an array since norminette limits to 4 args
 */
-int	load_textures(t_game *game, char *textures_files[4])
+int	load_textures(t_game *game, char **textures_files)
 {
 	int	x_size;
 	int	y_size;
@@ -661,6 +645,17 @@ int	load_textures(t_game *game, char *textures_files[4])
 		return (-1);
 	}
 	return (0);
+}
+
+void	free_minimap(t_game *game)
+{
+	if (!game->minimap_img.img)
+		return ;
+	if (!game->minimap_img.addr)
+	{
+		mlx_destroy_image(game->mlx, game->minimap_img.img);
+		return ;
+	}
 }
 
 int	init_textures_addresses(t_game *game)
@@ -687,17 +682,6 @@ int	init_textures_addresses(t_game *game)
 		return (-1);
 	}
 	return (0);
-}
-
-void	free_minimap(t_game *game)
-{
-	if (!game->minimap_img.img)
-		return ;
-	if (!game->minimap_img.addr)
-	{
-		mlx_destroy_image(game->mlx, game->minimap_img.img);
-		return ;
-	}
 }
 
 /*
@@ -743,7 +727,7 @@ void	free_main_img(t_game *game)
 		return ;
 	if (!game->main_img.addr)
 	{
-		mlx_destroy_window(game->main_img.img);
+		mlx_destroy_window(game->mlx, game->main_img.img);
 		return ;
 	}
 }
@@ -775,19 +759,19 @@ int	init_main_mlx_window_img(t_game *game, int width, int height, char *win_name
 	return (0);
 }
 
-int	init_mlx_images_and_textures(t_game *game, char *textures_files[4])
+int	init_mlx_images_and_textures(t_game *game, char **textures_files)
 {
-	if (!init_minimap(&game))
+	if (init_minimap(game))
 	{
-		free_main_win(&game);
-		free_main_img(&game);
+		free_main_win(game);
+		free_main_img(game);
 		return (-1);
 	}
-	if (!load_textures(&game, textures_files) || init_textures_addresses(&game))
+	if (load_textures(game, textures_files) || init_textures_addresses(game))
 	{
-		free_main_win(&game);
-		free_main_img(&game);
-		free_minimap(&game);
+		free_main_win(game);
+		free_main_img(game);
+		free_minimap(game);
 		return (-1);
 	}
 	return (0);
@@ -808,38 +792,90 @@ void	init_game(t_game *game)
 	game->player.direction.y = 0.0;
 
 	game->player.cam_plane.x = 0.0;
-	game->player.cam_plane.y = 0.66;
+	game->player.cam_plane.y = 0.78;
 
 	game->player.speed = 1.0;
 }
+#include <string.h>
+#include <stdio.h>
 
+
+void	*load_animated_sprites(void *arg)
+{
+	void	**animation = (void **) arg;
+
+	for (int i = 0; i <= 50; i++)
+	{
+		char filename[60] = "./speedlines_xpm_900-1600px/speedline_";
+		char num[4];
+		sprintf(num, "%d", i);
+		strcat(filename, num);
+		strcat(filename, ".xpm");
+		int nul;
+		animation[i] = mlx_xpm_file_to_image(game.mlx, filename, &nul, &nul);
+		if (!animation[i])
+			return ((void *) -1);
+	}
+	return (0);
+}
+
+#include <pthread.h>
 int main()
 {
-	char textures_files[4] =
+	char *textures_files[] =
 	{
 		"./N_tex.xpm",
 		"./S_tex.xpm",
 		"./E_tex.xpm",
 		"./W_tex.xpm"
 	};
+	init_game(&game);
+	if (init_main_mlx_window_img(&game, screenWidth, screenHeight, "Cub3D"))
+		return (-1);
+	if (init_mlx_images_and_textures(&game, (char **)textures_files))
+		return (-1);
+
+	int	x_size;
+	int	y_size;
+
+	pthread_t init_img_thread;
+
+	for (int i = 0; i <= 50; i++)
+	{
+		animation[i] = NULL;
+	}
+
+	pthread_create(&init_img_thread, NULL, &load_animated_sprites, animation);
 	
-	if (!init_main_mlx_window_img(&game, screenWidth, screenHeight, "Cub3D"))
-		return (-1);
-	if (!init_mlx_images_and_textures(&game, textures_files))
-		return (-1);
+	game.test1.image.img = mlx_xpm_file_to_image(game.mlx, "./1.xpm", &x_size, &y_size);
+	game.test1.height = y_size;
+	game.test1.width = x_size;
+
+	game.test1.image.addr = mlx_get_data_addr(game.test1.image.img, \
+				&game.test1.image.bpp, &game.test1.image.line_length, \
+				&game.test1.image.endian);
+
+	game.test2.image.img = mlx_xpm_file_to_image(game.mlx, "./2.xpm", &x_size, &y_size);
+	game.test2.height = y_size;
+	game.test2.width = x_size;
+
+	game.test2.image.addr = mlx_get_data_addr(game.test2.image.img, \
+				&game.test2.image.bpp, &game.test2.image.line_length, \
+				&game.test2.image.endian);
 
 	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_mouse_hide();
-	
+
 	do_render(&game);
-	
 	mlx_do_key_autorepeatoff(game.mlx);
 	
 	mlx_hook(game.window, 2, 0, &key_press_handler, &game);
 	mlx_hook(game.window, 3, 0, &key_release_handler, &game);
 
 	mlx_mouse_hook(game.window, &mouse_hook, &game);
-	
+
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
 	mlx_loop(game.mlx);
+
+	pthread_join(init_img_thread, NULL);
 }

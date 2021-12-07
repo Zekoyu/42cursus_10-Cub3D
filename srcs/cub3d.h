@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/05 00:57:25 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 16:10:02 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 
 #  define mapWidth 39
 #  define mapHeight 24
-#  define screenWidth 1280
-#  define screenHeight 720
+#  define screenWidth 1600
+#  define screenHeight 900
 #  define MOVEMENT_FACTOR 0.075
 #  define COS_ROTATION 0.99691733373
 #  define SIN_ROTATION 0.07845909568
@@ -134,6 +134,8 @@ typedef struct s_game
 	t_img_data		minimap_img;
 	t_player		player;
 	int				**map;
+	int				map_width;
+	int				map_height;
 	void			*mlx;
 	void			*window;
 	int				width;
@@ -144,6 +146,8 @@ typedef struct s_game
 	t_texture		s_tex;
 	t_texture		e_tex;
 	t_texture		w_tex;
+	t_texture		test1;
+	t_texture		test2;
 }	t_game;
 
 // Vectors
@@ -208,5 +212,9 @@ t_point		get_pos_current_tile(t_vector player_pos);
 
 // Hitbox
 int			has_intersection_with_wall(t_vector player_pos, int map[mapHeight][mapWidth]);
+
+// Frame counter
+void	add_curent_frame(void);
+int		get_current_frame(void);
 
 #endif
