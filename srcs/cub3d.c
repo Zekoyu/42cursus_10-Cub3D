@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 17:19:35 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 19:21:03 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -544,7 +544,7 @@ void	do_render(t_game *game)
 	
 	//print_elapsed("calculs minimap: ", start);
 	mlx_clear_window(game->mlx, game->window);
-	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0,0);
+	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0, 0);
 	mlx_put_image_to_window(game->mlx, game->window, game->minimap_img.img, 0, 0);
 
 	//printf("end\n");
@@ -595,12 +595,15 @@ int loop_hook(t_game *game)
 		game->player.pos.x -= game->player.velocity.x * game->player.speed;
 	}
 	do_render(game);
-	if ((game->player.velocity.x != 0.0 || game->player.velocity.y != 0.0) && game->player.speed > 1.0 && animation[animation_index] != NULL)
+	if ((fabs(game->player.velocity.x) > 0.01 || fabs(game->player.velocity.y) > 0.01) && game->player.speed > 1.0 && animation[animation_index] != NULL)
 	{
-		mlx_put_image_to_window(game->mlx, game->window, animation[animation_index++], 0, 0);
+		mlx_put_image_to_window(game->mlx, game->window, animation[animation_index], 0, 0);
+		if (get_current_frame() % 3 == 0)
+			animation_index++;
 		if (animation_index > 50)
 			animation_index = 0;
 	}
+	open_close_doors_if_needed();
 	add_curent_frame();
 	return (1);
 }
@@ -835,6 +838,8 @@ int main()
 	if (init_mlx_images_and_textures(&game, (char **)textures_files))
 		return (-1);
 
+	add_door(6, 5);
+	
 	int	x_size;
 	int	y_size;
 

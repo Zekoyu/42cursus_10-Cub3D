@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 19:12:34 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 19:17:03 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 19:41:16 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,12 @@ static t_vector	init_base_distances(t_vector direction, t_vector dda_distances, 
 	Here we can afford an infinite loop
 	because of the subject specifying that map should be enclosed with walls.
 	So the ray should always hit if we get to this step
+
+	If we find a door, check the position the ray hit on the door
+	compared to the current position of the door, if it should pass
+	continue the dda loop
 */
-static t_ray_hit	do_the_dda_algorithm(t_ray ray, int map[mapHeight][mapWidth])
+static t_ray_hit	do_the_dda_algorithm(t_ray ray, int map[mapHeight][mapWidth], t_vector player_pos)
 {
 	t_ray_hit	ray_hit;
 
@@ -79,7 +83,32 @@ static t_ray_hit	do_the_dda_algorithm(t_ray ray, int map[mapHeight][mapWidth])
 			ray_hit.side_hit = 'y';
 		}
 		if (map[ray.current_tile.y][ray.current_tile.x] != 0)
-			break ;
+		{
+			if (is_door(ray.current_tile))
+			{
+				t_door *door;
+				door = get_door(ray.current_tile);
+				if (ray_hit.side_hit == 'x')
+					ray_hit.distance = ray.total_distances.x - ray.dda_distances.x;
+				else
+					ray_hit.distance = ray.total_distances.y - ray.dda_distances.y;
+				ray_hit.tile_hit = ray.current_tile;
+	
+				if (ray_hit.side_hit == 'x')
+					ray_hit.wall_pos_hit = player_pos.y + ray_hit.distance * ray.direction.y;
+				else
+					ray_hit.wall_pos_hit = player_pos.x + ray_hit.distance * ray.direction.x;
+				ray_hit.wall_pos_hit = ray_hit.wall_pos_hit - floor(ray_hit.wall_pos_hit);
+				if (ray_hit.distance <= 2.0)
+					door->should_open = 1;
+				else
+					door->should_open = -1;
+				if (ray_hit.wall_pos_hit <= door->closed)
+					break ;
+			}
+			else
+				break ;
+		}
 	}
 	if (ray_hit.side_hit == 'x')
 		ray_hit.distance = ray.total_distances.x - ray.dda_distances.x;
@@ -104,7 +133,7 @@ t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector
 	ray.direction_steps = get_direction_steps(ray.direction);
 	ray.total_distances = init_base_distances(ray.direction, \
 											ray.dda_distances, player_pos);
-	ray_hit = do_the_dda_algorithm(ray, map);
+	ray_hit = do_the_dda_algorithm(ray, map, player_pos);
 	ray_hit.direction = direction;
 	if (ray_hit.side_hit == 'x')
 		ray_hit.wall_pos_hit = player_pos.y + ray_hit.distance * ray_hit.direction.y;

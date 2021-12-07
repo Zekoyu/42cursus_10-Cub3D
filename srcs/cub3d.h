@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 16:10:02 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/07 18:41:40 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 #  define COS_ROTATION 0.99691733373
 #  define SIN_ROTATION 0.07845909568
 #  define BOUNDING_BOX_SIDE_SIZE 0.4
-#  define SPRINT_SPEED_MULTIPLIER 1.5
+#  define SPRINT_SPEED_MULTIPLIER 2.5
 //Ratio compared to the size of the screen (here it takes 1/10 of the screen)
 //map will remain squared (take min(width/ratio), (height/ratio))
 //Should not be set to les than 1
@@ -35,9 +35,10 @@
 #  define SIZE_OF_TILE_ON_MINIMAP 10
 //player sprite size on minimap
 #  define PLAYER_SIZE_ON_MINIMAP 12
-#  define MINIMAP_BACKGROUND_COLOR 0x88FFFFFF
-#  define MINIMAP_FOREGROUND_COLOR 0x00FF00BB
+#  define MINIMAP_BACKGROUND_COLOR 0xFF000000 //0x88FFFFFF
+#  define MINIMAP_FOREGROUND_COLOR 0x00ede482 //0x00FF00BB
 #  define MINIMAP_PLAYER_COLOR 0x00FF8855
+
 /*
 	Structs
 */
@@ -59,6 +60,15 @@ typedef struct s_point
 	int	x;
 	int	y;
 }	t_point;
+
+typedef struct	s_door
+{
+	float			closed;
+	int				should_open;
+	t_point			coords;
+	struct s_door	*next;
+}	t_door;
+
 
 typedef struct s_img_data
 {
@@ -216,5 +226,11 @@ int			has_intersection_with_wall(t_vector player_pos, int map[mapHeight][mapWidt
 // Frame counter
 void	add_curent_frame(void);
 int		get_current_frame(void);
+
+// Doors
+void	add_door(int x, int y);
+t_door	*get_door(t_point tile);
+int		is_door(t_point tile);
+void	open_close_doors_if_needed(void);
 
 #endif
