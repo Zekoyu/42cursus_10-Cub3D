@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 19:12:34 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 19:45:05 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/08 16:47:25 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,11 @@ static t_vector	init_base_distances(t_vector direction, t_vector dda_distances, 
 	return (distances);
 }
 
+static int	check_door_collision(t_ray ray, t_ray_hit ray_hit)
+{
+	
+}
+
 /*
 	Here we can afford an infinite loop
 	because of the subject specifying that map should be enclosed with walls.
@@ -82,7 +87,7 @@ static t_ray_hit	do_the_dda_algorithm(t_ray ray, int map[mapHeight][mapWidth], t
 			ray.current_tile.y += ray.direction_steps.y;
 			ray_hit.side_hit = 'y';
 		}
-		if (map[ray.current_tile.y][ray.current_tile.x] != 0)
+		if (map[ray.current_tile.y][ray.current_tile.x] != 0 || is_door(ray.current_tile))
 		{
 			if (is_door(ray.current_tile))
 			{
@@ -99,12 +104,8 @@ static t_ray_hit	do_the_dda_algorithm(t_ray ray, int map[mapHeight][mapWidth], t
 				else
 					ray_hit.wall_pos_hit = player_pos.x + ray_hit.distance * ray.direction.x;
 				ray_hit.wall_pos_hit = ray_hit.wall_pos_hit - floor(ray_hit.wall_pos_hit);
-				if (ray_hit.distance <= 2.0)
-					door->should_open = 1;
-				else
-					door->should_open = -1;
 				if (ray_hit.wall_pos_hit <= door->closed)
-					break ;
+					return (ray_hit) ;
 			}
 			else
 				break ;

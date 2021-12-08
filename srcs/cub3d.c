@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 20:00:20 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/08 15:53:02 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,30 +216,30 @@ int gigaChad[texHeight][texWidth] = {
 
 int worldMap[mapHeight][mapWidth]=
 {
-  {0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,1,1,1,1,1,1,4,4,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {4,0,0,0,0,0,4,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,4,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,4,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,4,4,4,4,4,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+	{0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,1,1,1,1,1,1,4,4,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{4,0,0,0,0,0,4,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,4,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,4,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,4,4,4,4,4,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
 /*
 int crossTex[32][32]=
@@ -541,12 +541,12 @@ void	do_render(t_game *game)
 
 	add_minimap(&game->minimap_img, worldMap, game->player);
 
-	
 	//print_elapsed("calculs minimap: ", start);
 	mlx_clear_window(game->mlx, game->window);
+	
 	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0, 0);
 	mlx_put_image_to_window(game->mlx, game->window, game->minimap_img.img, 0, 0);
-
+	
 	//printf("end\n");
 	//mlx_put_image_to_window(game->mlx, game->window, game->shotgun_img, screenWidth / 2 - game->shotgun_width / 2, screenHeight - game->shotgun_height);
 	//print_elapsed("put window: ", start);
@@ -565,7 +565,7 @@ void	do_render(t_game *game)
 */
 int loop_hook(t_game *game)
 {
-	int mouse_velo = get_mouse_velocity(game->window);
+	int mouse_velo = get_mouse_velocity(game);
 	if (mouse_velo <= -2)
 	{
 		game->player.directions.rotate_l = 1;
@@ -587,28 +587,36 @@ int loop_hook(t_game *game)
 	}
 	if (game->player.directions.rotate_r == 1)
 		rotate_player(&game->player, 1);
-	game->player.pos.x += game->player.velocity.x * game->player.speed;
-	game->player.pos.y += game->player.velocity.y * game->player.speed;
-	if (has_intersection_with_wall(game->player.pos, worldMap))
+	if (!game->paused)
 	{
-		game->player.pos.y -= game->player.velocity.y * game->player.speed;
-		game->player.pos.x -= game->player.velocity.x * game->player.speed;
+		game->player.pos.x += game->player.velocity.x * game->player.speed;
+		game->player.pos.y += game->player.velocity.y * game->player.speed;
+		if (has_intersection_with_wall(game->player.pos, worldMap))
+		{
+			game->player.pos.y -= game->player.velocity.y * game->player.speed;
+			game->player.pos.x -= game->player.velocity.x * game->player.speed;
+		}
 	}
 	do_render(game);
-	if ((fabs(game->player.velocity.x) > 0.01 || fabs(game->player.velocity.y) > 0.01) && game->player.speed > 1.0 && animation[animation_index] != NULL)
+	if (!game->paused)
 	{
-		mlx_put_image_to_window(game->mlx, game->window, animation[animation_index], 0, 0);
-		if (get_current_frame() % 3 == 0)
-			animation_index++;
-		if (animation_index > 50)
-			animation_index = 0;
+		if ((fabs(game->player.velocity.x) > 0.01 || fabs(game->player.velocity.y) > 0.01) && game->player.speed > 1.0 && animation[animation_index] != NULL)
+		{
+			mlx_put_image_to_window(game->mlx, game->window, animation[animation_index], 0, 0);
+			if (get_current_frame() % 3 == 0)
+				animation_index++;
+			if (animation_index > 50)
+				animation_index = 0;
+		}
+		open_close_doors_if_needed(game->player.pos);
+		add_curent_frame();
 	}
-	open_close_doors_if_needed();
-	add_curent_frame();
+	else
+	{
+		mlx_put_image_to_window(game->mlx, game->window, game->pause_screen.img, 0, 0);
+	}
 	return (1);
 }
-
-
 
 void	free_textures(t_game *game)
 {
@@ -798,6 +806,7 @@ void	init_game(t_game *game)
 	game->player.cam_plane.y = 0.78;
 
 	game->player.speed = 1.0;
+	game->paused = 0;
 }
 #include <string.h>
 #include <stdio.h>
@@ -822,6 +831,13 @@ void	*load_animated_sprites(void *arg)
 	return (0);
 }
 
+int	close_win(t_game *game)
+{
+	printf("leave window\n");
+	exit (1);
+	return (69);
+}
+
 #include <pthread.h>
 int main()
 {
@@ -838,7 +854,9 @@ int main()
 	if (init_mlx_images_and_textures(&game, (char **)textures_files))
 		return (-1);
 
-	add_door(6, 8);
+	add_door(4, 10);
+	add_door(4, 9);
+	add_door(4, 11);
 	
 	int	x_size;
 	int	y_size;
@@ -868,6 +886,22 @@ int main()
 				&game.test2.image.bpp, &game.test2.image.line_length, \
 				&game.test2.image.endian);
 
+	game.pause_screen.img = mlx_xpm_file_to_image(game.mlx, "./pause_menu_1600-900px.xpm", &x_size, &y_size);
+
+	game.pause_screen.addr = mlx_get_data_addr(game.pause_screen.img, \
+				&game.pause_screen.bpp, &game.pause_screen.line_length, \
+				&game.pause_screen.endian);
+	for (int x = 0; x < 1600; x++)
+	{
+		for (int y = 0; y < 900; y++)
+		{
+			if (((unsigned int *) game.pause_screen.addr)[y * 1600 + x] == 0xFF000000)
+			{
+				((unsigned int *) game.pause_screen.addr)[y * 1600 + x] = 0x88888888;
+			}
+		}
+	}
+
 	game.door.image.img = mlx_xpm_file_to_image(game.mlx, "./door_tex.xpm", &x_size, &y_size);
 	game.door.height = y_size;
 	game.door.width = x_size;
@@ -875,6 +909,7 @@ int main()
 	game.door.image.addr = mlx_get_data_addr(game.door.image.img, \
 				&game.door.image.bpp, &game.door.image.line_length, \
 				&game.door.image.endian);
+
 
 	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_mouse_hide();
@@ -884,6 +919,7 @@ int main()
 	
 	mlx_hook(game.window, 2, 0, &key_press_handler, &game);
 	mlx_hook(game.window, 3, 0, &key_release_handler, &game);
+	mlx_hook(game.window, 17, 0, &close_win, &game);
 
 	mlx_mouse_hook(game.window, &mouse_hook, &game);
 

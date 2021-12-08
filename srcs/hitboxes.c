@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 19:19:20 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 18:36:07 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/08 14:07:17 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,15 @@ static int	point_intersects_wall(t_vector point, int map[mapHeight][mapWidth])
 	t_vector	rel_point;
 
 	current_tile = get_pos_current_tile(point);
-	if (map[current_tile.y][current_tile.x] != 0)
+	if (is_door(current_tile))
 	{
-		if (is_door(current_tile) && get_door(current_tile)->closed == 0.0)
+		if (get_door(current_tile)->closed == 0.0)
 			return (0);
-		return (1);
+		else
+			return (1);
 	}
+	else if (map[current_tile.y][current_tile.x] != 0)
+		return (1);
 	return (0);
 }
 

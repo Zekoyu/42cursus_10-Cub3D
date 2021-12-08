@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 19:44:02 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/08 16:43:58 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,7 @@ typedef struct s_game
 {
 	t_img_data		main_img;
 	t_img_data		minimap_img;
+	t_img_data		pause_screen;
 	t_player		player;
 	int				**map;
 	int				map_width;
@@ -159,6 +160,7 @@ typedef struct s_game
 	t_texture		test1;
 	t_texture		test2;
 	t_texture		door;
+	int				paused;
 }	t_game;
 
 // Vectors
@@ -173,7 +175,7 @@ int			key_release_handler(int keycode, t_game *game);
 
 // Mouse handling
 int			mouse_hook(int keycode, t_game *game);
-int			get_mouse_velocity(void *window);
+int			get_mouse_velocity(t_game *game);
 
 // MLX Utils
 void		mlx_put_pixel_img(t_img_data *img, int x, int y, int color);
@@ -232,6 +234,10 @@ int		get_current_frame(void);
 void	add_door(int x, int y);
 t_door	*get_door(t_point tile);
 int		is_door(t_point tile);
-void	open_close_doors_if_needed(void);
+void	open_close_doors_if_needed(t_vector player_pos);
+void	reset_doors_opening(void);
+
+// Map checking
+int	is_enclosed_algo(int *map, t_point msize, t_point *stack, t_point curr);
 
 #endif

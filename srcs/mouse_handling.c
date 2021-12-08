@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 23:53:25 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/07 17:37:27 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/08 14:46:43 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,10 @@ int	mouse_hook(int keycode, t_game *game)
 */
 static int	get_x_mouse_offset(void *window)
 {
-	int	initial_pos;
-	int	current_x;
-	int	current_y;
-	int	offset;
+	int		initial_pos;
+	int		current_x;
+	int		current_y;
+	int		offset;
 
 	initial_pos = screenWidth / 2;
 	mlx_mouse_get_pos(window, &current_x, &current_y);
@@ -52,14 +52,20 @@ static int	get_x_mouse_offset(void *window)
 	Velocity is done by comparing last frame position with current frame position
 	If the movement is too high (> 150 || < -150) do not smooth it
 */
-int	get_mouse_velocity(void *window)
+int	get_mouse_velocity(t_game *game)
 {
 	static int	prev_pos = 0;
 	static int	smooth_mouse_velo;
 	int			current_pos;
 	int			velo;
 
-	current_pos = get_x_mouse_offset(window);
+	if (game->paused)
+	{
+		smooth_mouse_velo = 0;
+		prev_pos = 0;
+		return (0);
+	}
+	current_pos = get_x_mouse_offset(game->window);
 	velo = current_pos - prev_pos;
 	prev_pos = current_pos;
 	if ((velo < 0 && velo > -150) || (velo > 0 && velo < 150))

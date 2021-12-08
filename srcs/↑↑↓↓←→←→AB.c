@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ↑↑↓↓←→←→AB.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 22:50:11 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 22:53:21 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/08 16:45:37 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,6 @@ int	check_uuddlrlrab(int keycode)
 	}
 	code[9] = keycode;
 	if (is_uuddlrlrab_complete(code))
-	{
 		return (1);
-	}
 	return (0);
 }
