@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 22:50:11 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 17:37:35 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 17:53:43 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,15 +51,15 @@ void	draw_special_texture(t_draw_coords draw_coords, t_ray_hit ray_hit, \
 	if (frame <= 30)
 	{
 		if (ray_hit.tile_hit.x % 2 == !(ray_hit.tile_hit.y % 2))
-			draw_texture(draw_coords, game->test1, ray_hit, game);
+			draw_texture(draw_coords, game->bg1, ray_hit, game);
 		else
-			draw_texture(draw_coords, game->test2, ray_hit, game);
+			draw_texture(draw_coords, game->bg2, ray_hit, game);
 	}
 	else
 	{
 		if (ray_hit.tile_hit.x % 2 == (ray_hit.tile_hit.y % 2))
-			draw_texture(draw_coords, game->test1, ray_hit, game);
+			draw_texture(draw_coords, game->bg1, ray_hit, game);
 		else
-			draw_texture(draw_coords, game->test2, ray_hit, game);
+			draw_texture(draw_coords, game->bg2, ray_hit, game);
 	}
 }

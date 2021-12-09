@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 17:42:15 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 18:04:06 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,16 @@
 # define MOVEMENT_FACTOR 0.075
 # define COS_ROTATION 0.99691733373
 # define SIN_ROTATION 0.07845909568
+/*
+	Cos of rotation angle and sin of rotation angle (directly in radians)
+	Current values for 
+
+	2 degrees	= 0,0349066000	rad (cos = 0.99939082649, sin = 0.03489951165)
+	3 degrees	= 0,0523599000	rad (cos = 0.99862953358, sin = 0.05233597865)
+	3.5 degrees	= 0.0610865238	rad (cos = 0.99813479842, sin = 0.06104853951)
+	4.5 degrees = 0.0785398163	rad (cos = 0.99691733373, sin = 0.07845909568)
+	5 degrees	= 0,0872665000	rad (cos = 0.99619469483, sin = 0.08715578000)
+*/
 # define BOUNDING_BOX_SIDE_SIZE 0.4
 # define SPRINT_SPEED_MULTIPLIER 2.5
 //Ratio compared to the size of the screen (here it takes 1/10 of the screen)
@@ -165,8 +175,8 @@ typedef struct s_game
 	t_texture		s_tex;
 	t_texture		e_tex;
 	t_texture		w_tex;
-	t_texture		test1;
-	t_texture		test2;
+	t_texture		bg1;
+	t_texture		bg2;
 	t_texture		door;
 	int				paused;
 	int				should_exit;
@@ -261,5 +271,20 @@ void		reset_doors_opening(void);
 // Map checking
 int			is_enclosed_algo(int *map, t_point msize, t_point *stack, \
 							t_point curr);
+
+// Initialization
+int			init_mlx_images_and_textures(t_game *game, char **textures_files);
+int			init_textures_addresses(t_game *game);
+int			init_minimap(t_game *game);
+int			init_main_mlx_window_img(t_game *game, int width, int height, \
+							char *win_name);
+int			load_textures(t_game *game, char **textures_files, \
+							int mahmoud, int zaraa);
+
+// Freeation
+void		free_main_win(t_game *game);
+void		free_main_img(t_game *game);
+void		free_minimap(t_game *game);
+void		free_textures(t_game *game);
 
 #endif
