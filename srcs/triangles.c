@@ -6,34 +6,36 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:28:57 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/03 16:00:48 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 17:34:13 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-static int sign (t_point p1, t_point p2, t_point p3)
+static int	sign(t_point p1, t_point p2, t_point p3)
 {
-    return ((p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y));
+	return ((p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y));
 }
 
 int	is_point_in_triangle(t_point pt, t_point v1, t_point v2, t_point v3)
 {
-    int d1, d2, d3;
-    int has_neg, has_pos;
+	int	d1;
+	int	d2;
+	int	d3;
+	int	has_neg;
+	int	has_pos;
 
-    d1 = sign(pt, v1, v2);
-    d2 = sign(pt, v2, v3);
-    d3 = sign(pt, v3, v1);
-
+	d1 = sign(pt, v1, v2);
+	d2 = sign(pt, v2, v3);
+	d3 = sign(pt, v3, v1);
 	has_neg = 0;
 	has_pos = 0;
-    if ((d1 < 0) || (d2 < 0) || (d3 < 0))
+	if ((d1 < 0) || (d2 < 0) || (d3 < 0))
 		has_neg = 1;
-    if ((d1 > 0) || (d2 > 0) || (d3 > 0))
+	if ((d1 > 0) || (d2 > 0) || (d3 > 0))
 		has_pos = 1;
 	if (has_neg && has_pos)
-		return(0);
+		return (0);
 	return (1);
 }
 

@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/08 16:43:58 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 17:42:15 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,28 +16,24 @@
 # include <math.h>
 # include <stdlib.h>
 # include "mlx_keycodes.h"
-#include "../minilibx/mlx.h"
+# include "../minilibx/mlx.h"
 
-#  define mapWidth 39
-#  define mapHeight 24
-#  define screenWidth 1600
-#  define screenHeight 900
-#  define MOVEMENT_FACTOR 0.075
-#  define COS_ROTATION 0.99691733373
-#  define SIN_ROTATION 0.07845909568
-#  define BOUNDING_BOX_SIDE_SIZE 0.4
-#  define SPRINT_SPEED_MULTIPLIER 2.5
+# define MOVEMENT_FACTOR 0.075
+# define COS_ROTATION 0.99691733373
+# define SIN_ROTATION 0.07845909568
+# define BOUNDING_BOX_SIDE_SIZE 0.4
+# define SPRINT_SPEED_MULTIPLIER 2.5
 //Ratio compared to the size of the screen (here it takes 1/10 of the screen)
 //map will remain squared (take min(width/ratio), (height/ratio))
 //Should not be set to les than 1
-#  define MINIMAP_SIZE_RATIO 3.75
+# define MINIMAP_SIZE_RATIO 3.75
 //Size of one tile represented on the minimap (here it's a square of 5x5)
-#  define SIZE_OF_TILE_ON_MINIMAP 10
+# define SIZE_OF_TILE_ON_MINIMAP 10
 //player sprite size on minimap
-#  define PLAYER_SIZE_ON_MINIMAP 12
-#  define MINIMAP_BACKGROUND_COLOR 0xFF000000 //0x88FFFFFF
-#  define MINIMAP_FOREGROUND_COLOR 0x00ede482 //0x00FF00BB
-#  define MINIMAP_PLAYER_COLOR 0x00FF8855
+# define PLAYER_SIZE_ON_MINIMAP 12
+# define MINIMAP_BACKGROUND_COLOR 0xFF000000 //0x88FFFFFF
+# define MINIMAP_FOREGROUND_COLOR 0x00ede482 //0x00FF00BB
+# define MINIMAP_PLAYER_COLOR 0x00FF8855
 
 /*
 	Structs
@@ -61,14 +57,13 @@ typedef struct s_point
 	int	y;
 }	t_point;
 
-typedef struct	s_door
+typedef struct s_door
 {
 	float			closed;
 	int				should_open;
 	t_point			coords;
 	struct s_door	*next;
 }	t_door;
-
 
 typedef struct s_img_data
 {
@@ -138,13 +133,26 @@ typedef struct s_draw_coords
 	int	draw_end;
 }	t_draw_coords;
 
+typedef struct s_map
+{
+	int	**map;
+	int	total_width;
+	int	total_height;
+	int	width;
+	int	height;
+}	t_map;
+
+typedef struct s_minimap
+{
+	t_img_data	img;
+	int			size_px;
+}	t_minimap;
 typedef struct s_game
 {
 	t_img_data		main_img;
-	t_img_data		minimap_img;
+	t_minimap		minimap;
 	t_img_data		pause_screen;
 	t_player		player;
-	int				**map;
 	int				map_width;
 	int				map_height;
 	void			*mlx;
@@ -161,13 +169,15 @@ typedef struct s_game
 	t_texture		test2;
 	t_texture		door;
 	int				paused;
+	int				should_exit;
+	t_map			map;
 }	t_game;
 
 // Vectors
 double		degrees_to_radians(double angle);
 double		get_x_direction(double angle);
 double		get_y_direction(double angle);
-
+void		normalize_vector(t_vector *vector);
 
 // Key handling
 int			key_press_handler(int keycode, t_game *game);
@@ -179,23 +189,27 @@ int			get_mouse_velocity(t_game *game);
 
 // MLX Utils
 void		mlx_put_pixel_img(t_img_data *img, int x, int y, int color);
+int			mlx_get_pixel_img(t_img_data *img, int x, int y);
+int			is_point_in_img_bounds(t_point px, int width, int height);
 
 // FT Utils
 int			min(int a, int b);
 double		power_two(double num);
 
 // Minimap
-void		add_minimap(t_img_data *minimap_img, int map[mapHeight][mapWidth], t_player player);
+void		add_minimap(t_minimap *minimap, t_map map, t_player player);
 
 // Triangles (for minimap)
 t_point		get_triangle_front_point(t_vector normalized_player_dir);
 t_point		get_triangle_side_point(t_vector normalized_player_dir);
-int			is_point_in_triangle(t_point pt, t_point v1, t_point v2, t_point v3);
+int			is_point_in_triangle(t_point pt, t_point v1, \
+								t_point v2, t_point v3);
 
 // ↑↑↓↓←→←→AB
 int			is_uuddlrlrab_complete(int code[10]);
 int			check_uuddlrlrab(int keycode);
-
+void		draw_special_texture(t_draw_coords draw_coords, t_ray_hit ray_hit, \
+								t_game *game);
 
 // Point utils
 int			get_max_x(t_point t1, t_point t2, t_point t3);
@@ -204,8 +218,10 @@ int			get_min_x(t_point t1, t_point t2, t_point t3);
 int			get_min_y(t_point t1, t_point t2, t_point t3);
 
 // Movements
-void		add_velocity(t_player *player, double x_direction, double y_direction);
-void		remove_velocity(t_player *player, double x_direction, double y_direction);
+void		add_velocity(t_player *player, double x_direction, \
+											double y_direction);
+void		remove_velocity(t_player *player, double x_direction, \
+												double y_direction);
 void		reset_velocity(t_player *player);
 void		rotate_player(t_player *player, int direction);
 void		add_player_movements(t_player *player);
@@ -215,29 +231,35 @@ void		teleport_player(t_player *player);
 
 // Rendering
 void		drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game);
+void		draw_texture(t_draw_coords draw_coords, t_texture tx, \
+						t_ray_hit hit, t_game *game);
 
 // DDA Algorithm
 t_vector	get_dda_distances(t_vector direction);
-t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector player_pos);
-
+t_ray_hit	get_ray_hit(t_vector direction, t_map map, \
+						t_vector player_pos);
+t_ray_hit	do_the_dda_algorithm(t_ray ray, t_map map, \
+						t_vector player_pos);
 // Coordinates manipulation
 t_point		get_pos_current_tile(t_vector player_pos);
+t_point		get_pos_current_tile_floor(t_vector player_pos);
 
 // Hitbox
-int			has_intersection_with_wall(t_vector player_pos, int map[mapHeight][mapWidth]);
+int			has_intersection_with_wall(t_vector player_pos, t_map map);
 
 // Frame counter
-void	add_curent_frame(void);
-int		get_current_frame(void);
+void		add_curent_frame(void);
+int			get_current_frame(void);
 
 // Doors
-void	add_door(int x, int y);
-t_door	*get_door(t_point tile);
-int		is_door(t_point tile);
-void	open_close_doors_if_needed(t_vector player_pos);
-void	reset_doors_opening(void);
+void		add_door(int x, int y);
+t_door		*get_door(t_point tile);
+int			is_door(t_point tile);
+void		open_close_doors_if_needed(t_vector player_pos);
+void		reset_doors_opening(void);
 
 // Map checking
-int	is_enclosed_algo(int *map, t_point msize, t_point *stack, t_point curr);
+int			is_enclosed_algo(int *map, t_point msize, t_point *stack, \
+							t_point curr);
 
 #endif

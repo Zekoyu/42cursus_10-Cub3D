@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/22 11:57:54 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 19:21:02 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 16:15:17 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,4 +30,13 @@ double	get_y_direction(double angle)
 double	get_vector_length(t_vector vector)
 {
 	return (sqrt(power_two(vector.x) + power_two(vector.y)));
+}
+
+void	normalize_vector(t_vector *player_dir)
+{
+	double	player_dir_len;
+
+	player_dir_len = sqrt(power_two(player_dir->x) + power_two(player_dir->y));
+	player_dir->x /= player_dir_len;
+	player_dir->y /= player_dir_len;
 }

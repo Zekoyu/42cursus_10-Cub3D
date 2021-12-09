@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 19:12:34 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/08 16:47:25 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 15:19:33 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ static t_point	get_direction_steps(t_vector direction)
 
 	The player relative position is the position within the tile (between 0-1)
 */
-static t_vector	init_base_distances(t_vector direction, t_vector dda_distances, t_vector player_pos)
+static t_vector	init_base_distances(t_vector direction, t_vector dda_distances, \
+									t_vector player_pos)
 {
 	t_vector	distances;
 	t_vector	player_relative_pos;
@@ -55,78 +56,14 @@ static t_vector	init_base_distances(t_vector direction, t_vector dda_distances, 
 	return (distances);
 }
 
-static int	check_door_collision(t_ray ray, t_ray_hit ray_hit)
-{
-	
-}
-
-/*
-	Here we can afford an infinite loop
-	because of the subject specifying that map should be enclosed with walls.
-	So the ray should always hit if we get to this step
-
-	If we find a door, check the position the ray hit on the door
-	compared to the current position of the door, if it should pass
-	continue the dda loop
-*/
-static t_ray_hit	do_the_dda_algorithm(t_ray ray, int map[mapHeight][mapWidth], t_vector player_pos)
-{
-	t_ray_hit	ray_hit;
-
-	while (1)
-	{
-		if (ray.total_distances.x < ray.total_distances.y)
-		{
-			ray.total_distances.x += ray.dda_distances.x;
-			ray.current_tile.x += ray.direction_steps.x;
-			ray_hit.side_hit = 'x';
-		}
-		else
-		{
-			ray.total_distances.y += ray.dda_distances.y;
-			ray.current_tile.y += ray.direction_steps.y;
-			ray_hit.side_hit = 'y';
-		}
-		if (map[ray.current_tile.y][ray.current_tile.x] != 0 || is_door(ray.current_tile))
-		{
-			if (is_door(ray.current_tile))
-			{
-				t_door *door;
-				door = get_door(ray.current_tile);
-				if (ray_hit.side_hit == 'x')
-					ray_hit.distance = ray.total_distances.x - ray.dda_distances.x;
-				else
-					ray_hit.distance = ray.total_distances.y - ray.dda_distances.y;
-				ray_hit.tile_hit = ray.current_tile;
-	
-				if (ray_hit.side_hit == 'x')
-					ray_hit.wall_pos_hit = player_pos.y + ray_hit.distance * ray.direction.y;
-				else
-					ray_hit.wall_pos_hit = player_pos.x + ray_hit.distance * ray.direction.x;
-				ray_hit.wall_pos_hit = ray_hit.wall_pos_hit - floor(ray_hit.wall_pos_hit);
-				if (ray_hit.wall_pos_hit <= door->closed)
-					return (ray_hit) ;
-			}
-			else
-				break ;
-		}
-	}
-	if (ray_hit.side_hit == 'x')
-		ray_hit.distance = ray.total_distances.x - ray.dda_distances.x;
-	else
-		ray_hit.distance = ray.total_distances.y - ray.dda_distances.y;
-	ray_hit.tile_hit = ray.current_tile;
-	return (ray_hit);
-}
-
 /*
 	Wall pos hit = position between 0-1 where our ray hit.
 	This value is used for texture projection
 */
-t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector player_pos)
+t_ray_hit	get_ray_hit(t_vector direction, t_map map, t_vector player_pos)
 {
 	t_ray		ray;
-	t_ray_hit	ray_hit;
+	t_ray_hit	hit;
 
 	ray.direction = direction;
 	ray.current_tile = get_pos_current_tile(player_pos);
@@ -134,12 +71,12 @@ t_ray_hit	get_ray_hit(t_vector direction, int map[mapHeight][mapWidth], t_vector
 	ray.direction_steps = get_direction_steps(ray.direction);
 	ray.total_distances = init_base_distances(ray.direction, \
 											ray.dda_distances, player_pos);
-	ray_hit = do_the_dda_algorithm(ray, map, player_pos);
-	ray_hit.direction = direction;
-	if (ray_hit.side_hit == 'x')
-		ray_hit.wall_pos_hit = player_pos.y + ray_hit.distance * ray_hit.direction.y;
+	hit = do_the_dda_algorithm(ray, map, player_pos);
+	hit.direction = direction;
+	if (hit.side_hit == 'x')
+		hit.wall_pos_hit = player_pos.y + hit.distance * hit.direction.y;
 	else
-		ray_hit.wall_pos_hit = player_pos.x + ray_hit.distance * ray_hit.direction.x;
-	ray_hit.wall_pos_hit = ray_hit.wall_pos_hit - floor(ray_hit.wall_pos_hit);
-	return (ray_hit);
+		hit.wall_pos_hit = player_pos.x + hit.distance * hit.direction.x;
+	hit.wall_pos_hit = hit.wall_pos_hit - floor(hit.wall_pos_hit);
+	return (hit);
 }

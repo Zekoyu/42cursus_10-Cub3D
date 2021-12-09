@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/08 12:25:02 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/08 16:43:43 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 11:57:50 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,11 @@ static t_point	*init_stack(int map_width, int map_height)
 	{
 		i = 0;
 		while (i < map_width * map_height * 4)
-			stack[i++] = 0;
+		{
+			stack[i].x = 0;
+			stack[i].y = 0;
+			i++;
+		}
 	}
 	return (stack);
 }

@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   dda_1.c                                            :+:      :+:    :+:   */
+/*   dda_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 19:11:33 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 19:11:38 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 13:28:16 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-static double get_dda_x_distance(t_vector direction)
+static double	get_dda_x_distance(t_vector direction)
 {
 	if (direction.x == 0)
 		return (1E30);
@@ -20,7 +20,7 @@ static double get_dda_x_distance(t_vector direction)
 		return (fabs(1.0 / direction.x));
 }
 
-static double get_dda_y_distance(t_vector direction)
+static double	get_dda_y_distance(t_vector direction)
 {
 	if (direction.y == 0)
 		return (1E30);

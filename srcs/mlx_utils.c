@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   mlx_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:07:39 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/05 00:57:44 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 16:53:31 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,14 @@ void	mlx_put_pixel_img(t_img_data *img, int x, int y, int color)
 
 	dst = img->addr + (y * img->line_length + x * (img->bpp / 8));
 	*((unsigned int *)dst) = color;
+}
+
+int	mlx_get_pixel_img(t_img_data *img, int x, int y)
+{
+	char	*dst;
+
+	dst = img->addr + (y * img->line_length + x * (img->bpp / 8));
+	return (*((int *)dst));
 }
 
 /*

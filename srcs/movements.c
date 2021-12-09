@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 15:18:52 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/04 19:18:08 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 16:43:31 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ void	add_velocity(t_player *player, double x_direction, double y_direction)
 	player->velocity.y += y_direction * MOVEMENT_FACTOR;
 }
 
-void	remove_velocity(t_player *player, double x_direction, double y_direction)
+void	remove_velocity(t_player *player, \
+						double x_direction, double y_direction)
 {
 	player->velocity.x -= x_direction * MOVEMENT_FACTOR;
 	player->velocity.y -= y_direction * MOVEMENT_FACTOR;
@@ -46,10 +47,12 @@ void	rotate_player(t_player *player, int direction)
 	player_y_dir = player->direction.y;
 	cam_x_dir = player->cam_plane.x;
 	cam_y_dir = player->cam_plane.y;
-	player->direction.x = (player_x_dir * COS_ROTATION - player_y_dir * (SIN_ROTATION * direction));
-	player->direction.y = (player_x_dir * (SIN_ROTATION * direction) + player_y_dir * COS_ROTATION);
-	player->cam_plane.x = (cam_x_dir * COS_ROTATION - cam_y_dir * (SIN_ROTATION * direction));
-	player->cam_plane.y = (cam_x_dir * (SIN_ROTATION * direction) + cam_y_dir * COS_ROTATION);
+	player->direction.x = (player_x_dir * COS_ROTATION \
+	- player_y_dir * (SIN_ROTATION * direction));
+	player->direction.y = (player_x_dir * (SIN_ROTATION * direction) \
+	+ player_y_dir * COS_ROTATION);
+	player->cam_plane.x = -player->direction.y;
+	player->cam_plane.y = player->direction.x;
 	if (player->directions.forward == 1)
 		add_velocity(player, player->direction.x, player->direction.y);
 	if (player->directions.backward == 1)

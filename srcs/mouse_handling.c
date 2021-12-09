@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 23:53:25 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/08 14:46:43 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 17:41:29 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,29 +20,34 @@ int	mouse_hook(int keycode, t_game *game)
 }
 
 /*
-	If mouse is almost outside the app in X (in the bounds of 10-90% of the screen height)
+	If mouse is almost outside the app in X
+		(outside of the bounds of 10-90% of the screen height)
 	Put it back to the center
 
-	If the mouse is "almost" outside the app in Y (in the bounds of 25-75% of the screen height)
-	we reset it as well so that it does not go over applications or something like that
+	If the mouse is "almost" outside the app in Y
+		(outside of the bounds of 25-75% of the screen height)
+
+	we reset it as well so that it does not go over applications
+		or something like that
 	(only reset it on Y axis)
 
 	The offset is between -Width/2 (= left), 0 = middle, +Width/2 = right
 */
-static int	get_x_mouse_offset(void *window)
+static int	get_x_mouse_offset(void *window, int win_height, int win_width)
 {
 	int		initial_pos;
 	int		current_x;
 	int		current_y;
 	int		offset;
 
-	initial_pos = screenWidth / 2;
+	initial_pos = win_width / 2;
 	mlx_mouse_get_pos(window, &current_x, &current_y);
 	offset = current_x - initial_pos;
-	if (current_y < screenHeight / 4 || current_y > screenHeight / 4)
-		mlx_mouse_move(window, offset + (screenWidth / 2), screenHeight / 2);
-	if (offset >= (screenWidth - screenWidth / 10) / 2 || offset <= -(screenWidth - screenWidth / 10) / 2)
-		mlx_mouse_move(window, screenWidth / 2, screenHeight / 2);
+	if (current_y < win_height / 4 || current_y > win_height / 4)
+		mlx_mouse_move(window, offset + (win_width / 2), win_height / 2);
+	if (offset >= (win_width - win_width / 10) / 2 \
+	|| offset <= -(win_width - win_width / 10) / 2)
+		mlx_mouse_move(window, win_width / 2, win_height / 2);
 	return (offset);
 }
 
@@ -65,7 +70,7 @@ int	get_mouse_velocity(t_game *game)
 		prev_pos = 0;
 		return (0);
 	}
-	current_pos = get_x_mouse_offset(game->window);
+	current_pos = get_x_mouse_offset(game->window, game->height, game->width);
 	velo = current_pos - prev_pos;
 	prev_pos = current_pos;
 	if ((velo < 0 && velo > -150) || (velo > 0 && velo < 150))
@@ -77,4 +82,3 @@ int	get_mouse_velocity(t_game *game)
 		smooth_mouse_velo += 3;
 	return (smooth_mouse_velo);
 }
-

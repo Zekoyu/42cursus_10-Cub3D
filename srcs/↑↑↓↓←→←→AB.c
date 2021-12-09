@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 22:50:11 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/08 16:45:37 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 17:37:35 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,4 +40,26 @@ int	check_uuddlrlrab(int keycode)
 	if (is_uuddlrlrab_complete(code))
 		return (1);
 	return (0);
+}
+
+void	draw_special_texture(t_draw_coords draw_coords, t_ray_hit ray_hit, \
+								t_game *game)
+{
+	int	frame;
+
+	frame = get_current_frame() % 61;
+	if (frame <= 30)
+	{
+		if (ray_hit.tile_hit.x % 2 == !(ray_hit.tile_hit.y % 2))
+			draw_texture(draw_coords, game->test1, ray_hit, game);
+		else
+			draw_texture(draw_coords, game->test2, ray_hit, game);
+	}
+	else
+	{
+		if (ray_hit.tile_hit.x % 2 == (ray_hit.tile_hit.y % 2))
+			draw_texture(draw_coords, game->test1, ray_hit, game);
+		else
+			draw_texture(draw_coords, game->test2, ray_hit, game);
+	}
 }
