@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 23:53:25 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 17:41:29 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 19:11:01 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,14 @@
 
 int	mouse_hook(int keycode, t_game *game)
 {
+	printf("test\n");
 	if (check_uuddlrlrab(keycode))
-		teleport_player(&game->player);
+	{
+		write(1, "tewtwetwt111\n", 14);
+		printf("test: %d\n", game->dqwdqwdqwd);
+		write(1, "tewtwetwtewt\n", 14);
+		game->dqwdqwdqwd = 1;
+	}
 	return (69420);
 }
 

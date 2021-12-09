@@ -6,13 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 18:07:04 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 19:16:16 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
-
-void	do_render(t_game *game);
 
 void *animation[51];
 int animation_index = 0;
@@ -49,6 +47,7 @@ int worldMap[mapHeight][mapWidth]=
 	{1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
+
 t_game		game;
 
 
@@ -106,84 +105,9 @@ inline double	ft_lerp(double min, double max, double val)
 	0.995 = cos(0.1)
 	0.0998 = sin(0.1)
 */
-int teleport_test = 0;
-void	teleport_player(t_player *player)
-{
-	teleport_test = 1;
-}
 
 
-void	do_render(t_game *game)
-{
-	t_vector	ray_dir;
-	t_vector 	direction;
-	double		dda_x_distance;
-	double		dda_y_distance;
-	double		camera_pos_on_plane;
-	
-	direction.x = game->player.direction.x;
-	direction.y = game->player.direction.y;
-	static double current_angle = 0.007;
-	static double multiplier = 1.07;
-	if (teleport_test != 0)
-	{
-		t_vector	player_dir;
-		t_vector	cam_dir;
-		double		current_cos;
-		double		current_sin;
 
-		current_cos = cos(current_angle);
-		current_sin = sin(current_angle);
-
-		player_dir.x = game->player.direction.x;
-		player_dir.y = game->player.direction.y;
-		cam_dir.x = game->player.cam_plane.x;
-		cam_dir.y = game->player.cam_plane.y;
-		game->player.direction.x = (player_dir.x * current_cos - player_dir.y * current_sin );
-		game->player.direction.y = (player_dir.x * current_sin + player_dir.y * current_cos);
-		game->player.cam_plane.x = (cam_dir.x * current_cos - cam_dir.y * current_sin);
-		game->player.cam_plane.y = (cam_dir.x * current_sin + cam_dir.y * current_cos);
-
-		reset_velocity(&game->player);
-		current_angle *= multiplier;
-		if (teleport_test == 1)
-		{
-			if (current_angle > M_PI * 2)
-			{
-				teleport_test = -1;
-				multiplier = 0.93;
-			}
-		}
-		else if (teleport_test == -1)
-		{
-			game->player.pos.x = 27.5;
-			game->player.pos.y = 10.5;
-			if (current_angle <= 0.007)
-			{
-				multiplier = 1.07;
-				teleport_test = 0;
-				current_angle = 0.007;
-				{
-					reset_velocity(&game->player);
-					add_player_movements(&game->player);
-				}
-			}
-		}
-	}
-	t_ray_hit ray_hit;
-	for (int x = 0; x < screenWidth; x++)
-	{
-		camera_pos_on_plane = (2.0 * x) / (double) screenWidth - 1;
-		ray_dir.x = direction.x + (game->player.cam_plane.x * camera_pos_on_plane);
-		ray_dir.y = direction.y + (game->player.cam_plane.y * camera_pos_on_plane);
-		ray_hit = get_ray_hit(ray_dir, game->map, game->player.pos);
-		drawline_from_distance(x, ray_hit, game);
-	}
-	add_minimap(&game->minimap, game->map, game->player);
-	mlx_clear_window(game->mlx, game->window);
-	mlx_put_image_to_window(game->mlx, game->window, game->main_img.img, 0, 0);
-	mlx_put_image_to_window(game->mlx, game->window, game->minimap.img.img, 0, 0);
-}
 
 /*
 	If there is an intersection with a wall after going forward (or any side)
@@ -191,9 +115,10 @@ void	do_render(t_game *game)
 	But don't reset the rotation, because we canstill look around
 	if we hit a wall
 
-	Since we do this before the render, the player will not "glitch out" in and out the wall
+	Since we do this before the render, the player will not "glitch out" in
+		and out the wall
 */
-int loop_hook(t_game *game)
+int	loop_hook(t_game *game)
 {
 	int mouse_velo = get_mouse_velocity(game);
 	if (mouse_velo <= -2)
@@ -274,6 +199,7 @@ void	init_game(t_game *game, int width, int height)
 	game->player.speed = 1.0;
 	game->paused = 0;
 	game->should_exit = 0;
+	game->dqwdqwdqwd = 0;
 }
 
 #include <string.h>
@@ -326,6 +252,7 @@ int main()
 	
 	int	x_size;
 	int	y_size;
+
 
 	pthread_t init_img_thread;
 
@@ -405,6 +332,7 @@ int main()
 
 	mlx_mouse_hook(game.window, &mouse_hook, &game);
 
+	printf("TESTSET: %d\n", game.dqwdqwdqwd);
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
 	mlx_loop(game.mlx);
 

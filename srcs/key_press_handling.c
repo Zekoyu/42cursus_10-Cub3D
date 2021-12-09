@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 22:52:06 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 13:34:26 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 19:10:55 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ int	key_press_handler(int keycode, t_game *game)
 
 	player = &game->player;
 	if (check_uuddlrlrab(keycode))
-		teleport_player(&game->player);
+		game->dqwdqwdqwd = 1;
 	else if (keycode == KEY_P)
 	{
 		game->paused = !game->paused;

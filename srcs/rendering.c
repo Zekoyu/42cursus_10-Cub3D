@@ -5,149 +5,102 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/04 18:18:29 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 17:45:53 by mframbou         ###   ########.fr       */
+/*   Created: 2021/12/09 18:17:05 by mframbou          #+#    #+#             */
+/*   Updated: 2021/12/09 19:11:08 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
 /*
-	This draws only the textured part of the screen vertical stripe
-
-	Always use texture_width/height - 1
-		because index starts at 0 to (texture_width/height - 1)
-
-	If the texture is bigger than the screen,
-		just "simulate" going x (until start of screen)
-		and adding a step each time, so just "move" on
-		texture ((0 - drawstart) = steps till drawstart = 0) times
+	Just rotate the player of given angle
 */
-void	draw_texture(t_draw_coords draw_coords, t_texture tx, \
-						t_ray_hit hit, t_game *game)
+static void	spin_player(t_game *game, double *angle)
 {
-	int				texture_x;
-	double			texture_y;
-	double			y_tex_step;
-	unsigned int	px_color;
+	double			current_cos;
+	double			current_sin;
+	t_vector		player_dir;
 
-	texture_x = (int) round((1.0 - hit.wall_pos_hit) * (double)(tx.width - 1));
-	if (hit.side_hit == 'x' && hit.direction.x > 0)
-		texture_x = (tx.width - 1) - texture_x;
-	else if (hit.side_hit == 'y' && hit.direction.y < 0)
-		texture_x = (tx.width - 1) - texture_x;
-	texture_y = 0.0;
-	y_tex_step = (double)(tx.height - 1) / (double)draw_coords.line_height;
-	if (draw_coords.draw_start < 0)
-		texture_y += -(y_tex_step * draw_coords.draw_start);
-	if (draw_coords.draw_start < 0)
-		draw_coords.draw_start = 0;
-	if (draw_coords.draw_end >= game->height)
-		draw_coords.draw_end = game->height - 1;
-	while (draw_coords.draw_start < draw_coords.draw_end)
-	{
-		mlx_put_pixel_img(&game->main_img, draw_coords.screen_x, \
-						draw_coords.draw_start++, \
-						mlx_get_pixel_img(&tx.image, texture_x, texture_y));
-		texture_y += y_tex_step;
-	}
+	current_cos = cos(*angle);
+	current_sin = sin(*angle);
+	player_dir.x = game->player.direction.x;
+	player_dir.y = game->player.direction.y;
+	game->player.direction.x = (player_dir.x * current_cos - \
+								player_dir.y * current_sin);
+	game->player.direction.y = (player_dir.x * current_sin + \
+								player_dir.y * current_cos);
+	game->player.cam_plane.x = -game->player.direction.y;
+	game->player.cam_plane.y = game->player.direction.x;
 }
 
 /*
-	For doors, don't flip the textue if seeing from another side
-	(handle need to be the same side either way)
+	Spin until the player did a 720 (2*PI)
+	Then slowly stop spinning and teleport
+
+	Once we reach an almost stopped point,
+		put back the player movements
 */
-static void	draw_door_texture(t_draw_coords draw_coords, t_texture tx, \
-								t_ray_hit hit, t_game *game)
+static void	do_render_spin(t_game *game)
 {
-	int				texture_x;
-	double			texture_y;
-	double			y_tex_step;
-	unsigned int	current_px_color;
-	float			door_pos;
+	static double	total_angle = 0.007;
+	static double	multiplier = 1.07;
 
-	door_pos = 1.0 - get_door(hit.tile_hit)->closed;
-	texture_x = (int) round(((hit.wall_pos_hit) + door_pos) \
-				* (double)(tx.width - 1));
-	texture_y = 0.0;
-	y_tex_step = (double)(tx.height - 1) / (double)draw_coords.line_height;
-	if (draw_coords.draw_start < 0)
-		texture_y += -(y_tex_step * draw_coords.draw_start);
-	if (draw_coords.draw_start < 0)
-		draw_coords.draw_start = 0;
-	if (draw_coords.draw_end >= game->height)
-		draw_coords.draw_end = game->height - 1;
-	while (draw_coords.draw_start < draw_coords.draw_end)
+	spin_player(game, &total_angle);
+	reset_velocity(&game->player);
+	total_angle *= multiplier;
+	if (game->dqwdqwdqwd == 1 && total_angle > M_PI * 2)
 	{
-		mlx_put_pixel_img(&game->main_img, draw_coords.screen_x, \
-						draw_coords.draw_start++, \
-						mlx_get_pixel_img(&tx.image, texture_x, texture_y));
-		texture_y += y_tex_step;
+		game->dqwdqwdqwd = -1;
+		multiplier = 0.93;
+	}
+	else if (game->dqwdqwdqwd == -1)
+	{
+		game->player.pos.x = 27.5;
+		game->player.pos.y = 10.5;
+		if (total_angle <= 0.007)
+		{
+			multiplier = 1.07;
+			game->dqwdqwdqwd = 0;
+			total_angle = 0.007;
+			reset_velocity(&game->player);
+			add_player_movements(&game->player);
+		}
 	}
 }
 
-static char	get_side_hit_orientation(t_ray_hit ray_hit)
+static void	display_render(t_game *game)
 {
+	mlx_clear_window(game->mlx, game->window);
+	mlx_put_image_to_window(game->mlx, game->window, \
+							game->main_img.img, 0, 0);
+	mlx_put_image_to_window(game->mlx, game->window, \
+							game->minimap.img.img, 0, 0);
+}
+
+void	do_render(t_game *game)
+{
+	t_vector	ray_dir;
 	t_vector	direction;
+	t_ray_hit	ray_hit;
+	double		camera_pos_on_plane;
+	int			x;
 
-	direction = ray_hit.direction;
-	if (ray_hit.side_hit == 'x')
+	direction.x = game->player.direction.x;
+	direction.y = game->player.direction.y;
+	if (game->dqwdqwdqwd != 0)
+		do_render_spin(game);
+	x = 0;
+	while (x < game->width)
 	{
-		if (direction.x < 0)
-			return ('W');
-		else
-			return ('E');
+		camera_pos_on_plane = (2.0 * x) / (double) game->width - 1;
+		ray_dir.x = direction.x + \
+					(game->player.cam_plane.x * camera_pos_on_plane);
+		ray_dir.y = direction.y + \
+					(game->player.cam_plane.y * camera_pos_on_plane);
+		ray_hit = get_ray_hit(ray_dir, game->map, game->player.pos);
+		drawline_from_distance(x, ray_hit, game);
+		x++;
 	}
-	else
-	{
-		if (direction.y < 0)
-			return ('N');
-		else
-			return ('S');
-	}
-}
-
-static void	draw_texture_depending_on_orientation(t_draw_coords draw_coords, \
-											t_ray_hit ray_hit, t_game *game)
-{
-	char	orientation;
-
-	orientation = get_side_hit_orientation(ray_hit);
-	if (is_door(ray_hit.tile_hit))
-		draw_door_texture(draw_coords, game->door, ray_hit, game);
-	else if (orientation == 'N')
-		draw_texture(draw_coords, game->n_tex, ray_hit, game);
-	else if (orientation == 'S')
-		draw_texture(draw_coords, game->s_tex, ray_hit, game);
-	else if (orientation == 'E')
-		draw_texture(draw_coords, game->e_tex, ray_hit, game);
-	else if (orientation == 'W')
-		draw_texture(draw_coords, game->w_tex, ray_hit, game);
-}
-
-void	drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game)
-{
-	t_draw_coords	draw_coords;
-	char			orientation;
-	int				y;
-
-	draw_coords.line_height = round(((double)game->height / ray_hit.distance));
-	draw_coords.draw_start = -draw_coords.line_height / 2 + game->height / 2;
-	draw_coords.draw_end = draw_coords.line_height / 2 + game->height / 2;
-	draw_coords.screen_x = x;
-	y = 0;
-	while (y < draw_coords.draw_start)
-		mlx_put_pixel_img(&game->main_img, x, y++, game->ceil_color);
-	if (ray_hit.tile_hit.x > (double) game->map.width - 1.0 \
-	|| ray_hit.tile_hit.y > (double) game->map.height - 1.0)
-	{
-		draw_special_texture(draw_coords, ray_hit, game);
-	}
-	else
-	{
-		draw_texture_depending_on_orientation(draw_coords, ray_hit, game);
-	}
-	y = draw_coords.draw_end;
-	while (y < game->height)
-		mlx_put_pixel_img(&game->main_img, x, y++, game->floor_color);
+	add_minimap(&game->minimap, game->map, game->player);
+	display_render(game);
 }

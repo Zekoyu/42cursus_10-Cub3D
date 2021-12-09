@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 18:04:06 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/09 19:10:48 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,12 +159,11 @@ typedef struct s_minimap
 }	t_minimap;
 typedef struct s_game
 {
+	int				dqwdqwdqwd;
 	t_img_data		main_img;
 	t_minimap		minimap;
 	t_img_data		pause_screen;
 	t_player		player;
-	int				map_width;
-	int				map_height;
 	void			*mlx;
 	void			*window;
 	int				width;
@@ -236,13 +235,11 @@ void		reset_velocity(t_player *player);
 void		rotate_player(t_player *player, int direction);
 void		add_player_movements(t_player *player);
 
-// ↑↑↓↓←→←→AB
-void		teleport_player(t_player *player);
-
 // Rendering
 void		drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game);
 void		draw_texture(t_draw_coords draw_coords, t_texture tx, \
 						t_ray_hit hit, t_game *game);
+void		do_render(t_game *game);
 
 // DDA Algorithm
 t_vector	get_dda_distances(t_vector direction);
