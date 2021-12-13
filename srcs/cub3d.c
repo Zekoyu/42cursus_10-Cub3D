@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 19:16:16 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/13 18:15:31 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ int worldMap[mapHeight][mapWidth]=
 	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
 
-t_game		game;
+static t_game		game;
 
 
 /* 
@@ -142,6 +142,7 @@ int	loop_hook(t_game *game)
 	}
 	if (game->player.directions.rotate_r == 1)
 		rotate_player(&game->player, 1);
+	#ifdef DO_BONUSES
 	if (!game->paused)
 	{
 		game->player.pos.x += game->player.velocity.x * game->player.speed;
@@ -152,12 +153,20 @@ int	loop_hook(t_game *game)
 			game->player.pos.x -= game->player.velocity.x * game->player.speed;
 		}
 	}
+	#else
+	game->player.pos.x += game->player.velocity.x * game->player.speed;
+	game->player.pos.y += game->player.velocity.y * game->player.speed;
+	if (game->player.pos.x <= 0.0 || game->player.pos.x >= game->map.width - 1.0 \
+	|| game->player.pos.y <= 0.0 || game->player.pos.y >= game->map.height - 1.0)
+		game->should_exit = 1;
+	#endif
 	if (game->should_exit)
 	{
 		printf("Exit ? TODO");
 		exit(1);
 	}
 	do_render(game);
+	#ifdef DO_BONUSES
 	if (!game->paused)
 	{
 		if ((fabs(game->player.velocity.x) > 0.01 || fabs(game->player.velocity.y) > 0.01) && game->player.speed > 1.0 && animation[animation_index] != NULL)
@@ -175,6 +184,7 @@ int	loop_hook(t_game *game)
 	{
 		mlx_put_image_to_window(game->mlx, game->window, game->pause_screen.img, 0, 0);
 	}
+	#endif
 	return (1);
 }
 
@@ -199,7 +209,7 @@ void	init_game(t_game *game, int width, int height)
 	game->player.speed = 1.0;
 	game->paused = 0;
 	game->should_exit = 0;
-	game->dqwdqwdqwd = 0;
+	game->do_the_spin = 0;
 }
 
 #include <string.h>
@@ -232,6 +242,7 @@ int	close_win(t_game *game)
 }
 
 #include <pthread.h>
+
 int main()
 {
 	char *textures_files[] =
@@ -247,8 +258,10 @@ int main()
 	if (init_mlx_images_and_textures(&game, (char **)textures_files))
 		return (-1);
 
+	#ifdef DO_BONUSES
 	add_door(6, 5);
 	add_door(6, 6);
+	#endif
 	
 	int	x_size;
 	int	y_size;
@@ -311,6 +324,19 @@ int main()
 		}
 	}
 
+	#ifndef DO_BONUSES
+	for (int x = 0; x < mapWidth; x++)
+	{
+		game.map.map[0][x] = 1;
+		game.map.map[mapHeight - 1][x] = 1;
+	}
+	for (int y = 0; y < mapHeight; y++)
+	{
+		game.map.map[y][0] = 1;
+		game.map.map[y][mapWidth - 1] = 1;
+	}
+	#endif
+
 	game.door.image.img = mlx_xpm_file_to_image(game.mlx, "./door_tex.xpm", &x_size, &y_size);
 	game.door.height = y_size;
 	game.door.width = x_size;
@@ -326,15 +352,19 @@ int main()
 	do_render(&game);
 	mlx_do_key_autorepeatoff(game.mlx);
 	
+	
 	mlx_hook(game.window, 2, 0, &key_press_handler, &game);
 	mlx_hook(game.window, 3, 0, &key_release_handler, &game);
 	mlx_hook(game.window, 17, 0, &close_win, &game);
+	
+	//mlx_hook(game.window, 4, 1L<<2, &mouse_click_handler, &game);
+	mlx_mouse_hook(game.window, &mouse_click_handler, &game);
 
-	mlx_mouse_hook(game.window, &mouse_hook, &game);
-
-	printf("TESTSET: %d\n", game.dqwdqwdqwd);
+	printf("TESTSET: %d\n", game.do_the_spin);
+	printf("GAME ADDRESS IN MAIN: %p\n", &game.do_the_spin);
 	mlx_loop_hook(game.mlx, &loop_hook, &game);
 	mlx_loop(game.mlx);
 
+	
 	pthread_join(init_img_thread, NULL);
 }

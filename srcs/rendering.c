@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/09 18:17:05 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 19:11:08 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/13 18:09:29 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,19 +48,19 @@ static void	do_render_spin(t_game *game)
 	spin_player(game, &total_angle);
 	reset_velocity(&game->player);
 	total_angle *= multiplier;
-	if (game->dqwdqwdqwd == 1 && total_angle > M_PI * 2)
+	if (game->do_the_spin == 1 && total_angle > M_PI * 2)
 	{
-		game->dqwdqwdqwd = -1;
+		game->do_the_spin = -1;
 		multiplier = 0.93;
 	}
-	else if (game->dqwdqwdqwd == -1)
+	else if (game->do_the_spin == -1)
 	{
 		game->player.pos.x = 27.5;
 		game->player.pos.y = 10.5;
 		if (total_angle <= 0.007)
 		{
 			multiplier = 1.07;
-			game->dqwdqwdqwd = 0;
+			game->do_the_spin = 0;
 			total_angle = 0.007;
 			reset_velocity(&game->player);
 			add_player_movements(&game->player);
@@ -77,6 +77,8 @@ static void	display_render(t_game *game)
 							game->minimap.img.img, 0, 0);
 }
 
+#ifdef DO_BONUSES
+
 void	do_render(t_game *game)
 {
 	t_vector	ray_dir;
@@ -87,7 +89,7 @@ void	do_render(t_game *game)
 
 	direction.x = game->player.direction.x;
 	direction.y = game->player.direction.y;
-	if (game->dqwdqwdqwd != 0)
+	if (game->do_the_spin != 0)
 		do_render_spin(game);
 	x = 0;
 	while (x < game->width)
@@ -104,3 +106,43 @@ void	do_render(t_game *game)
 	add_minimap(&game->minimap, game->map, game->player);
 	display_render(game);
 }
+#else
+
+void	do_render(t_game *game)
+{
+	t_vector	ray_dir;
+	t_vector	direction;
+	t_ray_hit	ray_hit;
+	double		camera_pos_on_plane;
+	int			x;
+
+	direction.x = game->player.direction.x;
+	direction.y = game->player.direction.y;
+	x = 0;
+	if (game->map.map[get_pos_current_tile(game->player.pos).y][get_pos_current_tile(game->player.pos).x] != 0)
+	{
+		for (int x = 0; x < game->width; x++)
+		{
+			for (int y = 0; y < game->height; y++)
+			{
+				mlx_put_pixel_img(&game->main_img, x, y, 0);
+			}
+		}
+	}
+	else
+	{
+		while (x < game->width)
+		{
+			camera_pos_on_plane = (2.0 * x) / (double) game->width - 1;
+			ray_dir.x = direction.x + \
+						(game->player.cam_plane.x * camera_pos_on_plane);
+			ray_dir.y = direction.y + \
+						(game->player.cam_plane.y * camera_pos_on_plane);
+			ray_hit = get_ray_hit(ray_dir, game->map, game->player.pos);
+			drawline_from_distance(x, ray_hit, game);
+			x++;
+		}
+	}
+	display_render(game);
+}
+#endif

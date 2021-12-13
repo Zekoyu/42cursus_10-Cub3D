@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/09 13:23:52 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 15:32:55 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/13 18:07:15 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ static int	has_collision(t_ray ray, t_ray_hit hit, t_vector player_pos)
 	compared to the current position of the door, if it should pass
 	continue the dda loop
 */
+#ifdef DO_BONUSES
+
 t_ray_hit	do_the_dda_algorithm(t_ray ray, t_map map, t_vector player_pos)
 {
 	t_ray_hit	ray_hit;
@@ -88,3 +90,23 @@ t_ray_hit	do_the_dda_algorithm(t_ray ray, t_map map, t_vector player_pos)
 	ray_hit.tile_hit = ray.current_tile;
 	return (ray_hit);
 }
+#else
+
+t_ray_hit	do_the_dda_algorithm(t_ray ray, t_map map, t_vector player_pos)
+{
+	t_ray_hit	ray_hit;
+
+	while (1)
+	{
+		set_distance_to_smallest_dda(&ray, &ray_hit);
+		if (map.map[ray.current_tile.y][ray.current_tile.x] != 0)
+			break ;
+	}
+	if (ray_hit.side_hit == 'x')
+		ray_hit.distance = ray.total_distances.x - ray.dda_distances.x;
+	else
+		ray_hit.distance = ray.total_distances.y - ray.dda_distances.y;
+	ray_hit.tile_hit = ray.current_tile;
+	return (ray_hit);
+}
+#endif

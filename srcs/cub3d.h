@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 19:10:48 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/13 10:00:21 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ typedef struct s_minimap
 }	t_minimap;
 typedef struct s_game
 {
-	int				dqwdqwdqwd;
+	int				do_the_spin;
 	t_img_data		main_img;
 	t_minimap		minimap;
 	t_img_data		pause_screen;
@@ -193,7 +193,7 @@ int			key_press_handler(int keycode, t_game *game);
 int			key_release_handler(int keycode, t_game *game);
 
 // Mouse handling
-int			mouse_hook(int keycode, t_game *game);
+int			mouse_click_handler(int keycode, int x, int y, t_game *game);
 int			get_mouse_velocity(t_game *game);
 
 // MLX Utils
@@ -204,6 +204,7 @@ int			is_point_in_img_bounds(t_point px, int width, int height);
 // FT Utils
 int			min(int a, int b);
 double		power_two(double num);
+int			is_almost_integer(double number, double precision);
 
 // Minimap
 void		add_minimap(t_minimap *minimap, t_map map, t_player player);
@@ -266,8 +267,10 @@ void		open_close_doors_if_needed(t_vector player_pos);
 void		reset_doors_opening(void);
 
 // Map checking
-int			is_enclosed_algo(int *map, t_point msize, t_point *stack, \
-							t_point curr);
+int			is_enclosed(int **original_map, int width, int height, \
+							t_point player);
+int	is_player_outside_map(int **map, int width, int height, \
+							t_vector player_pos);
 
 // Initialization
 int			init_mlx_images_and_textures(t_game *game, char **textures_files);

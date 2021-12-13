@@ -6,11 +6,14 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/08 12:25:02 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 11:57:50 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/13 16:49:29 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
+
+int			is_enclosed_algo(int *map, t_point msize, t_point *stack, \
+							t_point curr);
 
 /*
 	Clones the map and puts all walls to 1 and empty / doors to 0
@@ -60,6 +63,31 @@ static t_point	*init_stack(int map_width, int map_height)
 		}
 	}
 	return (stack);
+}
+
+int	is_player_outside_map(int **map, int width, int height, t_vector player_pos)
+{
+	t_point	player;
+	t_point	p1;
+	t_point	p2;
+	t_point	p3;
+	t_point	p4;
+
+	player = get_pos_current_tile_floor(player_pos);
+	printf("player pos : %d %d\n", player.x, player.y);
+	p1.x = player.x + 1;
+	p1.y = player.y;
+	p2.x = player.x - 1;
+	p2.y = player.y;
+	p3.x = player.x;
+	p3.y = player.y + 1;
+	p4.x = player.x;
+	p4.y = player.y - 1;
+	printf("%d %d %d %d\n", is_enclosed(map, width, height, p1), is_enclosed(map, width, height, p2), is_enclosed(map, width, height, p3), is_enclosed(map, width, height, p4));
+	return (!is_enclosed(map, width, height, p1) \
+			|| !is_enclosed(map, width, height, p2) \
+			|| !is_enclosed(map, width, height, p3) \
+			|| !is_enclosed(map, width, height, p4));
 }
 
 /*

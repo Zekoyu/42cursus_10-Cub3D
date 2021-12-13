@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_utils.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42nice.fr>      +#+  +:+       +#+        */
+/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:12:26 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/02 23:29:53 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/13 10:00:13 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,4 +22,19 @@ int	min(int a, int b)
 	if (a < b)
 		return (a);
 	return (b);
+}
+
+/*
+	For instance, number: 5.05, precision 0.1 > true, precision 0.01 > false
+*/
+int	is_almost_integer(double number, double precision)
+{
+	double	floored_num;
+	double	floor_limit;
+	double	ceil_limit;
+
+	floored_num = floor(number);
+	floor_limit = floored_num - precision;
+	ceil_limit = floored_num + precision;
+	return (number >= floor_limit && number <= ceil_limit);
 }

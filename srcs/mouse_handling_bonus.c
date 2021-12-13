@@ -1,27 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mouse_handling.c                                   :+:      :+:    :+:   */
+/*   mouse_handling_bonus.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 23:53:25 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 19:11:01 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/13 09:19:31 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	mouse_hook(int keycode, t_game *game)
+int	mouse_click_handler(int keycode, int x, int y, t_game *game)
 {
-	printf("test\n");
 	if (check_uuddlrlrab(keycode))
-	{
-		write(1, "tewtwetwt111\n", 14);
-		printf("test: %d\n", game->dqwdqwdqwd);
-		write(1, "tewtwetwtewt\n", 14);
-		game->dqwdqwdqwd = 1;
-	}
+		game->do_the_spin = 1;
 	return (69420);
 }
 
