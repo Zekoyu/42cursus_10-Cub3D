@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/13 10:00:21 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/14 15:55:58 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include <stdlib.h>
 # include "mlx_keycodes.h"
 # include "../minilibx/mlx.h"
+# include "../libft/libft.h"
+# include <fcntl.h>
 
 # define MOVEMENT_FACTOR 0.075
 # define COS_ROTATION 0.99691733373
@@ -269,8 +271,6 @@ void		reset_doors_opening(void);
 // Map checking
 int			is_enclosed(int **original_map, int width, int height, \
 							t_point player);
-int	is_player_outside_map(int **map, int width, int height, \
-							t_vector player_pos);
 
 // Initialization
 int			init_mlx_images_and_textures(t_game *game, char **textures_files);

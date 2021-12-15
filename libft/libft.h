@@ -15,8 +15,10 @@
 # define LIBFT_H
 
 # include <string.h>
+# include "./gnl/get_next_line.h"
+# include <stdlib.h>
+# include <unistd.h>
 
-// Part 1 (Libc functions)
 void	*ft_memset(void *s, int c, size_t n);
 void	ft_bzero(void *s, size_t n);
 void	*ft_memcpy(void *dest, const void *src, size_t n);
@@ -41,8 +43,6 @@ int		ft_strcmp(const char *s1, const char *s2);
 int		ft_tolower(int c);
 int		ft_toupper(int c);
 void	*ft_calloc(size_t nmemb, size_t size);
-
-// Part 2 (Aditionnal functions)
 void	ft_striteri(char *s, void (*f)(unsigned int, char *));
 char	*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 char	*ft_substr(char const *s, unsigned int start, size_t len);
@@ -54,8 +54,6 @@ void	ft_putchar_fd(char c, int fd);
 void	ft_putstr_fd(char const *s, int fd);
 void	ft_putendl_fd(char const *s, int fd);
 void	ft_putnbr_fd(int n, int fd);
-
-// Bonus 
 typedef struct s_list
 {
 	void			*content;
@@ -70,5 +68,17 @@ void	ft_lstdelone(t_list *lst, void (*del)(void *));
 void	ft_lstclear(t_list **lst, void (*del)(void *));
 void	ft_lstiter(t_list *lst, void (*f)(void *));
 t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
+
+// GNL
+char	*get_next_line(int fd);
+
+// Printf
+int		ft_printf(const char *str, ...);
+
+// Others
+void	free_ft_split(char **ft_split_return);
+int		print_error(char *error);
+int		print_error_plus_arg(char *arg);
+int		is_str_number(char *number_str);
 
 #endif
