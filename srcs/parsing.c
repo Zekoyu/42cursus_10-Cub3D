@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 13:31:04 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/15 10:57:34 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/16 17:24:23 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ static int	is_xpm(char *filename)
 			return (1);
 		}
 	}
-	return (print_error_plus_arg("Texture is not an xpm file.\n"));
+	print_error_plus_arg("Texture is not an xpm file.\n");
+	return (0);
 }
 
 /*
@@ -72,11 +73,11 @@ static int	check_texture_line(char *line, t_game *game)
 	if (fd == -1)
 	{
 		free_ft_split(args);
-		return (print_error_plus_arg("No permission to open texture \
-										file or non-existent file.\n"));
+		return (print_error_plus_arg("No permission to open texture " \
+									"file or non-existent file.\n"));
 	}
 	close(fd);
-	return (!is_xpm(args[0]));
+	return (!is_xpm(args[1]));
 }
 
 /*
@@ -89,18 +90,26 @@ int	parse_texture_line(char *line, t_game *game)
 	t_texture	*texture;
 	char		**args;
 
-	if (check_texture_line(line, game) == -1)
+	line = ft_strtrim(line, " \n");
+	if (check_texture_line(line, game))
+	{
+		free(line);
 		return (-1);
+	}
 	else
 	{
+		
 		args = ft_split(line, ' ');
 		texture = get_associated_texture(args[0], game);
-		texture->image.img = mlx_xpm_file_to_image(game->mlx, args[1], \
-							&texture->width, &texture->height);
+		texture->image.img = mlx_xpm_file_to_image(game->mlx, args[1], &texture->width, &texture->height);
 		free_ft_split(args);
 		if (!texture->image.img)
+		{
+			free(line);
 			return (print_error_plus_arg("Cannot convert XPM to image\n"));
+		}
 	}
+	free(line);
 	return (0);
 }
 
@@ -140,8 +149,7 @@ int	matches_rgb_format(char *rgb_str)
 	argc = 0;
 	while (rgb[argc])
 		argc++;
-	if (argc != 3 || !is_str_number(rgb[0]) \
-	|| !is_str_number(rgb[1]) || !is_str_number(rgb[2]))
+	if (argc != 3)
 	{
 		print_error_plus_arg("Wrong RGB format (expected R,G,B)\n");
 		return (0);
@@ -163,6 +171,7 @@ int	check_color_line(char *line)
 	args = ft_split(line, ' ');
 	if (!args)
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
+	argc = 0;
 	while (args[argc])
 		argc++;
 	if (argc != 2)
@@ -173,8 +182,8 @@ int	check_color_line(char *line)
 	if (ft_strcmp(args[0], "C") != 0 && ft_strcmp(args[0], "F") != 0)
 	{
 		free_ft_split(args);
-		return (print_error_plus_arg("Wrong floor/ceiling identifer \
-									(expected C or F\n"));
+		return (print_error_plus_arg("Wrong floor/ceiling identifer " \
+									"(expected C or F)\n"));
 	}
 	if (!matches_rgb_format(args[1]))
 	{
@@ -186,9 +195,6 @@ int	check_color_line(char *line)
 
 static unsigned int	rgb_to_hex(int r, int g, int b)
 {
-	unsigned int	color;
-
-	color = 0;
 	return (r << 16 | g << 8 | b);
 }
 
@@ -197,6 +203,7 @@ int	parse_color_line(char *line, t_game *game)
 	char	**args;
 	char	**rgb_args;
 
+	line = ft_strtrim(line, " \n");
 	if (check_color_line(line) == -1)
 		return (-1);
 	args = ft_split(line, ' ');
@@ -206,9 +213,9 @@ int	parse_color_line(char *line, t_game *game)
 	if (!rgb_args || !rgb_args[0])
 	{
 		free_ft_split(args);
+		free(line);
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
 	}
-	printf("test: %s\n", args[0]);
 	if (ft_strcmp(args[0], "C") == 0)
 		game->ceil_color = rgb_to_hex(ft_atoi_rgb(rgb_args[0]), \
 										ft_atoi_rgb(rgb_args[1]), \
@@ -217,6 +224,7 @@ int	parse_color_line(char *line, t_game *game)
 		game->floor_color = rgb_to_hex(ft_atoi_rgb(rgb_args[0]), \
 										ft_atoi_rgb(rgb_args[1]), \
 										ft_atoi_rgb(rgb_args[2]));
+	free(line);
 	free_ft_split(args);
 	free_ft_split(rgb_args);
 	return (0);
@@ -263,12 +271,13 @@ static int	is_cub(char *filename)
 		if (filename[len - 4] == '.' \
 			&& filename[len - 3] == 'c' \
 			&& filename[len - 2] == 'u' \
-			&& filename[len - 1] == 'n')
+			&& filename[len - 1] == 'b')
 		{
 			return (1);
 		}
 	}
-	return (print_error_plus_arg("The given file is not a .cub file.\n"));
+	print_error_plus_arg("The given file is not a .cub file.\n");
+	return (0);
 }
 
 /*
@@ -294,12 +303,12 @@ int	parse_cub_file_header(int fd, t_game *game)
 			free(line);
 			break ;
 		}
-		else if ((check_line_type(line) == 1 && !parse_color_line(line, game)) \
-		|| (check_line_type(line) == 2 && !parse_texture_line(line, game)))
+		else if ((check_line_type(line) == 1 && parse_color_line(line, game) == -1) \
+		|| (check_line_type(line) == 2 && parse_texture_line(line, game) == -1))
 		{
 			free(line);
-			return (print_error_plus_arg("There is an invalid \
-										line in the file"));
+			ft_printf("(line %d)\n\n", i);
+			return (-1);
 		}
 		free(line);
 		line = get_next_line(fd);
@@ -309,7 +318,27 @@ int	parse_cub_file_header(int fd, t_game *game)
 
 int	parse_cub_file_map(int fd, t_game *game)
 {
-	
+	return (0);
+}
+
+int	are_all_values_parsed(t_game *game)
+{
+	int	found_error;
+
+	found_error = 0;
+	if (game->ceil_color == 0xFF000000)
+		print_error_if_needed("Missing ceil color\n", &found_error);
+	if (game->floor_color == 0xFF000000)
+		print_error_if_needed("Missing ceil color\n", &found_error);
+	if (game->n_tex.image.img == NULL)
+		print_error_if_needed("Missing ceil color\n", &found_error);
+	if (game->s_tex.image.img == NULL)
+		print_error_if_needed("Missing ceil color\n", &found_error);
+	if (game->e_tex.image.img == NULL)
+		print_error_if_needed("Missing ceil color\n", &found_error);
+	if (game->w_tex.image.img == NULL)
+		print_error_if_needed("Missing ceil color\n", &found_error);
+	return (!found_error);
 }
 
 /*
@@ -328,32 +357,40 @@ int	parse_cub_file(char *filename, t_game *game)
 		return (-1);
 	fd = open(filename, O_RDONLY);
 	if (fd == -1)
-		return (print_error_plus_arg("Cannot open the .cub file"));
+		return (print_error_plus_arg("Cannot open the .cub file (non-existent or no permission)\n"));
 	map_start_line = parse_cub_file_header(fd, game);
 	close(fd);
+	if (!are_all_values_parsed(game))
+		return (-1);
 	if (map_start_line == -1)
 		return (-1);
 	fd = open(filename, O_RDONLY);
 	if (fd == -1)
-		return (print_error_plus_arg("Cannot re-open the .cub file"));
+		return (print_error_plus_arg("Cannot re-open the .cub file\n"));
 	while (map_start_line--)
 		free(get_next_line(fd));
-	if (!parse_cub_file_map(fd, game))
+	if (parse_cub_file_map(fd, game) == -1)
 		return (-1);
 	return (0);
 }
 
-int main()
+/*
+int main(int argc, char *argv[])
 {
-	t_game game;
+	t_game	game;
+	int		test = 0;
 
-	game.ceil_color = 0;
-	game.floor_color = 0;
+	game.ceil_color = 0xFF000000;
+	game.floor_color = 0xFF000000;
+	game.n_tex.image.img = NULL;
+	game.e_tex.image.img = NULL;
+	game.s_tex.image.img = NULL;
+	game.w_tex.image.img = NULL;
 	
-	printf("Default ceil color: %x\n", game.ceil_color);
-	int test = 0;
-	test = parse_color_line("C   255,-1,0", &game);
-	printf("Returned value: %d, new ceil color: %x\n", test, game.ceil_color);
+
+	game.mlx = mlx_init();
+	if (argc >= 2)
+		test = parse_cub_file(argv[1], &game);
+	printf("Returned value: %d\n", test);
 }
-
-
+*/

@@ -80,5 +80,6 @@ void	free_ft_split(char **ft_split_return);
 int		print_error(char *error);
 int		print_error_plus_arg(char *arg);
 int		is_str_number(char *number_str);
+void	print_error_if_needed(char *error, int *print_error_first_line);
 
 #endif
