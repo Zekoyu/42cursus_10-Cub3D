@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 13:31:04 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/16 17:24:23 by mframbou         ###   ########.fr       */
+/*   Updated: 2021/12/17 17:54:39 by mframbou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ int	parse_texture_line(char *line, t_game *game)
 	t_texture	*texture;
 	char		**args;
 
-	line = ft_strtrim(line, " \n");
+	remove_nl(line);
 	if (check_texture_line(line, game))
 	{
 		free(line);
@@ -203,7 +203,7 @@ int	parse_color_line(char *line, t_game *game)
 	char	**args;
 	char	**rgb_args;
 
-	line = ft_strtrim(line, " \n");
+	remove_nl(line);
 	if (check_color_line(line) == -1)
 		return (-1);
 	args = ft_split(line, ' ');
@@ -316,11 +316,6 @@ int	parse_cub_file_header(int fd, t_game *game)
 	return (i);
 }
 
-int	parse_cub_file_map(int fd, t_game *game)
-{
-	return (0);
-}
-
 int	are_all_values_parsed(t_game *game)
 {
 	int	found_error;
@@ -339,6 +334,70 @@ int	are_all_values_parsed(t_game *game)
 	if (game->w_tex.image.img == NULL)
 		print_error_if_needed("Missing ceil color\n", &found_error);
 	return (!found_error);
+}
+
+/*
+	Check if line only has the valid characters
+*/
+static int	is_line_valid(char *line)
+{
+	int	i;
+
+	i = 0;
+	while (line[i])
+	{
+		if (!(line[i] == '0' || line[i] == '1' || line[i] == 'N' \
+		|| line[i] == 'S' || line[i] == 'E' || line[i] == 'W'))
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+static void	remove_nl(char *line)
+{
+	if (line[ft_strlen(line) - 1] == '\n')
+		line[ft_strlen(line) - 1] = '\0';
+}
+
+/*
+	Realloc the line and realloc the map to add a line
+	So we can free the line in our calling function
+*/
+
+/*
+	We can do 2 remove_nl on the same line
+	because we know that GNL will return on the 1st '\n'encountered
+	so it shouldn't remove 2 '\n' on the line (which we don't want)
+	since there is only 0 or 1
+	(line Test\n\n => Test\n => Test is impossible)
+*/
+int	parse_cub_file_map(int fd, t_game *game)
+{
+	char	*line;
+	int		width;
+	int		height;
+	char	**map;
+
+	line = get_next_line(fd);
+	if (line)
+	{
+		remove_nl(line);
+		width = ft_strlen(line);
+	}
+	while (line)
+	{
+		remove_nl(line);
+
+		if (ft_strlen(line) != width)
+		{
+			
+		}
+
+		free(line);
+		line = get_next_line(fd);
+	}
+	return (0);
 }
 
 /*
@@ -370,7 +429,11 @@ int	parse_cub_file(char *filename, t_game *game)
 	while (map_start_line--)
 		free(get_next_line(fd));
 	if (parse_cub_file_map(fd, game) == -1)
+	{
+		close(fd);
 		return (-1);
+	}
+	close(fd);
 	return (0);
 }
 

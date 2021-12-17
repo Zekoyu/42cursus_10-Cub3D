@@ -81,5 +81,6 @@ int		print_error(char *error);
 int		print_error_plus_arg(char *arg);
 int		is_str_number(char *number_str);
 void	print_error_if_needed(char *error, int *print_error_first_line);
+void	*ft_realloc(void *mem, size_t mem_size, size_t new_bytes_num);
 
 #endif
