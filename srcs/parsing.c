@@ -6,11 +6,17 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 13:31:04 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/17 17:54:39 by mframbou         ###   ########.fr       */
+/*   Updated: 18-02-2022 12:39 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
+
+static void	remove_nl(char *line)
+{
+	if (line[ft_strlen(line) - 1] == '\n')
+		line[ft_strlen(line) - 1] = '\0';
+}
 
 static t_texture	*get_associated_texture(char *identifier, t_game *game)
 {
@@ -98,7 +104,6 @@ int	parse_texture_line(char *line, t_game *game)
 	}
 	else
 	{
-		
 		args = ft_split(line, ' ');
 		texture = get_associated_texture(args[0], game);
 		texture->image.img = mlx_xpm_file_to_image(game->mlx, args[1], &texture->width, &texture->height);
@@ -346,24 +351,77 @@ static int	is_line_valid(char *line)
 	i = 0;
 	while (line[i])
 	{
-		if (!(line[i] == '0' || line[i] == '1' || line[i] == 'N' \
-		|| line[i] == 'S' || line[i] == 'E' || line[i] == 'W'))
+		if (!(line[i] == '0' || line[i] == '1' || line[i] == ' ' \
+		|| line[i] == 'N' || line[i] == 'S' || line[i] == 'E' \
+		|| line[i] == 'W'))
 			return (0);
 		i++;
 	}
 	return (1);
 }
 
-static void	remove_nl(char *line)
+
+/*
+	Dont free map[i] since it's copied into the new one
+	Only free double array base
+*/
+char	**ft_addstr_to_str_array(char **map, char *new_line)
 {
-	if (line[ft_strlen(line) - 1] == '\n')
-		line[ft_strlen(line) - 1] = '\0';
+	int		i;
+	char	**new;
+
+	i = 0;
+	while (map[i])
+		i++;
+	new = malloc(sizeof(char *) * (i + 2));
+	if (!new)
+		return (NULL);
+	i = 0;
+	while (map[i])
+	{
+		new[i] = map[i];
+		i++;
+	}
+	new[i++] = new_line;
+	new[i] = NULL;
+	free(map);
+	return (new);
+}
+
+/*
+	Converts everything to 0 and 1 except player pos
+*/
+char	*convert_line_to_map_line(char *line)
+{
+	char	*res;
+	int		i;
+
+	res = malloc(sizeof(char) * (ft_strlen(line) + 1));
+	if (!res)
+		return (NULL);
+	i = 0;
+	while (line[i])
+	{
+		if (line[i] == ' ' || line[i] == '0')
+			res[i] = '0';
+		else if (line[i] == '1')
+			res[i] = '1';
+		else if (line[i] == 'N' || line[i] == 'S' || line[i] == 'E' \
+		|| line[i] == 'W')
+			res[i] = line[i];
+		else
+		{
+			free(res);
+			return (NULL);
+		}
+		i++;
+	}
+	return (res);
 }
 
 /*
 	Realloc the line and realloc the map to add a line
-	So we can free the line in our calling function
-*/
+	So we can free the line in our calling functio
 
 /*
 	We can do 2 remove_nl on the same line
@@ -391,7 +449,7 @@ int	parse_cub_file_map(int fd, t_game *game)
 
 		if (ft_strlen(line) != width)
 		{
-			
+			// return error
 		}
 
 		free(line);

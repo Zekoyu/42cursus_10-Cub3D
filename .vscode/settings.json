@@ -1,0 +1,16 @@
+{
+	"files.associations": {
+		"cub3d.h": "c",
+		"cmath": "cpp",
+		"complex": "cpp",
+		"mlx.h": "c",
+		"*.xpm": "c",
+		"math.h": "c",
+		"stdio.h": "c",
+		"mlx_keycodes.h": "c",
+		"stdlib.h": "c",
+		"libft.h": "c",
+		"get_next_line.h": "c",
+		"fcntl.h": "c"
+	}
+}
