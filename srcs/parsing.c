@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 13:31:04 by mframbou          #+#    #+#             */
-/*   Updated: 22-02-2022 16:08 by                                             */
+/*   Updated: 22-02-2022 17:37 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,6 +363,7 @@ int	parse_cub_file_header(int fd, t_game *game)
 {
 	char	*line;
 	int		i;
+	int		line_type;
 
 	line = get_next_line(fd);
 	i = 0;
@@ -370,20 +371,21 @@ int	parse_cub_file_header(int fd, t_game *game)
 	{
 		remove_nl(line);
 		i++;
-		if (check_line_type(line) == INVALID_LINE)
+		line_type = check_line_type(line);
+		if (line_type == INVALID_LINE)
 		{
 			ft_printf("(line %d)\n\n", i);
 			free(line);
 			return (-1);
 		}
-		else if ((check_line_type(line) == COLOR_LINE && parse_color_line(line, game) == -1) \
-		|| (check_line_type(line) == TEXTURE_LINE && parse_texture_line(line, game) == -1))
+		else if ((line_type == COLOR_LINE && parse_color_line(line, game) == -1) \
+		|| (line_type == TEXTURE_LINE && parse_texture_line(line, game) == -1))
 		{
 			// line already freed if error
 			ft_printf("(line %d)\n\n", i);
 			return (-1);
 		}
-		else if (check_line_type(line) == MAP_LINE)
+		else if (line_type == MAP_LINE)
 		{
 			free(line);
 			return (i);
@@ -414,65 +416,6 @@ int	are_all_values_parsed(t_game *game)
 	return (!found_error);
 }
 
-
-/*
-	Dont free map[i] since it's copied into the new one
-	Only free double array base
-*/
-char	**ft_addstr_to_str_array(char **map, char *new_line)
-{
-	int		i;
-	char	**new;
-
-	i = 0;
-	while (map[i])
-		i++;
-	new = malloc(sizeof(char *) * (i + 2));
-	if (!new)
-		return (NULL);
-	i = 0;
-	while (map[i])
-	{
-		new[i] = map[i];
-		i++;
-	}
-	new[i++] = new_line;
-	new[i] = NULL;
-	free(map);
-	return (new);
-}
-
-/*
-	Converts everything to 0 and 1 except player pos
-*/
-char	*convert_line_to_map_line(char *line)
-{
-	char	*res;
-	int		i;
-
-	res = malloc(sizeof(char) * (ft_strlen(line) + 1));
-	if (!res)
-		return (NULL);
-	i = 0;
-	while (line[i])
-	{
-		if (line[i] == ' ' || line[i] == '0')
-			res[i] = '0';
-		else if (line[i] == '1')
-			res[i] = '1';
-		else if (line[i] == 'N' || line[i] == 'S' || line[i] == 'E' \
-		|| line[i] == 'W')
-			res[i] = line[i];
-		else
-		{
-			free(res);
-			return (NULL);
-		}
-		i++;
-	}
-	return (res);
-}
-
 /*
 	Check map validity, set width and height
 	Return -1 on error
@@ -482,27 +425,30 @@ int	check_map(int fd, int *width, int *height)
 	char	*line;
 	int		i;
 	int		line_length;
+	int		found_nl;
 
 	*height = 0;
 	*width = 0;
+	found_nl = 0;
 	line = get_next_line(fd);
 	while (line)
 	{
 		remove_nl(line);
+		if (check_line_type(line) == INVALID_LINE)
+			return (-1);
+		else if (check_line_type(line) == EMPTY_LINE)
+			found_nl = 1;
+		else if (found_nl) // if new stuff after newline in map
+			return (print_error_plus_arg("Found stuff after map.\n"));
 		(*height)++;
 		line_length = ft_strlen(line);
-		printf("line = \"%s\"\n", line);
 		if (line_length > *width)
 			*width = line_length;
 		i = 0;
-		while (i < line_length)
+		if (!is_line_valid_in_map(line))
 		{
-			if (!is_valid_char_in_map(line[i]))
-			{
-				free(line);
-				return (print_error_plus_arg("Invalid character in map.\n"));
-			}
-			i++;
+			free(line);
+			return (print_error_plus_arg("Invalid character in map.\n"));
 		}
 		free(line);
 		line = get_next_line(fd);
@@ -510,14 +456,95 @@ int	check_map(int fd, int *width, int *height)
 	return (0);
 }
 
+/*
+	+5 for secret room
+*/
+int	**malloc_map(int width, int height)
+{
+	int		x;
+	int		y;
+	int	**map;
+
+	x = 0;
+	y = 0;
+	map = (int **) malloc(sizeof(int *) * height);
+	if (!map)
+		return (NULL);
+	while (y < height)
+	{
+		map[y] = (int *) malloc(sizeof(int) * (width + 5));
+		ft_bzero(map[y], sizeof(int) * (width + 5));
+		if (!map[y])
+		{
+			while (--y >= 0)
+				free(map[y]);
+			return (NULL);
+		}
+		y++;
+	}
+	return (map);
+}
+
+void	fill_map(int **map, int height, int width, int fd)
+{
+	char	*line;
+	int		x;
+	int		y;
+	int		ln_len;
+
+	line = get_next_line(fd);
+	while(line)
+	{	
+		remove_nl(line);
+		x = 0;
+		ln_len = ft_strlen(line);
+		while(x < ln_len)
+		{
+			if (line[x] == '1')
+				map[y][x] = 1;
+			else
+				map[y][x] = 0;
+			x++;
+		}
+		free(line);
+		line = get_next_line(fd);
+		y++;
+	}
+}
+
+void	fill_secret_room(int **map, int height, int width)
+{
+	int	x;
+	int	y;
+
+	x = width;
+	y = 0;
+	while (y < height) // left wall
+		map[y++][x] = 1;
+
+	x = width + 4;
+	y = 0;
+	while (y < height) // right wall
+		map[y++][x] = 1;
+
+	x = width;
+	y = 0;
+	while (x < width + 5) // top wall
+		map[y][x++] = 1;
+
+	x = width;
+	y = height - 1;
+	while (x < width + 5) // bottom wall
+		map[y][x++] = 1;
+}
+
 int	parse_cub_file_map(char *filename, int start_line, t_game *game)
 {
 	int		width;
 	int		height;
-	char	**map;
+	int		**map;
 	int		fd;
 
-	printf("Start line: %d\n", start_line);
 	fd = read_until_line(filename, start_line);
 	
 	
@@ -528,7 +555,21 @@ int	parse_cub_file_map(char *filename, int start_line, t_game *game)
 		close(fd);
 		return (-1);
 	}
-	printf("Map width: %d, height: %d\n", width, height);
+	close(fd);
+	if (fd == -1)
+		return (print_error_plus_arg("Couldn't re-reopen the .cub file.\n"));
+	map = malloc_map(width, height);
+	if (!map)
+		return (print_error_plus_arg("Couldn't malloc map.\n"));
+	flush_gnl_buffer();
+	fd = read_until_line(filename, start_line);
+	fill_map(map, height, width, fd);
+	fill_secret_room(map, height, width);
+	game->map.map = map;
+	game->map.height = height;
+	game->map.width = width;
+	game->map.total_height = height;
+	game->map.total_width = width + 5;
 	return (0);
 }
 
@@ -671,7 +712,7 @@ int	parse_cub_file(char *filename, t_game *game)
 	return (0);
 }
 
-
+/*
 #include <stdio.h>
 int main(int argc, char *argv[])
 {
@@ -690,9 +731,4 @@ int main(int argc, char *argv[])
 		test = parse_cub_file(argv[1], &game);
 	printf("Returned value: %d\n", test);
 	
-/*
-	int fd = read_until_line("srcs/pouet.test", 9);
-	printf("gnl read line: \"%s\"\n", get_next_line(fd));
-	close(fd);*/
-}
-
+}*/

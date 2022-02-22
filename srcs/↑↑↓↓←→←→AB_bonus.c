@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 22:50:11 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/14 13:11:21 by mframbou         ###   ########.fr       */
+/*   Updated: 22-02-2022 17:14 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,8 +107,8 @@ void	do_render_spin(t_game *game)
 	}
 	else if (game->do_the_spin == -1)
 	{
-		game->player.pos.x = 27.5;
-		game->player.pos.y = 10.5;
+		game->player.pos.x = (float) game->map.width + 2.5;
+		game->player.pos.y = 1.5;
 		if (total_angle <= 0.007)
 		{
 			multiplier = 1.07;

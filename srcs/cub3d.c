@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 28-01-2022 13:08 by      /\  `-'/      `-'  '/   (  `-'-..`-'-' */
+/*   Updated: 22-02-2022 17:34 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ int	close_win(t_game *game)
 
 #include <pthread.h>
 
-int main()
+int main(int argc, char **argv)
 {
 	char *textures_files[] =
 	{
@@ -306,7 +306,7 @@ int main()
 			}
 		}
 	}
-
+/*
 	game.map.total_width = mapWidth;
 	game.map.total_height = mapHeight;
 
@@ -335,7 +335,8 @@ int main()
 		game.map.map[y][mapWidth - 1] = 1;
 	}
 	#endif
-
+*/
+	#ifdef DO_BONUSES
 	game.door.image.img = mlx_xpm_file_to_image(game.mlx, "./door_tex.xpm", &x_size, &y_size);
 	game.door.height = y_size;
 	game.door.width = x_size;
@@ -345,24 +346,51 @@ int main()
 				&game.door.image.endian);
 
 
-	#ifdef DO_BONUSES
+	
 	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
 	mlx_mouse_hide();
 	mlx_mouse_hook(game.window, &mouse_click_handler, &game);
 	#endif
 	
+	if (argc < 2)
+	{
+		printf("not enough args\n");
+		return (1);
+	}
+
+	game.ceil_color = 0xFF000000;
+	game.floor_color = 0xFF000000;
+	game.n_tex.image.img = NULL;
+	game.e_tex.image.img = NULL;
+	game.s_tex.image.img = NULL;
+	game.w_tex.image.img = NULL;
+	if (parse_cub_file(argv[1], &game) == -1)
+	{
+		printf("Caught error in main, exiting.\n");
+		return (1);
+	}
+
+	printf("Map dimensions: width: %d, height: %d\n", game.map.width, game.map.height);
+
+	for (int y = 0; y < game.map.total_height; y++)
+	{
+		for (int x = 0; x < game.map.total_width; x++)
+		{
+			printf("%d", game.map.map[y][x]);
+		}
+		printf("\n");
+	}
+
+
 	do_render(&game);
 	
 	mlx_do_key_autorepeatoff(game.mlx);
-	
 	
 	mlx_hook(game.window, 2, 0, &key_press_handler, &game);
 	mlx_hook(game.window, 3, 0, &key_release_handler, &game);
 	mlx_hook(game.window, 17, 0, &close_win, &game);
 	
-	mlx_loop_hook(game.mlx, &loop_hook, &game);
-
-	
+	mlx_loop_hook(game.mlx, &loop_hook, &game);	
 	
 	mlx_loop(game.mlx);
 

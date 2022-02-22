@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 22-02-2022 13:45 by                                             */
+/*   Updated: 22-02-2022 17:20 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,5 +287,8 @@ void		free_main_win(t_game *game);
 void		free_main_img(t_game *game);
 void		free_minimap(t_game *game);
 void		free_textures(t_game *game);
+
+// Parsing
+int	parse_cub_file(char *filename, t_game *game);
 
 #endif
