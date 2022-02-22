@@ -11,6 +11,7 @@
 		"stdlib.h": "c",
 		"libft.h": "c",
 		"get_next_line.h": "c",
-		"fcntl.h": "c"
+		"fcntl.h": "c",
+		"ft_gnl.h": "c"
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/14 15:55:58 by mframbou         ###   ########.fr       */
+/*   Updated: 22-02-2022 13:45 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include "../minilibx/mlx.h"
 # include "../libft/libft.h"
 # include <fcntl.h>
+# include <unistd.h>
 
 # define MOVEMENT_FACTOR 0.075
 # define COS_ROTATION 0.99691733373

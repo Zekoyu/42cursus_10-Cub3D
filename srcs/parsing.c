@@ -6,11 +6,31 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 13:31:04 by mframbou          #+#    #+#             */
-/*   Updated: 18-02-2022 12:39 by                                             */
+/*   Updated: 22-02-2022 16:08 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
+
+#define INVALID_LINE -1
+#define COLOR_LINE 1
+#define TEXTURE_LINE 2
+#define EMPTY_LINE 3
+#define MAP_LINE 4
+
+static int	read_until_line(char *file, int line)
+{
+	int	fd;
+
+	fd = open(file, O_RDONLY);
+	if (fd != -1)
+	{
+		int i = 0;
+		while (--line > 0)
+			free(get_next_line(fd));
+	}
+	return (fd);
+}
 
 static void	remove_nl(char *line)
 {
@@ -51,6 +71,30 @@ static int	is_xpm(char *filename)
 	return (0);
 }
 
+
+static int	is_valid_char_in_map(char c)
+{
+	return (c == '0' || c == '1' || c == ' ' || \
+			c == 'N' || c =='S' || c == 'E' || c == 'W');
+}
+
+/*
+	Check if line only has the valid characters
+*/
+static int	is_line_valid_in_map(char *line)
+{
+	int	i;
+
+	i = 0;
+	while (line[i])
+	{
+		if (!is_valid_char_in_map(line[i]))
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 /*
 	Check that the texture format is valid and file is also valid
 	If not an xpm, will return 1 (= error)
@@ -64,7 +108,7 @@ static int	check_texture_line(char *line, t_game *game)
 	int			argc;
 	int			fd;
 
-	args = ft_split(line, ' ');
+	args = ft_split(line, " ");
 	if (!args)
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
 	argc = 0;
@@ -72,13 +116,13 @@ static int	check_texture_line(char *line, t_game *game)
 		argc++;
 	if (argc != 2 || !get_associated_texture(args[0], game))
 	{
-		free_ft_split(args);
+		ft_free_str_array(args);
 		return (print_error_plus_arg("Wrong texture line format.\n"));
 	}
 	fd = open(args[1], O_RDONLY);
 	if (fd == -1)
 	{
-		free_ft_split(args);
+		ft_free_str_array(args);
 		return (print_error_plus_arg("No permission to open texture " \
 									"file or non-existent file.\n"));
 	}
@@ -96,7 +140,6 @@ int	parse_texture_line(char *line, t_game *game)
 	t_texture	*texture;
 	char		**args;
 
-	remove_nl(line);
 	if (check_texture_line(line, game))
 	{
 		free(line);
@@ -104,17 +147,21 @@ int	parse_texture_line(char *line, t_game *game)
 	}
 	else
 	{
-		args = ft_split(line, ' ');
+		args = ft_split(line, " ");
 		texture = get_associated_texture(args[0], game);
+		if (texture->image.img)
+		{
+			free(line);
+			return (print_error_plus_arg("Found a texture more than once.\n"));
+		}
 		texture->image.img = mlx_xpm_file_to_image(game->mlx, args[1], &texture->width, &texture->height);
-		free_ft_split(args);
+		ft_free_str_array(args);
 		if (!texture->image.img)
 		{
 			free(line);
 			return (print_error_plus_arg("Cannot convert XPM to image\n"));
 		}
 	}
-	free(line);
 	return (0);
 }
 
@@ -132,7 +179,7 @@ int	ft_atoi_rgb(char *str)
 		if (i > 3)
 			return (-1);
 	}
-	if (num > 255)
+	if (str[i] || num > 255)
 		return (-1);
 	return (num);
 }
@@ -145,7 +192,7 @@ int	matches_rgb_format(char *rgb_str)
 	char	**rgb;
 	int		argc;
 
-	rgb = ft_split(rgb_str, ',');
+	rgb = ft_split(rgb_str, ",");
 	if (!rgb || !rgb[0])
 	{
 		print_error_plus_arg("Wrong rgb format (expected R,G,B)\n");
@@ -173,7 +220,7 @@ int	check_color_line(char *line)
 	char	**args;
 	int		argc;
 
-	args = ft_split(line, ' ');
+	args = ft_split(line, " ");
 	if (!args)
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
 	argc = 0;
@@ -181,18 +228,18 @@ int	check_color_line(char *line)
 		argc++;
 	if (argc != 2)
 	{
-		free_ft_split(args);
+		ft_free_str_array(args);
 		return (print_error_plus_arg("Wrong ceiling/floor color line format\n"));
 	}
 	if (ft_strcmp(args[0], "C") != 0 && ft_strcmp(args[0], "F") != 0)
 	{
-		free_ft_split(args);
+		ft_free_str_array(args);
 		return (print_error_plus_arg("Wrong floor/ceiling identifer " \
 									"(expected C or F)\n"));
 	}
 	if (!matches_rgb_format(args[1]))
 	{
-		free_ft_split(args);
+		ft_free_str_array(args);
 		return (-1);
 	}
 	return (0);
@@ -208,36 +255,50 @@ int	parse_color_line(char *line, t_game *game)
 	char	**args;
 	char	**rgb_args;
 
-	remove_nl(line);
 	if (check_color_line(line) == -1)
 		return (-1);
-	args = ft_split(line, ' ');
+	args = ft_split(line, " ");
 	if (!args || !args[0])
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
-	rgb_args = ft_split(args[1], ',');
+	rgb_args = ft_split(args[1], ",");
 	if (!rgb_args || !rgb_args[0])
 	{
-		free_ft_split(args);
+		ft_free_str_array(args);
 		free(line);
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
 	}
 	if (ft_strcmp(args[0], "C") == 0)
+	{
+		if (game->ceil_color != 0xFF000000)
+		{
+			ft_free_str_array(args);
+			free(line);
+			return (print_error_plus_arg("Ceiling color found more than once.\n"));
+		}
 		game->ceil_color = rgb_to_hex(ft_atoi_rgb(rgb_args[0]), \
 										ft_atoi_rgb(rgb_args[1]), \
 										ft_atoi_rgb(rgb_args[2]));
+	}
 	else if (ft_strcmp(args[0], "F") == 0)
+	{
+		if (game->floor_color != 0xFF000000)
+		{
+			ft_free_str_array(args);
+			free(line);
+			return (print_error_plus_arg("Floor color found more than once.\n"));
+		}
 		game->floor_color = rgb_to_hex(ft_atoi_rgb(rgb_args[0]), \
 										ft_atoi_rgb(rgb_args[1]), \
 										ft_atoi_rgb(rgb_args[2]));
-	free(line);
-	free_ft_split(args);
-	free_ft_split(rgb_args);
+	}
+	ft_free_str_array(args);
+	ft_free_str_array(rgb_args);
 	return (0);
 }
 
 /*
 	Lines types;
-	-1 = other
+	-1 = unknown
 	1 = floor / ceiling color
 	2 = wall texture
 	3 = newline (continue)
@@ -248,22 +309,27 @@ int	check_line_type(char *line)
 	char	**args;
 
 	len = ft_strlen(line);
-	if (len == 1 && line[0] == '\n')
-		return (3);
-	args = ft_split(line, ' ');
+	if (len == 0)
+		return (EMPTY_LINE);
+	args = ft_split(line, " ");
 	if (!args || !args[0])
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
 	if (ft_strlen(args[0]) == 1)
 	{
-		free_ft_split(args);
-		return (1);
+		ft_free_str_array(args);
+		return (COLOR_LINE);
 	}
 	else if (ft_strlen(args[0]) == 2)
 	{
-		free_ft_split(args);
-		return (2);
+		ft_free_str_array(args);
+		return (TEXTURE_LINE);
 	}
-	return (print_error_plus_arg("Incorrect line found"));
+	else if (is_line_valid_in_map(line))
+	{
+		ft_free_str_array(args);
+		return (MAP_LINE);
+	}
+	return (print_error_plus_arg("Incorrect line found.\n"));
 }
 
 static int	is_cub(char *filename)
@@ -302,18 +368,25 @@ int	parse_cub_file_header(int fd, t_game *game)
 	i = 0;
 	while (line)
 	{
+		remove_nl(line);
 		i++;
-		if (check_line_type(line) == -1)
+		if (check_line_type(line) == INVALID_LINE)
 		{
+			ft_printf("(line %d)\n\n", i);
 			free(line);
-			break ;
+			return (-1);
 		}
-		else if ((check_line_type(line) == 1 && parse_color_line(line, game) == -1) \
-		|| (check_line_type(line) == 2 && parse_texture_line(line, game) == -1))
+		else if ((check_line_type(line) == COLOR_LINE && parse_color_line(line, game) == -1) \
+		|| (check_line_type(line) == TEXTURE_LINE && parse_texture_line(line, game) == -1))
 		{
-			free(line);
+			// line already freed if error
 			ft_printf("(line %d)\n\n", i);
 			return (-1);
+		}
+		else if (check_line_type(line) == MAP_LINE)
+		{
+			free(line);
+			return (i);
 		}
 		free(line);
 		line = get_next_line(fd);
@@ -339,25 +412,6 @@ int	are_all_values_parsed(t_game *game)
 	if (game->w_tex.image.img == NULL)
 		print_error_if_needed("Missing ceil color\n", &found_error);
 	return (!found_error);
-}
-
-/*
-	Check if line only has the valid characters
-*/
-static int	is_line_valid(char *line)
-{
-	int	i;
-
-	i = 0;
-	while (line[i])
-	{
-		if (!(line[i] == '0' || line[i] == '1' || line[i] == ' ' \
-		|| line[i] == 'N' || line[i] == 'S' || line[i] == 'E' \
-		|| line[i] == 'W'))
-			return (0);
-		i++;
-	}
-	return (1);
 }
 
 
@@ -420,43 +474,166 @@ char	*convert_line_to_map_line(char *line)
 }
 
 /*
-	Realloc the line and realloc the map to add a line
-	So we can free the line in our calling functio
-
-/*
-	We can do 2 remove_nl on the same line
-	because we know that GNL will return on the 1st '\n'encountered
-	so it shouldn't remove 2 '\n' on the line (which we don't want)
-	since there is only 0 or 1
-	(line Test\n\n => Test\n => Test is impossible)
+	Check map validity, set width and height
+	Return -1 on error
 */
-int	parse_cub_file_map(int fd, t_game *game)
+int	check_map(int fd, int *width, int *height)
 {
 	char	*line;
-	int		width;
-	int		height;
-	char	**map;
+	int		i;
+	int		line_length;
 
+	*height = 0;
+	*width = 0;
 	line = get_next_line(fd);
-	if (line)
-	{
-		remove_nl(line);
-		width = ft_strlen(line);
-	}
 	while (line)
 	{
 		remove_nl(line);
-
-		if (ft_strlen(line) != width)
+		(*height)++;
+		line_length = ft_strlen(line);
+		printf("line = \"%s\"\n", line);
+		if (line_length > *width)
+			*width = line_length;
+		i = 0;
+		while (i < line_length)
 		{
-			// return error
+			if (!is_valid_char_in_map(line[i]))
+			{
+				free(line);
+				return (print_error_plus_arg("Invalid character in map.\n"));
+			}
+			i++;
 		}
-
 		free(line);
 		line = get_next_line(fd);
 	}
 	return (0);
 }
+
+int	parse_cub_file_map(char *filename, int start_line, t_game *game)
+{
+	int		width;
+	int		height;
+	char	**map;
+	int		fd;
+
+	printf("Start line: %d\n", start_line);
+	fd = read_until_line(filename, start_line);
+	
+	
+	if (fd == -1)
+		return (print_error_plus_arg("Couldn't reopen the .cub file.\n"));
+	if (check_map(fd, &width, &height) == -1)
+	{
+		close(fd);
+		return (-1);
+	}
+	printf("Map width: %d, height: %d\n", width, height);
+	return (0);
+}
+
+/*
+int    parse_cub_file_map(int fd, char *file, t_cube *data, int nb_of_line_before)
+{
+	char 	*line;
+    int      max_line_lenght;
+    char    **map;
+	int 	nb_of_lines; 
+
+
+ // ---------VERIFY THE MAP --------- (First pass)
+ 	nb_of_lines = 0;
+	line = get_next_line(fd);
+	if(!line)
+		return 0;
+	max_line_lenght = 0;
+	while(line)
+	{
+		remove_newline(line);
+		int i;
+		int line_lenght;
+
+		i = 0;
+		if (line[i] == 0) // line is empty
+			return 0;
+		nb_of_lines++;
+		
+		line_lenght = ft_strlen(line);
+
+		if (max_line_lenght < line_lenght)
+			max_line_lenght = line_lenght;
+		
+		while(i < line_lenght)
+			if(!is_valid_char(line[i++]))
+				return 0;
+		free(line);
+		line = get_next_line(fd);
+		
+		
+	}
+	if (nb_of_lines < 3) // has to be minimum 3 lines for a valid map
+		return 0;
+
+	close(fd);
+	fd  = open(file, O_RDONLY);
+
+	
+	
+ // ---------PARSE THE MAP --------- (second pass)
+ 	int k;
+	k = 0;
+	while(k++ < nb_of_line_before) // go to the begining of the map
+		free(get_next_line(fd));
+	int x;
+	int y;
+	x = 0;
+	y = 0;
+	map = (char **)malloc(sizeof(char *) * nb_of_lines);
+	while(x < nb_of_lines)
+	{
+		map[x] = (char *)malloc(sizeof(char) * (max_line_lenght));
+		memset(map[x],0,max_line_lenght);
+		x++;
+	}
+		
+	line = get_next_line(fd);
+	
+	while(line)
+	{	
+		remove_newline(line);
+		x = 0;
+		while(x < strlen(line))
+		{
+			if (line[x] == ' ')
+				map[y][x] = 0;
+			else
+				map[y][x] = line[x] - '0';
+			x++;
+		}
+		free(line);
+		line = get_next_line(fd);
+		y++;
+	}
+
+	
+	for (int j = 0; j < nb_of_lines; j++)
+	{
+		for (int i = 0; i < max_line_lenght; i++)
+		{
+			printf("%d", map[j][i]);
+		}
+		printf("\n");
+	}
+	return 1;
+}
+*/
+
+/*
+	Read file until the given line (until line 1 would read 0 lines)
+	return the fd / -1 on error
+
+	line parameter will be the next one read by get_next_line
+*/
 
 /*
 	Parse header, then if valid reopen file and go
@@ -464,6 +641,8 @@ int	parse_cub_file_map(int fd, t_game *game)
 
 	We do it simply by calling GNL x times
 	(while freeing it directly since we don't need the value)
+
+	flush buffer after first close since we close in the middle of file
 */
 int	parse_cub_file(char *filename, t_game *game)
 {
@@ -475,18 +654,15 @@ int	parse_cub_file(char *filename, t_game *game)
 	fd = open(filename, O_RDONLY);
 	if (fd == -1)
 		return (print_error_plus_arg("Cannot open the .cub file (non-existent or no permission)\n"));
-	map_start_line = parse_cub_file_header(fd, game);
+	map_start_line = parse_cub_file_header(fd, game); // since we already read the first line using gnl, we need to go back to it
+	if (map_start_line == -1 || !are_all_values_parsed(game))
+	{
+		close(fd);
+		return (-1);
+	}
 	close(fd);
-	if (!are_all_values_parsed(game))
-		return (-1);
-	if (map_start_line == -1)
-		return (-1);
-	fd = open(filename, O_RDONLY);
-	if (fd == -1)
-		return (print_error_plus_arg("Cannot re-open the .cub file\n"));
-	while (map_start_line--)
-		free(get_next_line(fd));
-	if (parse_cub_file_map(fd, game) == -1)
+	flush_gnl_buffer();
+	if (parse_cub_file_map(filename, map_start_line, game) == -1)
 	{
 		close(fd);
 		return (-1);
@@ -495,7 +671,8 @@ int	parse_cub_file(char *filename, t_game *game)
 	return (0);
 }
 
-/*
+
+#include <stdio.h>
 int main(int argc, char *argv[])
 {
 	t_game	game;
@@ -507,11 +684,15 @@ int main(int argc, char *argv[])
 	game.e_tex.image.img = NULL;
 	game.s_tex.image.img = NULL;
 	game.w_tex.image.img = NULL;
-	
 
 	game.mlx = mlx_init();
 	if (argc >= 2)
 		test = parse_cub_file(argv[1], &game);
 	printf("Returned value: %d\n", test);
+	
+/*
+	int fd = read_until_line("srcs/pouet.test", 9);
+	printf("gnl read line: \"%s\"\n", get_next_line(fd));
+	close(fd);*/
 }
-*/
+
