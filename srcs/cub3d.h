@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 22-02-2022 17:20 by                                             */
+/*   Updated: 23-02-2022 15:38 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,7 +274,7 @@ int			is_enclosed(int **original_map, int width, int height, \
 							t_point player);
 
 // Initialization
-int			init_mlx_images_and_textures(t_game *game, char **textures_files);
+int			init_mlx_images_and_textures(t_game *game);
 int			init_textures_addresses(t_game *game);
 int			init_minimap(t_game *game);
 int			init_main_mlx_window_img(t_game *game, int width, int height, \
@@ -289,6 +289,29 @@ void		free_minimap(t_game *game);
 void		free_textures(t_game *game);
 
 // Parsing
-int	parse_cub_file(char *filename, t_game *game);
+int			parse_cub_file(char *filename, t_game *game);
+int			set_player_pos_and_dir(t_player *player, int **map, int width, \
+																int height);
+int			get_face_player(char c);
+int			parse_texture_line(char *line, t_game *game);
+int			parse_color_line(char *line, t_game *game);
+int			parse_map(char *filename, int start_line, t_game *game);
+int			parse_header(int fd, t_game *game);
+
+// Parsing utils
+int			read_until_line(char *file, int line);
+void		remove_nl(char *line);
+int			is_valid_char_in_map(char c);
+int			is_line_valid_in_map(char *line);
+int			check_line_type(char *line);
+
+enum e_line_type
+{
+	INVALID_LINE = -1,
+	COLOR_LINE = 1,
+	TEXTURE_LINE,
+	EMPTY_LINE,
+	MAP_LINE
+};
 
 #endif

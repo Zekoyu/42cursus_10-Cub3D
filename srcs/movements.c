@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 15:18:52 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 16:43:31 by mframbou         ###   ########.fr       */
+/*   Updated: 23-02-2022 14:46 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,25 +34,22 @@ void	reset_velocity(t_player *player)
 /*
 	Automatically readjusts velocity
 	(if player is going forward before rotate, he will still after)
+
+	Don't make camera plane perpendicular to player but rotate is just as
+	any vector, since player direction is normalized but cam plane is not
+	if we change fov, it would cause it to reset to normalized (90 degrees)
 */
 void	rotate_player(t_player *player, int direction)
 {
-	double	player_x_dir;
-	double	player_y_dir;
-	double	cam_x_dir;
-	double	cam_y_dir;
-
 	reset_velocity(player);
-	player_x_dir = player->direction.x;
-	player_y_dir = player->direction.y;
-	cam_x_dir = player->cam_plane.x;
-	cam_y_dir = player->cam_plane.y;
-	player->direction.x = (player_x_dir * COS_ROTATION \
-	- player_y_dir * (SIN_ROTATION * direction));
-	player->direction.y = (player_x_dir * (SIN_ROTATION * direction) \
-	+ player_y_dir * COS_ROTATION);
-	player->cam_plane.x = -player->direction.y;
-	player->cam_plane.y = player->direction.x;
+	player->direction.x = player->direction.x * COS_ROTATION \
+							- player->direction.y * (SIN_ROTATION * direction);
+	player->direction.y = player->direction.x * (SIN_ROTATION * direction) \
+							+ player->direction.y * COS_ROTATION;
+	player->cam_plane.x = player->cam_plane.x * COS_ROTATION \
+							- player->cam_plane.y * (SIN_ROTATION * direction);
+	player->cam_plane.y = player->cam_plane.x * (SIN_ROTATION * direction) \
+							+ player->cam_plane.y * COS_ROTATION;
 	if (player->directions.forward == 1)
 		add_velocity(player, player->direction.x, player->direction.y);
 	if (player->directions.backward == 1)

@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 19:12:34 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 15:19:33 by mframbou         ###   ########.fr       */
+/*   Updated: 23-02-2022 14:37 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ static t_vector	init_base_distances(t_vector direction, t_vector dda_distances, 
 /*
 	Wall pos hit = position between 0-1 where our ray hit.
 	This value is used for texture projection
+
+	fmod = float modulo (same as wall_pos_hit - floor(wall_pos_hit))
 */
 t_ray_hit	get_ray_hit(t_vector direction, t_map map, t_vector player_pos)
 {
@@ -77,6 +79,6 @@ t_ray_hit	get_ray_hit(t_vector direction, t_map map, t_vector player_pos)
 		hit.wall_pos_hit = player_pos.y + hit.distance * hit.direction.y;
 	else
 		hit.wall_pos_hit = player_pos.x + hit.distance * hit.direction.x;
-	hit.wall_pos_hit = hit.wall_pos_hit - floor(hit.wall_pos_hit);
+	hit.wall_pos_hit = fmod(hit.wall_pos_hit, 1.0);
 	return (hit);
 }

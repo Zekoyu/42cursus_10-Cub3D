@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 22-02-2022 17:34 by                                             */
+/*   Updated: 23-02-2022 15:25 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,7 +204,7 @@ void	init_game(t_game *game, int width, int height)
 	game->player.direction.y = 0.0;
 
 	game->player.cam_plane.x = 0.0;
-	game->player.cam_plane.y = 0.78;
+	game->player.cam_plane.y = 1.0;
 
 	game->player.speed = 1.0;
 	game->paused = 0;
@@ -254,8 +254,6 @@ int main(int argc, char **argv)
 	};
 	init_game(&game, screenWidth, screenHeight);
 	if (init_main_mlx_window_img(&game, screenWidth, screenHeight, "Cub3D"))
-		return (-1);
-	if (init_mlx_images_and_textures(&game, (char **)textures_files))
 		return (-1);
 
 	#ifdef DO_BONUSES
@@ -369,8 +367,9 @@ int main(int argc, char **argv)
 		printf("Caught error in main, exiting.\n");
 		return (1);
 	}
-
-	printf("Map dimensions: width: %d, height: %d\n", game.map.width, game.map.height);
+	if (init_mlx_images_and_textures(&game))
+		return (-1);
+	printf("player dir = (%f, %f)\n", game.player.direction.x, game.player.direction.y);
 
 	for (int y = 0; y < game.map.total_height; y++)
 	{

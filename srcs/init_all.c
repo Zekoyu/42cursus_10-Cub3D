@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/09 17:48:40 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 18:07:07 by mframbou         ###   ########.fr       */
+/*   Updated: 23-02-2022 14:38 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,10 @@ int	load_textures(t_game *game, char **textures_files, int x_size, int y_size)
 
 /*
 	https://string-functions.com/hex-string.aspx
+
+	textures images are already parsed, only init addresses
 */
-int	init_mlx_images_and_textures(t_game *game, char **textures_files)
+int	init_mlx_images_and_textures(t_game *game)
 {
 	if (init_minimap(game))
 	{
@@ -53,8 +55,7 @@ int	init_mlx_images_and_textures(t_game *game, char **textures_files)
 		free_main_img(game);
 		return (-1);
 	}
-	if (load_textures(game, textures_files, 63686164, 63686164) \
-	|| init_textures_addresses(game))
+	if (init_textures_addresses(game))
 	{
 		free_main_win(game);
 		free_main_img(game);
