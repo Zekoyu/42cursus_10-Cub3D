@@ -6,7 +6,7 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 23-02-2022  by  `-'                        `-'                  */
-/*   Updated: 23-02-2022 15:25 by                                             */
+/*   Updated: 23-02-2022 17:13 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,9 @@ static int	check_color_line(char *line)
 	while (args[argc])
 		argc++;
 	if (argc != 2)
-	{
 		ft_free_str_array(args);
+	if (argc != 2)
 		return (print_error_plus_arg("Wrong ceiling/floor color line format\n"));
-	}
 	if (ft_strcmp(args[0], "C") != 0 && ft_strcmp(args[0], "F") != 0)
 	{
 		ft_free_str_array(args);
@@ -92,9 +91,36 @@ static int	check_color_line(char *line)
 	return (0);
 }
 
-static unsigned int	rgb_to_hex(int r, int g, int b)
+/*
+unsigned int	rgb_to_hex(int r, int g, int b)
 {
 	return (r << 16 | g << 8 | b);
+}
+*/
+int	set_game_color(t_game *game, char *identifier, char **rgb)
+{
+	if (ft_strcmp(identifier, "C") == 0)
+	{
+		if (game->ceil_color != 0xFF000000)
+		{
+			return (print_error_plus_arg("Ceiling color found more \
+										than once.\n"));
+		}
+		game->ceil_color = (ft_atoi_rgb(rgb[0]) << 16 \
+							| ft_atoi_rgb(rgb[1]) << 8 \
+							| ft_atoi_rgb(rgb[2]));
+	}
+	else if (ft_strcmp(identifier, "F") == 0)
+	{
+		if (game->floor_color != 0xFF000000)
+		{
+			return (print_error_plus_arg("Floor color found more than once.\n"));
+		}
+		game->floor_color = (ft_atoi_rgb(rgb[0]) << 16 \
+							| ft_atoi_rgb(rgb[1]) << 8 \
+							| ft_atoi_rgb(rgb[2]));
+	}
+	return (0);
 }
 
 int	parse_color_line(char *line, t_game *game)
@@ -114,29 +140,12 @@ int	parse_color_line(char *line, t_game *game)
 		free(line);
 		return (print_error_plus_arg("Encountered a ft_split error.\n"));
 	}
-	if (ft_strcmp(args[0], "C") == 0)
+	if (set_game_color(game, args[0], rgb_args) == -1)
 	{
-		if (game->ceil_color != 0xFF000000)
-		{
-			ft_free_str_array(args);
-			free(line);
-			return (print_error_plus_arg("Ceiling color found more than once.\n"));
-		}
-		game->ceil_color = rgb_to_hex(ft_atoi_rgb(rgb_args[0]), \
-										ft_atoi_rgb(rgb_args[1]), \
-										ft_atoi_rgb(rgb_args[2]));
-	}
-	else if (ft_strcmp(args[0], "F") == 0)
-	{
-		if (game->floor_color != 0xFF000000)
-		{
-			ft_free_str_array(args);
-			free(line);
-			return (print_error_plus_arg("Floor color found more than once.\n"));
-		}
-		game->floor_color = rgb_to_hex(ft_atoi_rgb(rgb_args[0]), \
-										ft_atoi_rgb(rgb_args[1]), \
-										ft_atoi_rgb(rgb_args[2]));
+		free(line);
+		ft_free_str_array(rgb_args);
+		ft_free_str_array(args);
+		return (-1);
 	}
 	ft_free_str_array(args);
 	ft_free_str_array(rgb_args);

@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:07:39 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 16:53:31 by mframbou         ###   ########.fr       */
+/*   Updated: 23-02-2022 17:08 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,4 +55,9 @@ void	mlx_put_line_to_img(t_img_data *img,
 		pixel_y += delta_y;
 		pixels_count--;
 	}
+}
+
+unsigned int	rgb_to_hex(int r, int g, int b)
+{
+	return (r << 16 | g << 8 | b);
 }

@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 23-02-2022 15:38 by                                             */
+/*   Updated: 23-02-2022 17:23 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,6 +297,7 @@ int			parse_texture_line(char *line, t_game *game);
 int			parse_color_line(char *line, t_game *game);
 int			parse_map(char *filename, int start_line, t_game *game);
 int			parse_header(int fd, t_game *game);
+int			check_map(int fd, int *width, int *height);
 
 // Parsing utils
 int			read_until_line(char *file, int line);
