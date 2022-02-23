@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 23-02-2022 17:23 by                                             */
+/*   Updated: 23-02-2022 17:53 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@
 # define MINIMAP_BACKGROUND_COLOR 0xFF000000 //0x88FFFFFF
 # define MINIMAP_FOREGROUND_COLOR 0x00ede482 //0x00FF00BB
 # define MINIMAP_PLAYER_COLOR 0x00FF8855
-
+# define SCREEN_WIDTH 1600
+# define SCREEN_HEIGHT 900
 /*
 	Structs
 */

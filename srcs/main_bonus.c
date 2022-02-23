@@ -1,99 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   cub3d.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/18 18:05:21 by mframbou          #+#    #+#             */
-/*   Updated: 23-02-2022 17:49 by                                             */
+/*                                  .-.                       .               */
+/*                                 / -'                      /                */
+/*                  .  .-. .-.   -/--).--..-.  .  .-. .-.   /-.  .-._.)  (    */
+/*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
+/*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
+/*   Created: 23-02-2022  by  `-'                        `-'                  */
+/*   Updated: 23-02-2022 17:57 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
+#define DO_BONUSES
+
+#ifdef DO_BONUSES
 typedef struct s_sprite
 {
 	void	*mlx;
 	void	*animation[51];
+	int		index;
 }	t_sprite;
 
 t_sprite animation;
-int animation_index = 0;
+animation.index = 0;
 
-#define mapWidth 39
-#define mapHeight 24
-#define screenWidth 1600
-#define screenHeight 900
-
-
-/* 
-"gngngn fait un lerp" #orondarnaque
-inline double	ft_lerp(double min, double max, double val)
-{
-	return (min + val * (max - min));
-}
-*/
-
-/*	     X
-	+-------->
-	|
-  Y |
-	|
-	V
-*/
-
-/* Moving left / right (rotate direction vector by 90 to get velocity vector)
-	Rotate a vector:
-	x2 = x * cos(90) - y * sin(90)
-	y2 = x * sin(90) + y * cos(90)
-
-	x2 = x * cos(pi/2) - y * sin(pi/2)
-	y2 = x * sin(pi/2) - y * cos(pi/2)
-
-	x2 = x * 0 - y * 1
-	y2 = x * 1 - y * 0
-
-	x2 = 0 - y * 1
-	y2 = x * 1 - 0
-
-	(90 degrees)
-	x2 = -y
-	y2 = x
-
-	(-90 degrees)
-	x2 = y
-	y2 = -x
-*/
-
-/* Rotating left / right
-
-	x2 = x * cos(0.1) - y * sin (0.1)
-	y2 = x * sin(0.1) + y * cos(0.1)
-
-	x2 = x * 0.1 - y * 0.01
-	y2 = x * 0.01 + y * 0.1
-*/
-
-/*
-	Direction 1 = right, -1 = left
-	0.1 radians ~= 5.7 degrees
-	0.995 = cos(0.1)
-	0.0998 = sin(0.1)
-*/
-
-/*
-	If there is an intersection with a wall after going forward (or any side)
-	Revert the movement (pos -= velocity since before we had pos += velocity)
-	But don't reset the rotation, because we canstill look around
-	if we hit a wall
-
-	Since we do this before the render, the player will not "glitch out" in
-		and out the wall
-*/
 int	loop_hook(t_game *game)
 {
-	#ifdef DO_BONUSES
 	int mouse_velo = get_mouse_velocity(game);
 	if (mouse_velo <= -2)
 	{
@@ -110,14 +43,12 @@ int	loop_hook(t_game *game)
 		game->player.directions.rotate_l = 0;
 		game->player.directions.rotate_r = 0;
 	}
-	#endif
 	if (game->player.directions.rotate_l == 1)
 	{
 		rotate_player(&game->player, -1);
 	}
 	if (game->player.directions.rotate_r == 1)
 		rotate_player(&game->player, 1);
-	#ifdef DO_BONUSES
 	if (!game->paused)
 	{
 		game->player.pos.x += game->player.velocity.x * game->player.speed;
@@ -128,20 +59,12 @@ int	loop_hook(t_game *game)
 			game->player.pos.x -= game->player.velocity.x * game->player.speed;
 		}
 	}
-	#else
-	game->player.pos.x += game->player.velocity.x * game->player.speed;
-	game->player.pos.y += game->player.velocity.y * game->player.speed;
-	if (game->player.pos.x <= 0.0 || game->player.pos.x >= game->map.width - 1.0 \
-	|| game->player.pos.y <= 0.0 || game->player.pos.y >= game->map.height - 1.0)
-		game->should_exit = 1;
-	#endif
 	if (game->should_exit)
 	{
 		printf("Exit ? TODO");
 		exit(1);
 	}
 	do_render(game);
-	#ifdef DO_BONUSES
 	if (!game->paused)
 	{
 		if ((fabs(game->player.velocity.x) > 0.01 || fabs(game->player.velocity.y) > 0.01) && game->player.speed > 1.0 && animation.animation[animation_index] != NULL)
@@ -220,9 +143,6 @@ int	close_win(t_game *game)
 
 #include <pthread.h>
 
-#define DO_BONUSES
-#ifdef DO_BONUSES
-
 static int	init_bg(void *mlx, t_texture *tex, char *filename)
 {
 	int	x_size;
@@ -298,8 +218,8 @@ int main(int argc, char **argv)
 {
 	t_game game;
 
-	init_game(&game, screenWidth, screenHeight);
-	if (init_main_mlx_window_img(&game, screenWidth, screenHeight, "Cub3D"))
+	init_game(&game, SCREEN_WIDTH, SCREEN_HEIGHT);
+	if (init_main_mlx_window_img(&game, SCREEN_WIDTH, SCREEN_HEIGHT, "Cub3D"))
 		return (EXIT_FAILURE);
 	/*
 	#ifdef DO_BONUSES
@@ -336,7 +256,7 @@ int main(int argc, char **argv)
 
 
 	
-	mlx_mouse_move(game.window, screenWidth / 2, screenHeight / 2);
+	mlx_mouse_move(game.window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 	mlx_mouse_hide();
 	mlx_mouse_hook(game.window, &mouse_click_handler, &game);
 	#endif
@@ -365,6 +285,5 @@ int main(int argc, char **argv)
 	mlx_loop(game.mlx);
 	pthread_join(init_img_thread, NULL);
 }
-#else
 
 #endif
