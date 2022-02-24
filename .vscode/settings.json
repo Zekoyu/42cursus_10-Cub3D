@@ -13,6 +13,7 @@
 		"get_next_line.h": "c",
 		"fcntl.h": "c",
 		"ft_gnl.h": "c",
-		"ios": "c"
+		"ios": "c",
+		"pthread.h": "c"
 	}
 }
