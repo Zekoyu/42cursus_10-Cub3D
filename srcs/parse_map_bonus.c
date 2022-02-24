@@ -6,14 +6,16 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 23-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 15:47 by                                             */
+/*   Updated: 24-02-2022 15:51 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-#ifndef DO_BONUSES
-
+#ifdef DO_BONUSES
+/*
+	+5 for secret room
+*/
 static int	**malloc_map(int width, int height)
 {
 	int		x;
@@ -27,8 +29,8 @@ static int	**malloc_map(int width, int height)
 		return (NULL);
 	while (y < height)
 	{
-		map[y] = (int *) malloc(sizeof(int) * (width));
-		ft_bzero(map[y], sizeof(int) * (width));
+		map[y] = (int *) malloc(sizeof(int) * (width + 5));
+		ft_bzero(map[y], sizeof(int) * (width + 5));
 		if (!map[y])
 		{
 			while (--y >= 0)
@@ -51,16 +53,17 @@ static void	fill_map(int **map, int height, int width, int fd)
 	while (line)
 	{	
 		remove_nl(line);
-		x = 0;
+		x = -1;
 		ln_len = ft_strlen(line);
-		while (x < ln_len)
+		while (++x < ln_len)
 		{
 			if (line[x] == '1')
 				map[y][x] = 1;
 			else if (line[x] == 'N' || line[x] == 'S' || line[x] == 'E' \
 			|| line[x] == 'W')
 				map[y][x] = get_face_player(line[x]);
-			x++;
+			else if (line[x] == 'D')
+				add_door(x, y);
 		}
 		free(line);
 		line = get_next_line(fd);
@@ -68,15 +71,45 @@ static void	fill_map(int **map, int height, int width, int fd)
 	}
 }
 
+/*
+	- Left wall
+	- Right wall
+	- Top wall
+	- Bottom wall
+*/
+static void	fill_secret_room(int **map, int height, int width)
+{
+	int	x;
+	int	y;
+
+	x = width;
+	y = 0;
+	while (y < height)
+		map[y++][x] = 1;
+	x = width + 4;
+	y = 0;
+	while (y < height)
+		map[y++][x] = 1;
+	x = width;
+	y = 0;
+	while (x < width + 5)
+		map[y][x++] = 1;
+	x = width;
+	y = height - 1;
+	while (x < width + 5)
+		map[y][x++] = 1;
+}
+
 static int	parse_map2(int **map, int height, int width, t_game *game)
 {
+	fill_secret_room(map, height, width);
 	if (set_player_pos_and_dir(&(game->player), map, width, height) == -1)
 		return (-1);
 	game->map.map = map;
 	game->map.height = height;
 	game->map.width = width;
 	game->map.total_height = height;
-	game->map.total_width = width;
+	game->map.total_width = width + 5;
 	return (0);
 }
 

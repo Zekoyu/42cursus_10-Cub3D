@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/18 18:05:45 by mframbou          #+#    #+#             */
-/*   Updated: 23-02-2022 17:53 by                                             */
+/*   Updated: 24-02-2022 14:43 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,6 +161,14 @@ typedef struct s_minimap
 	t_img_data	img;
 	int			size_px;
 }	t_minimap;
+
+typedef struct s_sprite
+{
+	void	*mlx;
+	void	*animation[51];
+	int		index;
+}	t_sprite;
+
 typedef struct s_game
 {
 	int				do_the_spin;
@@ -184,6 +192,7 @@ typedef struct s_game
 	int				paused;
 	int				should_exit;
 	t_map			map;
+	t_sprite		animation;
 }	t_game;
 
 // Vectors
