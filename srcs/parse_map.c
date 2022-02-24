@@ -6,7 +6,7 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 23-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 15:47 by                                             */
+/*   Updated: 24-02-2022 19:18 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static int	**malloc_map(int width, int height)
 	return (map);
 }
 
-static void	fill_map(int **map, int height, int width, int fd)
+static void	fill_map(int **map, int fd)
 {
 	char	*line;
 	int		x;
@@ -48,6 +48,7 @@ static void	fill_map(int **map, int height, int width, int fd)
 	int		ln_len;
 
 	line = get_next_line(fd);
+	y = 0;
 	while (line)
 	{	
 		remove_nl(line);
@@ -70,6 +71,8 @@ static void	fill_map(int **map, int height, int width, int fd)
 
 static int	parse_map2(int **map, int height, int width, t_game *game)
 {
+	t_point	player_pt;
+
 	if (set_player_pos_and_dir(&(game->player), map, width, height) == -1)
 		return (-1);
 	game->map.map = map;
@@ -77,6 +80,10 @@ static int	parse_map2(int **map, int height, int width, t_game *game)
 	game->map.width = width;
 	game->map.total_height = height;
 	game->map.total_width = width;
+	player_pt.x = (int) game->player.pos.x;
+	player_pt.y = (int) game->player.pos.y;
+	if (!is_enclosed(map, width, height, player_pt))
+		return (print_error_plus_arg("Map not enclosed.\n"));
 	return (0);
 }
 
@@ -103,7 +110,7 @@ int	parse_map(char *filename, int start_line, t_game *game)
 	fd = read_until_line(filename, start_line);
 	if (fd == -1)
 		return (print_error_plus_arg("Couldn't re-reopen the .cub file.\n"));
-	fill_map(map, height, width, fd);
+	fill_map(map, fd);
 	close (fd);
 	return (parse_map2(map, height, width, game));
 }

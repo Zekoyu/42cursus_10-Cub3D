@@ -6,7 +6,7 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 23-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 17:34 by                                             */
+/*   Updated: 24-02-2022 19:17 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,8 @@ static void	fill_secret_room(int **map, int height, int width)
 
 static int	parse_map2(int **map, int height, int width, t_game *game)
 {
+	t_point	player_pt;
+
 	fill_secret_room(map, height, width);
 	if (set_player_pos_and_dir(&(game->player), map, width, height) == -1)
 		return (-1);
@@ -111,6 +113,10 @@ static int	parse_map2(int **map, int height, int width, t_game *game)
 	game->map.width = width;
 	game->map.total_height = height;
 	game->map.total_width = width + 5;
+	player_pt.x = (int) game->player.pos.x;
+	player_pt.y = (int) game->player.pos.y;
+	if (!is_enclosed(map, width, height, player_pt))
+		return (print_error_plus_arg("Map not enclosed.\n"));
 	return (0);
 }
 
