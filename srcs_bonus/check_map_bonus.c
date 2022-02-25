@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/08 12:25:02 by mframbou          #+#    #+#             */
-/*   Updated: 25-02-2022 12:36 by                                             */
+/*   Updated: 25-02-2022 15:50 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,10 +81,13 @@ int	is_enclosed(int **original_map, int width, int height, t_point player)
 	t_point	dimensions;
 	t_point	*stack;
 	int		*map;
+	int		is_enclosed;
 
 	map = clone_map_bzero(original_map, width, height);
 	stack = init_stack(width, height);
 	dimensions.x = width;
 	dimensions.y = height;
-	return (is_enclosed_algo(map, dimensions, stack, player));
+	is_enclosed = is_enclosed_algo(map, dimensions, stack, player);
+	free(map);
+	return (is_enclosed);
 }
