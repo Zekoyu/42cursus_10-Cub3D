@@ -6,7 +6,7 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 23-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 19:18 by                                             */
+/*   Updated: 25-02-2022 15:21 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,29 @@ static int	**malloc_map(int width, int height)
 	return (map);
 }
 
+static void	put_walls_around_the_map_so_we_dont_crash_the_game(int **map, \
+														int width, int height)
+{
+	int	x;
+	int	y;
+
+	x = 0;
+	y = 0;
+	while (x < width)
+		map[y][x++] = 1;
+	x = 0;
+	y = height - 1;
+	while (x < width)
+		map[y][x++] = 1;
+	x = 0;
+	while (y < height)
+		map[y++][x] = 1;
+	x = width - 1;
+	y = 0;
+	while (y < height)
+		map[y++][x] = 1;
+}
+
 static void	fill_map(int **map, int fd)
 {
 	char	*line;
@@ -50,7 +73,7 @@ static void	fill_map(int **map, int fd)
 	line = get_next_line(fd);
 	y = 0;
 	while (line)
-	{	
+	{
 		remove_nl(line);
 		x = 0;
 		ln_len = ft_strlen(line);
@@ -84,6 +107,7 @@ static int	parse_map2(int **map, int height, int width, t_game *game)
 	player_pt.y = (int) game->player.pos.y;
 	if (!is_enclosed(map, width, height, player_pt))
 		return (print_error_plus_arg("Map not enclosed.\n"));
+	put_walls_around_the_map_so_we_dont_crash_the_game(map, width, height);
 	return (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:18:29 by mframbou          #+#    #+#             */
-/*   Updated: 24-02-2022 17:16 by                                             */
+/*   Updated: 25-02-2022 15:15 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,18 +133,15 @@ void	drawline_from_distance(int x, t_ray_hit ray_hit, t_game *game)
 	draw_coords.draw_end = draw_coords.line_height / 2 + game->height / 2;
 	draw_coords.screen_x = x;
 	y = 0;
-	while (y < draw_coords.draw_start)
+
+	while (y < draw_coords.draw_start && y < game->height)
 		mlx_put_pixel_img(&game->main_img, x, y++, game->ceil_color);
 	if (ray_hit.tile_hit.x > (double) game->map.width - 1.0 \
 	|| ray_hit.tile_hit.y > (double) game->map.height - 1.0)
-	{
 		draw_special_texture(draw_coords, ray_hit, game);
-	}
 	else
-	{
 		draw_texture_depending_on_orientation(draw_coords, ray_hit, game);
-	}
 	y = draw_coords.draw_end;
-	while (y < game->height)
+	while (y >= 0 && y < game->height)
 		mlx_put_pixel_img(&game->main_img, x, y++, game->floor_color);
 }

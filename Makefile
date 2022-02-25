@@ -26,7 +26,7 @@ NAME = cub3d
 NAME_BONUS = cub3d_bonus
 LIBFT = ./libft/libft.a
 MLX = -lmlx -Iminilibx/ -Lminilibx/ -framework OpenGL -framework AppKit -lz
-CC = gcc -Wall -Wextra -Werror -O3
+CC = gcc -Wall -Wextra -Werror -O3 -g -fsanitize=address
 
 SHELL = zsh
 
