@@ -1,2 +1,4 @@
 useless/**
 *.o
+.DS_Store
+.vscode/
