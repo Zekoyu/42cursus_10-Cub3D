@@ -6,7 +6,7 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 24-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 17:31 by                                             */
+/*   Updated: 25-02-2022 13:43 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #ifdef DO_BONUSES
 
-# define SPEEDLINES_PATH "./speedlines_xpm_900-1600px/speedline_"
+# define SPEEDLINES_PATH "./textures/speedlines/speedline_"
 
 void	init_game(t_game *game, int width, int height)
 {
@@ -93,9 +93,9 @@ int	init_tex(void *mlx, t_texture *tex, char *filename)
 
 int	init_beaux_gosses(t_game *game)
 {
-	if (init_tex(game->mlx, &(game->bg1), "./1.xpm") == -1)
+	if (init_tex(game->mlx, &(game->bg1), "./textures/bg1.xpm") == -1)
 		return (-1);
-	if (init_tex(game->mlx, &(game->bg2), "./2.xpm") == -1)
+	if (init_tex(game->mlx, &(game->bg2), "./textures/bg2.xpm") == -1)
 	{
 		mlx_destroy_image(game->mlx, game->bg1.image.img);
 		return (-1);

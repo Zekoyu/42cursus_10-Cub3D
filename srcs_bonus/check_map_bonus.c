@@ -6,11 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/08 12:25:02 by mframbou          #+#    #+#             */
-/*   Updated: 24-02-2022 17:03 by                                             */
+/*   Updated: 25-02-2022 12:36 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 int			is_enclosed_algo(int *map, t_point msize, t_point *stack, \
 							t_point curr);

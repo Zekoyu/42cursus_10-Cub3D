@@ -6,11 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/08 16:42:32 by mframbou          #+#    #+#             */
-/*   Updated: 24-02-2022 19:27 by                                             */
+/*   Updated: 25-02-2022 12:36 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 static void	add_stack_dir_x(t_point *stack, int x_dir, int stack_height, \
 							t_point current)

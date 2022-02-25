@@ -6,17 +6,16 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 24-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 19:20 by                                             */
+/*   Updated: 25-02-2022 13:51 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 #ifdef DO_BONUSES
 
 # include <pthread.h>
-# define SPEEDLINES_PATH "./speedlines_xpm_900-1600px/speedline_"
-# define DOOR_TEXTURE "./door_tex.xpm"
+# define SPEEDLINES_PATH "./textures/speedlines/speedline_"
 
 int		init_beaux_gosses(t_game *game);
 int		init_tex(void *mlx, t_texture *tex, char *filename);
@@ -32,7 +31,7 @@ static int	init_pause_screen(t_game *game)
 	t_point	px;
 
 	game->pause_screen.img = mlx_xpm_file_to_image(game->mlx, \
-							"./pause_menu_1600-900px.xpm", &pouet, &pouet);
+							"./textures/pause_menu.xpm", &pouet, &pouet);
 	if (!game->pause_screen.img)
 		return (-1);
 	game->pause_screen.addr = mlx_get_data_addr(game->pause_screen.img, \

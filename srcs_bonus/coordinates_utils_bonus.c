@@ -6,11 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 19:13:17 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 14:10:03 by mframbou         ###   ########.fr       */
+/*   Updated: 25-02-2022 12:36 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 t_point	get_pos_current_tile(t_vector player_pos)
 {

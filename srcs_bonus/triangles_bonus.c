@@ -6,11 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 23:28:57 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 17:34:13 by mframbou         ###   ########.fr       */
+/*   Updated: 25-02-2022 12:36 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 static int	sign(t_point p1, t_point p2, t_point p3)
 {

@@ -6,11 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/09 13:29:07 by mframbou          #+#    #+#             */
-/*   Updated: 2021/12/09 13:31:02 by mframbou         ###   ########.fr       */
+/*   Updated: 25-02-2022 12:36 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 t_door	**get_door_lst(void)
 {

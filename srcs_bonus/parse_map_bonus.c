@@ -6,11 +6,11 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 23-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 19:17 by                                             */
+/*   Updated: 25-02-2022 12:36 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 #ifdef DO_BONUSES
 /*
@@ -47,7 +47,6 @@ static void	fill_map(int **map, int fd)
 	char	*line;
 	int		x;
 	int		y;
-	int		ln_len;
 
 	line = get_next_line(fd);
 	y = 0;
@@ -55,8 +54,7 @@ static void	fill_map(int **map, int fd)
 	{	
 		remove_nl(line);
 		x = -1;
-		ln_len = ft_strlen(line);
-		while (++x < ln_len)
+		while (++x < (int) ft_strlen(line))
 		{
 			if (line[x] == '1')
 				map[y][x] = 1;

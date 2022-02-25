@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 15:18:52 by mframbou          #+#    #+#             */
-/*   Updated: 23-02-2022 14:46 by                                             */
+/*   Updated: 25-02-2022 12:13 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,19 @@ void	reset_velocity(t_player *player)
 */
 void	rotate_player(t_player *player, int direction)
 {
+	float	dir_x;
+	float	cam_x;
+
 	reset_velocity(player);
+	dir_x = player->direction.x;
 	player->direction.x = player->direction.x * COS_ROTATION \
 							- player->direction.y * (SIN_ROTATION * direction);
-	player->direction.y = player->direction.x * (SIN_ROTATION * direction) \
-							+ player->direction.y * COS_ROTATION;
+	player->direction.y = dir_x * (SIN_ROTATION * direction) \
+								+ player->direction.y * (COS_ROTATION);
+	cam_x = player->cam_plane.x;
 	player->cam_plane.x = player->cam_plane.x * COS_ROTATION \
 							- player->cam_plane.y * (SIN_ROTATION * direction);
-	player->cam_plane.y = player->cam_plane.x * (SIN_ROTATION * direction) \
+	player->cam_plane.y = cam_x * (SIN_ROTATION * direction) \
 							+ player->cam_plane.y * COS_ROTATION;
 	if (player->directions.forward == 1)
 		add_velocity(player, player->direction.x, player->direction.y);

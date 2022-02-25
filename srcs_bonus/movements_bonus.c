@@ -6,11 +6,11 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 15:18:52 by mframbou          #+#    #+#             */
-/*   Updated: 23-02-2022 14:46 by                                             */
+/*   Updated: 25-02-2022 12:36 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 void	add_velocity(t_player *player, double x_direction, double y_direction)
 {
@@ -19,7 +19,7 @@ void	add_velocity(t_player *player, double x_direction, double y_direction)
 }
 
 void	remove_velocity(t_player *player, \
-						double x_direction, double y_direction)
+					double x_direction, double y_direction)
 {
 	player->velocity.x -= x_direction * MOVEMENT_FACTOR;
 	player->velocity.y -= y_direction * MOVEMENT_FACTOR;
@@ -41,14 +41,19 @@ void	reset_velocity(t_player *player)
 */
 void	rotate_player(t_player *player, int direction)
 {
+	float	dir_x;
+	float	cam_x;
+
 	reset_velocity(player);
+	dir_x = player->direction.x;
 	player->direction.x = player->direction.x * COS_ROTATION \
 							- player->direction.y * (SIN_ROTATION * direction);
-	player->direction.y = player->direction.x * (SIN_ROTATION * direction) \
-							+ player->direction.y * COS_ROTATION;
+	player->direction.y = dir_x * (SIN_ROTATION * direction) \
+								+ player->direction.y * (COS_ROTATION);
+	cam_x = player->cam_plane.x;
 	player->cam_plane.x = player->cam_plane.x * COS_ROTATION \
 							- player->cam_plane.y * (SIN_ROTATION * direction);
-	player->cam_plane.y = player->cam_plane.x * (SIN_ROTATION * direction) \
+	player->cam_plane.y = cam_x * (SIN_ROTATION * direction) \
 							+ player->cam_plane.y * COS_ROTATION;
 	if (player->directions.forward == 1)
 		add_velocity(player, player->direction.x, player->direction.y);
@@ -74,11 +79,7 @@ void	add_player_movements(t_player *player)
 	else if (player->directions.right == 1)
 		add_velocity(player, -player->direction.y, player->direction.x);
 	else if (player->directions.rotate_l == 1)
-	{
 		rotate_player(player, -1);
-	}
 	else if (player->directions.rotate_r == 1)
-	{
 		rotate_player(player, 1);
-	}
 }

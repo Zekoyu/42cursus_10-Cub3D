@@ -6,17 +6,15 @@
 /*   By:             )/   )   )  /  /    (  |   )/   )   ) /   )(   )(    )   */
 /*                  '/   /   (`.'  /      `-'-''/   /   (.'`--'`-`-'  `--':   */
 /*   Created: 23-02-2022  by  `-'                        `-'                  */
-/*   Updated: 24-02-2022 17:33 by                                             */
+/*   Updated: 25-02-2022 13:50 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 #ifdef DO_BONUSES
 
 # include <pthread.h>
-# define SPEEDLINES_PATH "./speedlines_xpm_900-1600px/speedline_"
-# define DOOR_TEXTURE "./door_tex.xpm"
 
 int		init_all(t_game *game, pthread_t *anim_thread, char *cub_file);
 void	init_game(t_game *game, int width, int height);

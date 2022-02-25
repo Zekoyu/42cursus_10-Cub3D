@@ -14,6 +14,7 @@
 		"fcntl.h": "c",
 		"ft_gnl.h": "c",
 		"ios": "c",
-		"pthread.h": "c"
+		"pthread.h": "c",
+		"cub3d_bonus.h": "c"
 	}
 }

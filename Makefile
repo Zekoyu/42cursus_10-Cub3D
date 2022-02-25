@@ -1,13 +1,13 @@
 SRCS =	check_map.c				check_map_algorithm.c	coordinates_utils.c	dda_algo.c \
 		dda_algo2.c				dda_utils.c				doors_bonus.c		doors_lst_bonus.c \
 		frame_counter_bonus.c	free_all.c				ft_utils.c			hitboxes_bonus.c \
-		init_all.c				init_all2_bonus.c		init_all_bonus.c	key_press_handling.c \
+		init_all.c				init_all2_bonus.c		↑↑↓↓←→←→AB_bonus.c	key_press_handling.c \
 		key_release_handling.c	main.c					main_bonus.c		minimap_bonus.c \
 		mouse_handling_bonus.c	movements.c				parse_color_line.c	parse_header.c \
-		parse_map.c				parse_map2.c			parse_map_bonus.c	parse_player.c \
+		parse_map.c				parse_map2.c			mlx_utils.c			parse_player.c \
 		parse_texture_line.c	parsing.c				parsing_utils.c		parsing_utils2.c \
 		point_utils.c			rendering.c				rendering_2.c		triangles.c \
-		vectors.c				↑↑↓↓←→←→AB_bonus.c		mlx_utils.c
+		vectors.c					
 
 SRCS_BONUS =	check_map_algorithm_bonus.c check_map_bonus.c coordinates_utils_bonus.c dda_algo2_bonus.c \
 				dda_algo_bonus.c dda_utils_bonus.c doors_bonus.c doors_lst_bonus.c frame_counter_bonus.c \
