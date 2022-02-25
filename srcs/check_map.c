@@ -6,7 +6,7 @@
 /*   By: mframbou <mframbou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/08 12:25:02 by mframbou          #+#    #+#             */
-/*   Updated: 25-02-2022 15:49 by                                             */
+/*   Updated: 25-02-2022 16:22 by                                             */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,5 +89,6 @@ int	is_enclosed(int **original_map, int width, int height, t_point player)
 	dimensions.y = height;
 	is_enclosed = is_enclosed_algo(map, dimensions, stack, player);
 	free(map);
+	free(stack);
 	return (is_enclosed);
 }
